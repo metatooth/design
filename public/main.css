@@ -1,0 +1,22 @@
+body { 
+    margin: 0;
+    background-color: #000000;
+    overflow: hidden;
+}
+
+canvas {
+    width: 95%;
+    height: 95%
+}
+
+#logo {
+    position: absolute;
+    bottom: 10px;
+    width: 100%;
+    padding: 10px;
+    text-align: center;
+    user-select: none;
+    pointer-events: none;
+    z-index: 1;
+}
+
