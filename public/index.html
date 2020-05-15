@@ -58,16 +58,16 @@
 	  
 	  // Lights
 
-	  ambient = new THREE.AmbientLight(0xffffff, 0.25);
+	  ambient = new THREE.AmbientLight( 0xffffff, 0.25 );
 	  scene.add(ambient);
 	  
-	  key_light = new THREE.DirectionalLight(new THREE.Color('hsl(193, 100%, 46.7%)'), 1.0);
+	  key_light = new THREE.DirectionalLight( 0x00bbee, 1.0 );
 	  key_light.position.set(-100, 0, 100);
 
-	  fill_light = new THREE.DirectionalLight(new THREE.Color('hsl(320, 100%, 60%)'), 0.75);
+	  fill_light = new THREE.DirectionalLight( 0xff33bb, 0.75 );
 	  fill_light.position.set(100, 0, 100);
 
-	  back_light = new THREE.DirectionalLight(0xffffff, 1.0);
+	  back_light = new THREE.DirectionalLight( 0xffffff, 1.0 );
 	  back_light.position.set(100, 0, -100).normalize();
 
 	  top_light = new THREE.DirectionalLight(0xffffff, 1.0);
@@ -198,8 +198,6 @@
 	  camera.updateProjectionMatrix();
 
 	  renderer.setSize(window.innerWidth, window.innerHeight);
-
-	  controls.handleResize();
       }
 
       
