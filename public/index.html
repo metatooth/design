@@ -166,19 +166,21 @@
       }
 
       function raycast(e) {
-	  raycaster.setFromCamera(mouse, camera);
+	  if (SHIFT_IS_DOWN) {
+	      raycaster.setFromCamera(mouse, camera);
 
-	  const intersects = raycaster.intersectObjects(scene.children);
+	      const intersects = raycaster.intersectObjects(scene.children);
 
-	  if (intersects.length > 0) {
-	      const geometry = new THREE.SphereGeometry( 0.5, 32, 32 );
-	      const material = new THREE.MeshPhongMaterial( { color: 0xff33bb, specular: 0x111111, shininess: 100 } );
-	      const sphere = new THREE.Mesh( geometry, material );
-	      sphere.position.x = intersects[0].point.x;
-	      sphere.position.y = intersects[0].point.y;
-	      sphere.position.z = intersects[0].point.z;
-	      scene.add( sphere );
-	  }	  
+	      if (intersects.length > 0) {
+		  const geometry = new THREE.SphereGeometry( 0.5, 32, 32 );
+		  const material = new THREE.MeshPhongMaterial( { color: 0xff33bb, specular: 0x111111, shininess: 100 } );
+		  const sphere = new THREE.Mesh( geometry, material );
+		  sphere.position.x = intersects[0].point.x;
+		  sphere.position.y = intersects[0].point.y;
+		  sphere.position.z = intersects[0].point.z;
+		  scene.add( sphere );
+	      }
+	  }
       }
 
       function onKeyboardEvent(e) {
