@@ -24,28 +24,30 @@
       const frustumSize = 1000;
       let aspect = window.innerWidth / window.innerHeight;  
 
-      let INTERSECTED;
-      let SHIFT_IS_DOWN;
       let ASSET;
-      
+      let DRAG_IS_ON;
+      let HIGHLIGHTED;
+      let SELECTED;
+      let SHIFT_IS_DOWN;
+            
       const MOUSE = new THREE.Vector2();
-
-      const PICKED_POINTS = new THREE.Group();
+      const START = new THREE.Vector2();
+      const THRESHOLD = 5;
       
-      if ( WEBGL.isWebGLAvailable() ) {
-	  
+      const PICKED_POINTS = new THREE.Group();
+
+      
+      if ( WEBGL.isWebGLAvailable() ) {  
 	  init();
 	  animate();
 	  
       } else {
-	  
 	  const warning = WEBGL.getWebGLErrorMessage();
 	  document.getElementById( 'container' ).appendChild( warning );
 	  
       }
       
-      function init() {
-
+      function init() {  
 	  container = document.getElementById('container');
 
 	  // Camera
@@ -68,23 +70,16 @@
 	  
 	  key_light = new THREE.DirectionalLight( 0x00bbee, 1.0 );
 	  key_light.position.set(-100, 0, 100);
-	  const key_light_helper = new THREE.DirectionalLightHelper( key_light );
 	  
 	  fill_light = new THREE.DirectionalLight( 0xff33bb, 0.75 );
 	  fill_light.position.set(100, 0, 100);
-	  const fill_light_helper = new THREE.DirectionalLightHelper( fill_light );
 
 	  back_light = new THREE.DirectionalLight( 0xffffff, 1.0 );
 	  back_light.position.set(100, 0, -100).normalize();
-	  const back_light_helper = new THREE.DirectionalLightHelper( back_light );
-
-	  top_light = new THREE.DirectionalLight(0xffffff, 1.0);
-	  top_light.position.set(0, -100, 0);
 
 	  scene.add(key_light);
 	  scene.add(fill_light);
 	  scene.add(back_light);
-	  //scene.add(top_light);
 
 	  // Model
 
@@ -118,11 +113,15 @@
 		      ASSET.rotation.set(Math.PI / 2, Math.PI, - Math.PI / 2);
 
 		      scene.add(ASSET);
+		      document.body.style.cursor = 'default';
+		      render();
 		  });
 		  
 	      }
 	  };
-	  
+
+	  document.body.style.cursor = 'wait';
+
 	  xhttp.send();
 
 	  //scene.add(new THREE.AxesHelper(100));
@@ -153,47 +152,128 @@
 
 	  // Events
 
-	  window.addEventListener('click', onClick, false);
 	  window.addEventListener('keydown', onKeyboardEvent, false);
 	  window.addEventListener('keyup', onKeyboardEvent, false);
-	  window.addEventListener('mousemove', onDocumentMouseMove, false);
+	  window.addEventListener('mousedown', onMouseDown, false);
+	  window.addEventListener('mousemove', onMouseMove, false);
+	  window.addEventListener('mouseup', onMouseUp, false);
 	  window.addEventListener('resize', onWindowResize, false);
 	  
       }
 
-      function onClick(e) {
-	  if (SHIFT_IS_DOWN) {
+      function highlight() {
 	      raycaster.setFromCamera(MOUSE, camera);
-
-	      const intersects = raycaster.intersectObject(ASSET);
-
+	  
+	      const intersects = raycaster.intersectObjects(PICKED_POINTS.children);
+  
 	      if (intersects.length > 0) {
-		  const geometry = new THREE.SphereGeometry( 0.5, 32, 32 );
-		  const material = new THREE.MeshPhongMaterial( { color: 0xff33bb, specular: 0x111111, shininess: 100 } );
-		  const sphere = new THREE.Mesh( geometry, material );
-		  sphere.position.x = intersects[0].point.x;
-		  sphere.position.y = intersects[0].point.y;
-		  sphere.position.z = intersects[0].point.z;
-		  PICKED_POINTS.add( sphere );
+		  if ( intersects[ 0 ].object != HIGHLIGHTED ) {
+		      if ( HIGHLIGHTED ) {
+			  HIGHLIGHTED.material.color.setHex( HIGHLIGHTED.currentHex );
+		      }
+
+		      HIGHLIGHTED = intersects[ 0 ].object;
+		      HIGHLIGHTED.currentHex = HIGHLIGHTED.material.color.getHex();
+		      HIGHLIGHTED.material.color.setHex( 0xffff00 );
+		  }
+	      } else {
+		  if ( HIGHLIGHTED ) {
+		      HIGHLIGHTED.material.color.setHex( HIGHLIGHTED.currentHex );
+		  }
+		  
+		  HIGHLIGHTED = null;
 	      }
+      }
+      
+      function update_selected() {
+	  raycaster.setFromCamera(MOUSE, camera);
+
+	  const intersects = raycaster.intersectObject(ASSET);
+	  
+	  if (intersects.length > 0) {
+	      SELECTED.position.x = intersects[0].point.x;
+	      SELECTED.position.y = intersects[0].point.y;
+	      SELECTED.position.z = intersects[0].point.z;
+	      render();
 	  }
+	  
       }
 
+      function pick() {
+	  raycaster.setFromCamera(MOUSE, camera);
+
+	  const intersects = raycaster.intersectObject(ASSET);
+	  
+	  if (intersects.length > 0) {
+	      const geometry = new THREE.SphereGeometry( 0.5, 32, 32 );
+	      const material = new THREE.MeshPhongMaterial( { color: 0xff33bb, specular: 0x111111, shininess: 100 } );
+	      const sphere = new THREE.Mesh( geometry, material );
+	      sphere.position.x = intersects[0].point.x;
+	      sphere.position.y = intersects[0].point.y;
+	      sphere.position.z = intersects[0].point.z;
+	      PICKED_POINTS.add( sphere );
+	      render();
+	  }
+	  
+      }
+      
       function onKeyboardEvent(e) {
 	  SHIFT_IS_DOWN = e.shiftKey;
 
-	  if (SHIFT_IS_DOWN) {
+	  if (e.keyCode == 46 && HIGHLIGHTED) {
+	      PICKED_POINTS.remove(HIGHLIGHTED);
+	      HIGHLIGHTED = null;
+	      render();
+	  } else if (SHIFT_IS_DOWN) {
 	      document.body.style.cursor = 'crosshair';
 	  } else {
 	      document.body.style.cursor = 'default';
 	  }
       }
       
-      function onDocumentMouseMove(e) {
-	  e.preventDefault();
-	  
+      function onMouseDown(e) {
+	  START.x = ( e.clientX / window.innerWidth ) * 2 - 1;
+	  START.y = - ( e.clientY / window.innerHeight ) * 2 + 1;
+
+	  if (HIGHLIGHTED) {
+	      DRAG_IS_ON = true;
+	      SELECTED = HIGHLIGHTED;
+	      controls.enabled = false;
+	  } else {
+
+	  }
+      }
+
+      function onMouseMove(e) {
 	  MOUSE.x = ( e.clientX / window.innerWidth ) * 2 - 1;
 	  MOUSE.y = - ( e.clientY / window.innerHeight ) * 2 + 1;
+	  
+	  if (DRAG_IS_ON) {
+	      update_selected();
+	      controls.saveState();
+	      controls.enabled = false;
+	  } else if (!SHIFT_IS_DOWN) {
+	      highlight();
+	  }
+      }
+
+      function onMouseUp(e) {
+	  const dx = Math.abs(MOUSE.x - START.x);
+	  const dy = Math.abs(MOUSE.y - START.y);
+
+	  if (dx < THRESHOLD && dy < THRESHOLD) {      
+	      if (DRAG_IS_ON) {
+		  // drop it
+		  SELECTED = null;
+		  HIGHLIGHTED.material.color.setHex( HIGHLIGHTED.currentHex );
+		  HIGHLIGHTED = null;
+		  controls.reset();
+		  controls.enabled = true;
+		  DRAG_IS_ON = false;
+	      } else if (SHIFT_IS_DOWN) {
+		  pick();
+	      }
+	  }
       }
 
       function onWindowResize() {
