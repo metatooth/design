@@ -89,39 +89,69 @@ function init() {
 
     xhttp.onreadystatechange = function() {
 
-    if ( this.readyState == 4 && this.status == 200 ) {
+	if ( this.readyState == 4 && this.status == 200 ) {
 
-        const asset = JSON.parse( this.response ).data;
+            const asset = JSON.parse( this.response ).data;
 
-        loader.load( asset.url, function ( geometry ) {
+            loader.load( asset.url, function ( geometry ) {
 
-        const material = new THREE.MeshPhongMaterial( { color: 0x00bbee, specular: 0x111111, shininess: 100 } );
-        ASSET = new THREE.Mesh( geometry, material );
+		const material = new THREE.MeshPhongMaterial( { color: 0x00bbee, specular: 0x111111, shininess: 100 } );
+		ASSET = new THREE.Mesh( geometry, material );
 
-        ASSET.position.set( 0, 0, 0 );
-        ASSET.translation = geometry.center();
+		ASSET.position.set( 0, 0, 0 );
+		ASSET.translation = geometry.center();
 
-        // :NOTE: 20200513 Terry:
-        // Rotation for SHINING 3D Autoscan DS-EX Upper Jaw
+		// :NOTE: 20200513 Terry:
+		// Rotation for SHINING 3D Autoscan DS-EX Upper Jaw
 
-        ASSET.rotation.set( Math.PI / 2, Math.PI, - Math.PI / 2 );
+		ASSET.rotation.set( Math.PI / 2, Math.PI, - Math.PI / 2 );
 
-        scene.add( ASSET );
-        document.body.style.cursor = 'default';
-        render();
+		scene.add( ASSET );
 
-        } );
+		const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 10);
+		//const helper = new THREE.PlaneHelper( plane, 100, 0xff33bb);
+		//scene.add(helper);
+		
+		let positions = geometry.getAttribute('position');
+		let point = new THREE.Vector3();
+		let projected = new THREE.Vector3();
 
-    }
+		const vertices = new Float32Array(3 * positions.array.length);
+		
+		for (let i = 0; i < positions.array.length; i+=3) {
+		    point.x = positions.array[i];
+		    point.y = positions.array[i+1];
+		    point.z = positions.array[i+2];
+		    
+		    plane.projectPoint(point, projected);
+
+		    vertices[i] = projected.x;
+		    vertices[i+1] = projected.y;
+		    vertices[i+2] = projected.z;
+		}
+
+		const flat = new THREE.BufferGeometry();
+		flat.setAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
+
+		scene.add(new THREE.Mesh( flat, new THREE.MeshBasicMaterial( 0xff33bb ) ) );
+
+		document.body.style.cursor = 'default';
+		render();
+
+            } );
+
+	}
 
     };
 
-    document.body.style.cursor = 'wait';
-
     xhttp.send();
 
-    //scene.add(new THREE.AxesHelper(100));
+    scene.add(new THREE.AxesHelper(100));
 
+    //const grid = new THREE.GridHelper(100, 25, 0xff33bb, 0x00bbee);
+    //grid.position.y = -10;
+    //scene.add(grid);
+    
     // Renderer
 
     renderer = new THREE.WebGLRenderer();
@@ -148,12 +178,13 @@ function init() {
 
     // Events
 
-    window.addEventListener( 'keydown', onKeyboardEvent, false );
-    window.addEventListener( 'keyup', onKeyboardEvent, false );
-    window.addEventListener( 'mousedown', onMouseDown, false );
-    window.addEventListener( 'mousemove', onMouseMove, false );
-    window.addEventListener( 'mouseup', onMouseUp, false );
-    window.addEventListener( 'resize', onWindowResize, false );
+    window.addEventListener( 'dblclick', dbl, false );
+    window.addEventListener( 'keydown', kyb, false );
+    window.addEventListener( 'keyup', kyb, false );
+    window.addEventListener( 'mousedown', mdn, false );
+    window.addEventListener( 'mousemove', mmv, false );
+    window.addEventListener( 'mouseup', mup, false );
+    window.addEventListener( 'resize', wdr, false );
 
 }
 
@@ -165,29 +196,29 @@ function highlight() {
 
     if ( intersects.length > 0 ) {
 
-    if ( intersects[ 0 ].object != HIGHLIGHTED ) {
+	if ( intersects[ 0 ].object != HIGHLIGHTED ) {
 
-        if ( HIGHLIGHTED ) {
+            if ( HIGHLIGHTED ) {
 
-        HIGHLIGHTED.material.color.setHex( HIGHLIGHTED.currentHex );
+		HIGHLIGHTED.material.color.setHex( HIGHLIGHTED.currentHex );
 
-        }
+            }
 
-        HIGHLIGHTED = intersects[ 0 ].object;
-        HIGHLIGHTED.currentHex = HIGHLIGHTED.material.color.getHex();
-        HIGHLIGHTED.material.color.setHex( 0xffff00 );
+            HIGHLIGHTED = intersects[ 0 ].object;
+            HIGHLIGHTED.currentHex = HIGHLIGHTED.material.color.getHex();
+            HIGHLIGHTED.material.color.setHex( 0xffff00 );
 
-    }
+	}
 
     } else {
 
-    if ( HIGHLIGHTED ) {
+	if ( HIGHLIGHTED ) {
 
-        HIGHLIGHTED.material.color.setHex( HIGHLIGHTED.currentHex );
+            HIGHLIGHTED.material.color.setHex( HIGHLIGHTED.currentHex );
 
-    }
+	}
 
-    HIGHLIGHTED = null;
+	HIGHLIGHTED = null;
 
     }
 
@@ -201,10 +232,10 @@ function update_selected() {
 
     if ( intersects.length > 0 ) {
 
-    SELECTED.position.x = intersects[ 0 ].point.x;
-    SELECTED.position.y = intersects[ 0 ].point.y;
-    SELECTED.position.z = intersects[ 0 ].point.z;
-    render();
+	SELECTED.position.x = intersects[ 0 ].point.x;
+	SELECTED.position.y = intersects[ 0 ].point.y;
+	SELECTED.position.z = intersects[ 0 ].point.z;
+	render();
 
     }
 
@@ -218,43 +249,49 @@ function pick() {
 
     if ( intersects.length > 0 ) {
 
-    const geometry = new THREE.SphereGeometry( 0.5, 32, 32 );
-    const material = new THREE.MeshPhongMaterial( { color: 0xff33bb, specular: 0x111111, shininess: 100 } );
-    const sphere = new THREE.Mesh( geometry, material );
-    sphere.position.x = intersects[ 0 ].point.x;
-    sphere.position.y = intersects[ 0 ].point.y;
-    sphere.position.z = intersects[ 0 ].point.z;
-    PICKED_POINTS.add( sphere );
-    render();
+	const geometry = new THREE.SphereGeometry( 0.5, 32, 32 );
+	const material = new THREE.MeshPhongMaterial( { color: 0xff33bb, specular: 0x111111, shininess: 100 } );
+	const sphere = new THREE.Mesh( geometry, material );
+	sphere.position.x = intersects[ 0 ].point.x;
+	sphere.position.y = intersects[ 0 ].point.y;
+	sphere.position.z = intersects[ 0 ].point.z;
+	PICKED_POINTS.add( sphere );
+	render();
 
     }
 
 }
 
-function onKeyboardEvent( e ) {
+function dbl( e ) {
+    console.log('dbl');
+}
+
+function kyb( e ) {
+    console.log('kyb');
 
     SHIFT_IS_DOWN = e.shiftKey;
 
     if ( e.keyCode == 46 && HIGHLIGHTED ) {
 
-    PICKED_POINTS.remove( HIGHLIGHTED );
-    HIGHLIGHTED = null;
-    render();
+	PICKED_POINTS.remove( HIGHLIGHTED );
+	HIGHLIGHTED = null;
+	render();
 
     } else if ( SHIFT_IS_DOWN ) {
 
-    document.body.style.cursor = 'crosshair';
+	document.body.style.cursor = 'crosshair';
 
     } else {
 
-    document.body.style.cursor = 'default';
+	document.body.style.cursor = 'default';
 
     }
 
 }
 
-function onMouseDown( e ) {
-
+function mdn( e ) {
+    console.log('mdn');
+    
     START.x = ( e.clientX / window.innerWidth ) * 2 - 1;
     START.y = - ( e.clientY / window.innerHeight ) * 2 + 1;
 
@@ -268,27 +305,29 @@ function onMouseDown( e ) {
 
 }
 
-function onMouseMove( e ) {
-
+function mmv( e ) {
+    console.log('mmv');
+    
     MOUSE.x = ( e.clientX / window.innerWidth ) * 2 - 1;
     MOUSE.y = - ( e.clientY / window.innerHeight ) * 2 + 1;
 
     if ( DRAG_IS_ON ) {
 
-    update_selected();
-    controls.saveState();
-    controls.enabled = false;
+	update_selected();
+	controls.saveState();
+	controls.enabled = false;
 
     } else if ( !SHIFT_IS_DOWN ) {
 
-    highlight();
+	highlight();
 
     }
 
 }
 
-function onMouseUp() {
-
+function mup() {
+    console.log('mup');
+    
     const dx = Math.abs( MOUSE.x - START.x );
     const dy = Math.abs( MOUSE.y - START.y );
 
@@ -314,8 +353,9 @@ function onMouseUp() {
 
 }
 
-function onWindowResize() {
-
+function wdr() {
+    console.log('wdr');
+    
     aspect = window.innerWidth / window.innerHeight;
 
     camera.left = -frustumSize * aspect / 2;
