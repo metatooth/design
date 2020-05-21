@@ -9,7 +9,7 @@
   "scripts": {
     "start": "node index.js",
     "test": "node test.js",
-    "lint": "node_modules/eslint/bin/eslint.js public/js/main.js --fix"
+    "lint": "node_modules/eslint/bin/eslint.js public/main.js --fix"
   },
   "dependencies": {
     "ejs": "^2.5.6",

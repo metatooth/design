@@ -98,42 +98,36 @@ function init() {
 		const material = new THREE.MeshPhongMaterial( { color: 0x00bbee, specular: 0x111111, shininess: 100 } );
 		ASSET = new THREE.Mesh( geometry, material );
 
-		ASSET.position.set( 0, 0, 0 );
 		ASSET.translation = geometry.center();
-
-		// :NOTE: 20200513 Terry:
-		// Rotation for SHINING 3D Autoscan DS-EX Upper Jaw
-
-		ASSET.rotation.set( Math.PI / 2, Math.PI, - Math.PI / 2 );
 
 		scene.add( ASSET );
 
-		const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 10);
+		const plane = new THREE.Plane( new THREE.Vector3( 0, 1, 0 ), 10 );
 		//const helper = new THREE.PlaneHelper( plane, 100, 0xff33bb);
 		//scene.add(helper);
-		
-		let positions = geometry.getAttribute('position');
-		let point = new THREE.Vector3();
-		let projected = new THREE.Vector3();
 
-		const vertices = new Float32Array(3 * positions.array.length);
-		
-		for (let i = 0; i < positions.array.length; i+=3) {
-		    point.x = positions.array[i];
-		    point.y = positions.array[i+1];
-		    point.z = positions.array[i+2];
-		    
-		    plane.projectPoint(point, projected);
+		const positions = geometry.getAttribute( 'position' );
+		const point = new THREE.Vector3();
+		const projected = new THREE.Vector3();
 
-		    vertices[i] = projected.x;
-		    vertices[i+1] = projected.y;
-		    vertices[i+2] = projected.z;
+		const vertices = new Float32Array( 3 * positions.array.length );
+
+		for ( let i = 0; i < positions.array.length; i += 3 ) {
+
+		    point.x = positions.array[ i ];
+		    point.y = positions.array[ i + 1 ];
+		    point.z = positions.array[ i + 2 ];
+
+		    plane.projectPoint( point, projected );
+
+		    vertices[ i ] = projected.x;
+		    vertices[ i + 1 ] = projected.y;
+		    vertices[ i + 2 ] = projected.z;
 		}
 
 		const flat = new THREE.BufferGeometry();
 		flat.setAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
-
-		scene.add(new THREE.Mesh( flat, new THREE.MeshBasicMaterial( 0xff33bb ) ) );
+		scene.add( new THREE.Mesh( flat, new THREE.MeshBasicMaterial( 0xff33bb ) ) );
 
 		document.body.style.cursor = 'default';
 		render();
@@ -146,12 +140,12 @@ function init() {
 
     xhttp.send();
 
-    scene.add(new THREE.AxesHelper(100));
+    scene.add( new THREE.AxesHelper( 100 ) );
 
     //const grid = new THREE.GridHelper(100, 25, 0xff33bb, 0x00bbee);
     //grid.position.y = -10;
     //scene.add(grid);
-    
+
     // Renderer
 
     renderer = new THREE.WebGLRenderer();
@@ -263,11 +257,14 @@ function pick() {
 }
 
 function dbl( e ) {
-    console.log('dbl');
+
+    console.log( 'dbl' );
+
 }
 
 function kyb( e ) {
-    console.log('kyb');
+
+    console.log( 'kyb' );
 
     SHIFT_IS_DOWN = e.shiftKey;
 
@@ -290,8 +287,9 @@ function kyb( e ) {
 }
 
 function mdn( e ) {
-    console.log('mdn');
-    
+
+    console.log( 'mdn' );
+
     START.x = ( e.clientX / window.innerWidth ) * 2 - 1;
     START.y = - ( e.clientY / window.innerHeight ) * 2 + 1;
 
@@ -306,8 +304,9 @@ function mdn( e ) {
 }
 
 function mmv( e ) {
-    console.log('mmv');
-    
+
+    console.log( 'mmv' );
+
     MOUSE.x = ( e.clientX / window.innerWidth ) * 2 - 1;
     MOUSE.y = - ( e.clientY / window.innerHeight ) * 2 + 1;
 
@@ -326,8 +325,9 @@ function mmv( e ) {
 }
 
 function mup() {
-    console.log('mup');
-    
+
+    console.log( 'mup' );
+
     const dx = Math.abs( MOUSE.x - START.x );
     const dy = Math.abs( MOUSE.y - START.y );
 
@@ -354,8 +354,9 @@ function mup() {
 }
 
 function wdr() {
-    console.log('wdr');
-    
+
+    console.log( 'wdr' );
+
     aspect = window.innerWidth / window.innerHeight;
 
     camera.left = -frustumSize * aspect / 2;
