@@ -1,16 +1,21 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
   <head>
     <title>Design x Metatooth</title>
     <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-    <link rel="shortcut icon" href="favicon.ico" />
-    <link type="text/css" rel="stylesheet" href="main.css">
+    <link rel="shortcut icon" href="<%= BASE_URL %>favicon.ico">
+    <style>
+      body {
+          margin: 0;
+          background-color: #2d2d2d;
+          overflow: hidden;
+      }
+    </style>
   </head>
   <body>
-    <div id="container"></div>
-    <div id="logo"><img width="200" src="images/metatooth.png" alt="Metatooth Logo"></div>
-    <script type="module" src="main.js">    
-      document.body.style.cursor = 'wait';
-    </script>
+    <noscript><strong>Enable JavaScript to continue with Design x Metatooth</strong></noscript>
+    <div id="app"></div>
   </body>
 </html>
