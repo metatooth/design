@@ -10,7 +10,6 @@ import {Mesh} from 'three';
 import {MeshPhongMaterial} from 'three';
 
 export default {
-
   name: 'editor',
   components: {
     Viewer,
