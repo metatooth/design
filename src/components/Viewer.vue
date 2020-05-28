@@ -1,13 +1,16 @@
 <template>
-  <div id="container"/>
+<div id="container" v-bind:class="{ 'target' : shift }"
+     @keydown.shift="shift = true"
+     @keyup="shift = false"
+     @click.shift="pick" />
 </template>
 
 <script>
-import {AxesHelper} from 'three';
 import {AmbientLight} from 'three';
 import {DirectionalLight} from 'three';
 import {Mesh} from 'three';
 import {OrthographicCamera} from 'three';
+import {Raycaster} from 'three';
 import {Scene} from 'three';
 import {WebGLRenderer} from 'three';
 
@@ -23,7 +26,6 @@ export default {
     }},
   watch: {
     mesh: function(newVal, oldVal) {
-      console.log('Prop changed: ', newVal, ' | was: ', oldVal);
       if (this.scene) {
         this.scene.remove( oldVal );
         this.scene.add( newVal );
@@ -36,6 +38,8 @@ export default {
       scene: null,
       renderer: null,
       controls: null,
+      raycaster: null,
+      shift: false,
     };
   },
   mounted() {
@@ -78,8 +82,6 @@ export default {
       this.scene.add( fillLight );
       this.scene.add( backLight );
 
-      this.scene.add( new AxesHelper( 100 ) );
-
       this.renderer = new WebGLRenderer();
       this.renderer.setPixelRatio( window.devicePixelRatio );
       this.renderer.setSize( window.innerWidth, window.innerHeight );
@@ -97,11 +99,16 @@ export default {
       this.controls.minDistance = 100;
       this.controls.maxDistance = 500;
       this.controls.maxPolarAngle = 2 * Math.PI;
+
+      this.raycaster = new Raycaster;
     },
     animate: function() {
       requestAnimationFrame( this.animate );
       this.controls.update();
       this.renderer.render( this.scene, this.camera );
+    },
+    pick: function() {
+      console.log('pick');
     },
   },
 };
@@ -111,5 +118,11 @@ export default {
   canvas {
     width: 95%;
     height: 95%;
+  }
+  .target {
+      cursor: crosshair;
+  }
+  .arrow {
+      cursor: default;
   }
 </style>
