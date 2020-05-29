@@ -130,7 +130,6 @@ export default {
       console.log('dbl');
     },
     drag: function() {
-      console.log('drag');
       this.raycaster.setFromCamera( this.mouse, this.camera );
       const intersects = this.raycaster.intersectObject( this.mesh );
 
@@ -142,8 +141,6 @@ export default {
       }
     },
     highlight: function() {
-      console.log('highlight');
-
       this.raycaster.setFromCamera( this.mouse, this.camera );
 
       const intersects = this.raycaster.intersectObjects( this.picks.children );
@@ -177,15 +174,13 @@ export default {
 
       this.shift = event.shiftKey;
 
-      if ( event.keyCode == 16 && this.highlighted ) {
+      if ( event.keyCode == 88 && this.highlighted ) {
         this.picks.remove( this.highlighted );
         this.highlighted = null;
         this.render();
       } else if ( this.shift ) {
-        console.log('crosshair');
         document.body.style.cursor = 'crosshair';
       } else {
-        console.log('default');
         document.body.style.cursor = 'default';
       }
     },
@@ -196,7 +191,7 @@ export default {
 
       if ( this.highlighted ) {
         this.selected = this.highlighted;
-        controls.enabled = false;
+        this.controls.enabled = false;
       }
     },
     mmove: function( event ) {
