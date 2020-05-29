@@ -25,7 +25,7 @@ export default {
     background-color: #2d2d2d;
 }
 #logo {
-    background-color: #2d2d2d;
+    background-color: transparent;
     position: absolute;
     bottom: 10px;
     width: 100%;
