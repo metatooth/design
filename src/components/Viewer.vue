@@ -1,8 +1,11 @@
 <template>
 <div id="container" v-bind:class="{ 'target' : shift }"
-     @keydown.shift="shift = true"
-     @keyup="shift = false"
-     @click.shift="pick($event)" />
+     @keydown="keydown"
+     @keyup="keyup"
+     @click.shift="pick($event)"
+     @mousemove="mouseMove($event)"
+     @mousedown="mouseDown($event)"
+     @mouseup="mouseUp($event)" />
 </template>
 
 <script>
@@ -132,8 +135,6 @@ export default {
       this.renderer.render( this.scene, this.camera );
     },
     pick: function(event) {
-      console.log('pick');
-
       this.mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
       this.mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
 

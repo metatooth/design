@@ -37,7 +37,7 @@ export default {
               console.log('START');
               const material = new MeshPhongMaterial( {color: 0x00bbee,
                 specular: 0x111111,
-                shininess: 100} );
+                shininess: 10} );
               scope.mesh = new Mesh( geometry, material );
               console.log('DUO');
               scope.mesh.translation = geometry.center();
