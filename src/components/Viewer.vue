@@ -1,11 +1,11 @@
 <template>
-<div id="container" v-bind:class="{ 'target' : shift }"
-     @keydown="keydown"
-     @keyup="keyup"
-     @click.shift="pick($event)"
-     @mousemove="mouseMove($event)"
-     @mousedown="mouseDown($event)"
-     @mouseup="mouseUp($event)" />
+<div id="container"
+     @dblclick="dbl"
+     @keydown="key"
+     @keyup="key"
+     @mousemove="mmove($event)"
+     @mousedown="mdown($event)"
+     @mouseup="mup($event)" />
 </template>
 
 <script>
@@ -42,15 +42,20 @@ export default {
   },
   data: function() {
     return {
+      aspect: 0.0,
       camera: null,
-      scene: null,
-      renderer: null,
       controls: null,
-      raycaster: null,
-      mouse: null,
-      start: null,
-      picks: null,
+      frustum: 1000,
+      highlighted: null,
+      mouse: new Vector2,
+      picks: new Group,
+      raycaster: new Raycaster,
+      renderer: new WebGLRenderer,
+      scene: new Scene,
+      selected: null,
       shift: false,
+      start: new Vector2,
+      threshold: 5,
     };
   },
   mounted() {
@@ -60,24 +65,18 @@ export default {
   methods: {
     init: function() {
       const container = document.getElementById( 'container' );
-      const frustumSize = 1000;
-      console.log(window.innerWidth);
-      console.log(window.innerHeight);
-      console.log(container.innerWidth);
-      console.log(container.innerHeight);
 
-      const aspect = window.innerWidth / window.innerHeight;
+      this.aspect = window.innerWidth / window.innerHeight;
 
-      this.camera = new OrthographicCamera( frustumSize * aspect / -2,
-          frustumSize * aspect / 2,
-          frustumSize / 2,
-          frustumSize / -2, 1, 1000 );
+      this.camera = new OrthographicCamera( this.frustum * this.aspect / -2,
+          this.frustum * this.aspect / 2,
+          this.frustum / 2,
+          this.frustum / -2, 1, 1000 );
       this.camera.lookAt( 0, 0, 0 );
       this.camera.zoom = 10;
       this.camera.position.set( 0, 0, 10 );
       this.camera.updateProjectionMatrix();
 
-      this.scene = new Scene();
       this.scene.add( new CameraHelper( this.camera ) );
 
       const ambient = new AmbientLight( 0xffffff, 0.25 );
@@ -114,13 +113,6 @@ export default {
       this.controls.maxDistance = 500;
       this.controls.maxPolarAngle = 2 * Math.PI;
 
-      this.raycaster = new Raycaster;
-
-      this.mouse = new Vector2;
-      this.start = new Vector2;
-
-      this.picks = new Group;
-
       this.scene.add( this.picks );
     },
     animate: function() {
@@ -134,14 +126,118 @@ export default {
     render: function() {
       this.renderer.render( this.scene, this.camera );
     },
-    pick: function(event) {
+    dbl: function( event ) {
+      console.log('dbl');
+    },
+    drag: function() {
+      console.log('drag');
+      this.raycaster.setFromCamera( this.mouse, this.camera );
+      const intersects = this.raycaster.intersectObject( this.mesh );
+
+      if ( intersects.length > 0 ) {
+        this.selected.position.x = intersects[0].point.x;
+        this.selected.position.y = intersects[0].point.y;
+        this.selected.position.z = intersects[0].point.z;
+        this.render();
+      }
+    },
+    highlight: function() {
+      console.log('highlight');
+
+      this.raycaster.setFromCamera( this.mouse, this.camera );
+
+      const intersects = this.raycaster.intersectObjects( this.picks.children );
+
+      if ( intersects.length > 0 ) {
+        if ( intersects[0].object != this.highlighted ) {
+          if ( this.highlighted ) {
+            this.highlighted.material.color.setHex(
+                this.highlighted.currentHex,
+            );
+          }
+
+          this.highlighted = intersects[0].object;
+          this.highlighted.currentHex =
+            this.highlighted.material.color.getHex();
+          this.highlighted.material.color.set( 0xffff00 );
+        }
+      } else {
+        if ( this.highlighted ) {
+          this.highlighted.material.color.setHex( this.highlighted.currentHex );
+        }
+
+        this.highlighted = null;
+      }
+    },
+    key: function( event ) {
+      console.log('key( event )');
+      console.log('event.key -> ', event.key);
+      console.log('event.shiftKey -> ', event.shiftKey);
+      console.log('event.keyCode -> ', event.keyCode);
+
+      this.shift = event.shiftKey;
+
+      if ( event.keyCode == 16 && this.highlighted ) {
+        this.picks.remove( this.highlighted );
+        this.highlighted = null;
+        this.render();
+      } else if ( this.shift ) {
+        console.log('crosshair');
+        document.body.style.cursor = 'crosshair';
+      } else {
+        console.log('default');
+        document.body.style.cursor = 'default';
+      }
+    },
+    mdown: function( event ) {
+      console.log( 'mdown' );
+      this.start.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+      this.start.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+
+      if ( this.highlighted ) {
+        this.selected = this.highlighted;
+        controls.enabled = false;
+      }
+    },
+    mmove: function( event ) {
+      console.log( 'mmove' );
       this.mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
       this.mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+      if ( this.selected ) {
+        this.drag();
+        this.controls.saveState();
+        this.controls.enabled = false;
+      } else if ( !this.shift ) {
+        this.highlight();
+      }
+    },
+    mup: function( event ) {
+      console.log( 'mup' );
+
+      const dx = Math.abs( this.mouse.x - this.start.x );
+      const dy = Math.abs( this.mouse.y - this.start.y );
+
+      if ( dx < this.threshold && dy < this.threshold ) {
+        if ( this.highlighted ) {
+          // Drop
+          this.highlighted.material.color.setHex( this.highlighted.currentHex );
+          this.controls.reset();
+          this.controls.enabled = true;
+          this.selected = null;
+          this.highligted = null;
+        } else if ( this.shift ) {
+          // Shift+Click
+          this.pick();
+        }
+      }
+    },
+    pick: function() {
+      console.log( 'pick' );
 
       this.raycaster.setFromCamera( this.mouse, this.camera );
 
       const intersects = this.raycaster.intersectObject( this.mesh );
-      console.log(intersects.length);
+
       if ( intersects.length > 0 ) {
         const geometry = new SphereGeometry( 0.5, 32, 32 );
         const material = new MeshPhongMaterial( {color: 0xff33bb,
@@ -157,6 +253,19 @@ export default {
         this.render();
       }
     },
+    resize: function() {
+      console.log( 'resize' );
+
+      this.aspect = window.innerWidth / window.innerHeight;
+
+      this.camera.left = - this.frustum * this.aspect / 2;
+      this.camera.right = this.frustum * this.aspect / 2;
+      this.camera.top = this.frustum / 2;
+      this.camera.bottom = this.frustum / -2;
+      this.camera.updateProjectionMatrix();
+
+      this.renderer.setSize( window.innerWidth, window.innerHeight );
+    },
   },
 };
 </script>
@@ -165,11 +274,5 @@ export default {
   canvas {
     width: 95%;
     height: 95%;
-  }
-  .target {
-      cursor: crosshair;
-  }
-  .arrow {
-      cursor: default;
   }
 </style>
