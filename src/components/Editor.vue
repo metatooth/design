@@ -27,6 +27,8 @@ export default {
     const scope = this;
 
     if (asset) {
+      console.log('asset -> ', asset);
+
       AssetsService.get( asset )
           .then(( response ) => {
             console.log( response.data.data.url );
