@@ -10,9 +10,13 @@
 
 <script>
 import {AmbientLight} from 'three';
+import {BufferAttribute} from 'three';
+import {BufferGeometry} from 'three';
 import {CameraHelper} from 'three';
 import {DirectionalLight} from 'three';
 import {Group} from 'three';
+import {Line} from 'three';
+import {LineBasicMaterial} from 'three';
 import {Mesh} from 'three';
 import {MeshPhongMaterial} from 'three';
 import {OrthographicCamera} from 'three';
@@ -43,19 +47,27 @@ export default {
   data: function() {
     return {
       aspect: 0.0,
+      black: 0x2d2d2d,
       camera: null,
       controls: null,
+      count: 0,
       frustum: 1000,
       highlighted: null,
+      line: null,
+      max: 500,
       mouse: new Vector2,
+      primary: 0x00bbee,
       picks: new Group,
+      radius: 0.3,
       raycaster: new Raycaster,
       renderer: new WebGLRenderer,
       scene: new Scene,
+      secondary: 0xff33bb,
       selected: null,
       shift: false,
       start: new Vector2,
       threshold: 5,
+      white: 0xffffff,
     };
   },
   mounted() {
@@ -79,16 +91,16 @@ export default {
 
       this.scene.add( new CameraHelper( this.camera ) );
 
-      const ambient = new AmbientLight( 0xffffff, 0.25 );
+      const ambient = new AmbientLight( this.white, 0.25 );
       this.scene.add( ambient );
 
-      const keyLight = new DirectionalLight( 0x00bbee, 1.0 );
+      const keyLight = new DirectionalLight( this.primary, 1.0 );
       keyLight.position.set( -100, 0, 100 );
 
-      const fillLight = new DirectionalLight( 0xff33bb, 0.75 );
+      const fillLight = new DirectionalLight( this.secondary, 0.75 );
       fillLight.position.set( 100, 0, 100 );
 
-      const backLight = new DirectionalLight( 0xffffff, 1.0 );
+      const backLight = new DirectionalLight( this.white, 1.0 );
       backLight.position.set( 100, 0, -100 ).normalize();
 
       this.scene.add( keyLight );
@@ -98,7 +110,7 @@ export default {
       this.renderer = new WebGLRenderer();
       this.renderer.setPixelRatio( window.devicePixelRatio );
       this.renderer.setSize( window.innerWidth, window.innerHeight );
-      this.renderer.setClearColor( 0x2d2d2d );
+      this.renderer.setClearColor( this.black );
 
       container.appendChild( this.renderer.domElement );
 
@@ -114,6 +126,18 @@ export default {
       this.controls.maxPolarAngle = 2 * Math.PI;
 
       this.scene.add( this.picks );
+
+      const positions = new Float32Array( this.max * 3);
+      const geometry = new BufferGeometry;
+      geometry.setAttribute( 'position', new BufferAttribute( positions, 3 ) );
+      geometry.setDrawRange( 0, 0 );
+
+      const material = new LineBasicMaterial(
+          {color: this.primary, linewidth: 5} );
+      this.line = new Line( geometry, material );
+      this.scene.add( this.line );
+
+      window.addEventListener( 'resize', this.resize, false );
     },
     animate: function() {
       requestAnimationFrame( this.animate );
@@ -138,6 +162,23 @@ export default {
         this.selected.position.y = intersects[0].point.y;
         this.selected.position.z = intersects[0].point.z;
         this.render();
+      }
+    },
+    draw: function() {
+      if (this.count < this.max * 3) {
+        this.raycaster.setFromCamera( this.mouse, this.camera );
+
+        const intersects = this.raycaster.intersectObject( this.mesh );
+        if ( intersects.length > 0 ) {
+          const positions = this.line.geometry.attributes.position.array;
+
+          positions[this.count++] = intersects[0].point.x;
+          positions[this.count++] = intersects[0].point.y;
+          positions[this.count++] = intersects[0].point.z;
+
+          this.line.geometry.setDrawRange( 0, this.count / 3 );
+          this.line.geometry.attributes.position.needsUpdate = true;
+        }
       }
     },
     highlight: function() {
@@ -173,8 +214,9 @@ export default {
       console.log('event.keyCode -> ', event.keyCode);
 
       this.shift = event.shiftKey;
+      this.ctrl = event.ctrlKey;
 
-      if ( event.keyCode == 88 && this.highlighted ) {
+      if ( event.keyCode == 46 && this.highlighted ) {
         this.picks.remove( this.highlighted );
         this.highlighted = null;
         this.render();
@@ -198,12 +240,15 @@ export default {
       console.log( 'mmove' );
       this.mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
       this.mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+
       if ( this.selected ) {
         this.drag();
         this.controls.saveState();
         this.controls.enabled = false;
       } else if ( !this.shift ) {
         this.highlight();
+      } else if ( this.shift ) {
+        this.draw();
       }
     },
     mup: function( event ) {
@@ -218,8 +263,7 @@ export default {
           this.highlighted.material.color.setHex( this.highlighted.currentHex );
           this.controls.reset();
           this.controls.enabled = true;
-          this.selected = null;
-          this.highligted = null;
+          this.selected = this.highlighted = null;
         } else if ( this.shift ) {
           // Shift+Click
           this.pick();
@@ -234,11 +278,10 @@ export default {
       const intersects = this.raycaster.intersectObject( this.mesh );
 
       if ( intersects.length > 0 ) {
-        const geometry = new SphereGeometry( 0.5, 32, 32 );
-        const material = new MeshPhongMaterial( {color: 0xff33bb,
+        const geometry = new SphereGeometry( this.radius, 32, 32 );
+        const material = new MeshPhongMaterial( {color: this.secondary,
           specular: 0x111111, shininess: 100} );
         const sphere = new Mesh( geometry, material );
-        console.log(intersects[0].point);
         sphere.position.x = intersects[0].point.x;
         sphere.position.y = intersects[0].point.y;
         sphere.position.z = intersects[0].point.z;
