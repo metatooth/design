@@ -30,14 +30,14 @@ import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls';
 
 export default {
   props: {
-    mesh: {
+    component: {
       type: Object,
       default: function() {
-        return new Mesh;
+        return new Group;
       },
     }},
   watch: {
-    mesh: function(newVal, oldVal) {
+    component: function(newVal, oldVal) {
       if (this.scene) {
         this.scene.remove( oldVal );
         this.scene.add( newVal );
@@ -155,7 +155,7 @@ export default {
     },
     drag: function() {
       this.raycaster.setFromCamera( this.mouse, this.camera );
-      const intersects = this.raycaster.intersectObject( this.mesh );
+      const intersects = this.raycaster.intersectObject( this.mesh() );
 
       if ( intersects.length > 0 ) {
         this.selected.position.x = intersects[0].point.x;
@@ -168,7 +168,8 @@ export default {
       if (this.count < this.max * 3) {
         this.raycaster.setFromCamera( this.mouse, this.camera );
 
-        const intersects = this.raycaster.intersectObject( this.mesh );
+        const intersects = this.raycaster.intersectObject( this.mesh() );
+
         if ( intersects.length > 0 ) {
           const positions = this.line.geometry.attributes.position.array;
 
@@ -226,6 +227,9 @@ export default {
         document.body.style.cursor = 'default';
       }
     },
+    mesh: function() {
+      return this.component.children[0];
+    },
     mdown: function( event ) {
       console.log( 'mdown' );
       this.start.x = ( event.clientX / window.innerWidth ) * 2 - 1;
@@ -266,7 +270,7 @@ export default {
           this.selected = this.highlighted = null;
         } else if ( this.shift ) {
           // Shift+Click
-          this.pick();
+
         }
       }
     },
