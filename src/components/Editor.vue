@@ -1,10 +1,11 @@
 <template>
-  <Viewer v-bind:component='component'/>
+  <Viewer v-bind:component='component' v-bind:tool='tool'/>
 </template>
 
 <script>
 import Viewer from './Viewer.vue';
-import AssetsService from '../api-services/assets';
+import {DrawTool} from '../tools/draw-tool.js';
+import AssetsService from '../api-services/assets.js';
 import {STLLoader} from 'three/examples/jsm/loaders/STLLoader.js';
 import {Group} from 'three';
 import {Mesh} from 'three';
@@ -17,12 +18,11 @@ export default {
   },
   data: function() {
     return {
-      component: null,
+      component: new Group,
+      tool: new DrawTool,
     };
   },
   mounted() {
-    this.component = new Group;
-
     const query = window.location.search;
     const params = new URLSearchParams( query );
     const asset = params.get( 'asset' );

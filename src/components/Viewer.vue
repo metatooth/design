@@ -33,9 +33,16 @@ export default {
     component: {
       type: Object,
       default: function() {
-        return new Group;
+        return null;
       },
-    }},
+    },
+    tool: {
+      type: Object,
+      default: function() {
+        return null;
+      },
+    },
+  },
   watch: {
     component: function(newVal, oldVal) {
       if (this.scene) {
@@ -124,6 +131,8 @@ export default {
       this.controls.minDistance = 100;
       this.controls.maxDistance = 500;
       this.controls.maxPolarAngle = 2 * Math.PI;
+
+      this.scene.add( this.component );
 
       this.scene.add( this.picks );
 
@@ -232,12 +241,20 @@ export default {
     },
     mdown: function( event ) {
       console.log( 'mdown' );
-      this.start.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-      this.start.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+      const manipulator = this.tool.create( this, event );
+      if (manipulator) {
+        manipulator.grasp( event );
 
-      if ( this.highlighted ) {
-        this.selected = this.highlighted;
-        this.controls.enabled = false;
+        let b = false;
+        do {
+          b = manipulator.manipulating( event );
+        } while ( b );
+
+        manipulator.effect( event );
+
+        const command = this.tool.interpret( manipulator );
+        command.execute();
+        command.log();
       }
     },
     mmove: function( event ) {
@@ -279,7 +296,7 @@ export default {
 
       this.raycaster.setFromCamera( this.mouse, this.camera );
 
-      const intersects = this.raycaster.intersectObject( this.mesh );
+      const intersects = this.raycaster.intersectObject( this.mesh() );
 
       if ( intersects.length > 0 ) {
         const geometry = new SphereGeometry( this.radius, 32, 32 );
