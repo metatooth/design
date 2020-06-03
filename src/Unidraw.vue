@@ -3,63 +3,27 @@
   <div id="logo">
     <img width="200" alt="Metatooth Logo" src="./assets/logo.png">
   </div>
-  <div id="container"/>
+  <Editor v-bind:asset='asset' />
 </div>
 </template>
 
 <script>
-import {Editor} from './editor.js';
+import Editor from './Editor.vue';
 
 export default {
+  name: 'unidraw',
+  components: {
+    Editor,
+  },
   data: function() {
     return {
-      alive: true,
-      editors: [],
-      updated: true,
+      asset: '',
     };
   },
   mounted() {
     const query = window.location.search;
     const params = new URLSearchParams( query );
-    const asset = params.get( 'asset' );
-
-    const editor = new Editor(asset);
-
-    this.open(editor);
-    this.run();
-  },
-  methods: {
-    close: function() {
-      editor = this.editors.pop();
-      editor.close();
-    },
-    open: function( editor ) {
-      this.editors.push( editor );
-      editor.open();
-    },
-    run: function() {
-      if ( this.alive ) {
-        window.requestAnimationFrame( this.run );
-        this.updated = true;
-
-        // read & handle events ??
-
-        if (this.updated) {
-          this.update(true);
-        }
-      }
-    },
-    update: function( immediate = false ) {
-      if (immediate) {
-        for (let i = 0, l = this.editors.length; i < l; i++) {
-          this.editors[i].update();
-        }
-      }
-      this.updated = !immediate;
-    },
-    quit: function() {
-      this.alive = false;
-    },
+    this.asset = params.get( 'asset' );
   },
 };
 </script>

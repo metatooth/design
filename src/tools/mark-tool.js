@@ -1,5 +1,5 @@
 import {Command} from '../commands/command.js';
-import {DragManip} from '../drag-manip.js';
+import {VertexManip} from '../vertex-manip.js';
 import {Rubberband} from '../rubberband.js';
 import {Tool} from './tool.js';
 import {Vector2, Raycaster} from 'three';
@@ -8,16 +8,16 @@ import {Vector2, Raycaster} from 'three';
  * Description: A tool for drawing.
  * @constructor
  */
-function DrawTool() {
+function MarkTool() {
   Tool.call( this );
 
-  this.type = 'DrawTool';
+  this.type = 'MarkTool';
 }
 
-DrawTool.prototype = Object.assign( Object.create( Tool.prototype ), {
-  constructor: DrawTool,
+MarkTool.prototype = Object.assign( Object.create( Tool.prototype ), {
+  constructor: MarkTool,
 
-  isDrawTool: true,
+  isMarkTool: true,
 
   /**
    * @param {Viewer} viewer - the container
@@ -37,7 +37,7 @@ DrawTool.prototype = Object.assign( Object.create( Tool.prototype ), {
 
     if ( intersects.length > 0 ) {
       const rubberband = new Rubberband( mouse.x, mouse.y );
-      manipulator = new DragManip( viewer, rubberband );
+      manipulator = new VertexManip( viewer, rubberband );
     }
 
     return manipulator;
@@ -52,4 +52,4 @@ DrawTool.prototype = Object.assign( Object.create( Tool.prototype ), {
   },
 });
 
-export {DrawTool};
+export {MarkTool};

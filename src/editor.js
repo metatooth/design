@@ -1,4 +1,3 @@
-import {EventDispatcher} from 'three';
 import {Group} from 'three';
 import {Mesh} from 'three';
 import {MeshPhongMaterial} from 'three';
@@ -20,11 +19,11 @@ function Editor( asset ) {
 
   this.object = new Group;
   this.tool = new DrawTool;
-  this.viewers = [];
 
   const viewer = new Viewer(this, this.object);
   viewer.init();
 
+  this.viewers = [];
   this.viewers.push(viewer);
 
   const loader = new STLLoader;
@@ -43,7 +42,7 @@ function Editor( asset ) {
   });
 }
 
-Editor.prototype = Object.assign( Object.create( EventDispatcher.prototype ), {
+Object.assign( Editor.prototype, {
   constructor: Editor,
 
   isEditor: true,

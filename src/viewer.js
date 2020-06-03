@@ -3,7 +3,6 @@ import {BufferAttribute} from 'three';
 import {BufferGeometry} from 'three';
 import {CameraHelper} from 'three';
 import {DirectionalLight} from 'three';
-import {EventDispatcher} from 'three';
 import {Group} from 'three';
 import {Line} from 'three';
 import {LineBasicMaterial} from 'three';
@@ -51,7 +50,7 @@ function Viewer( editor, object ) {
   this.white = 0xffffff;
 }
 
-Viewer.prototype = Object.assign( Object.create( EventDispatcher.prototype ), {
+Object.assign( Viewer.prototype, {
   constructor: Viewer,
 
   isViewer: true,
@@ -121,10 +120,18 @@ Viewer.prototype = Object.assign( Object.create( EventDispatcher.prototype ), {
     this.scene.add( this.line );
 
     window.addEventListener( 'resize', this.resize, false );
+
+    window.addEventListener( 'mousedown', this.handle, false );
+    window.addEventListener( 'mouseup', this.handle, false );
+    window.addEventListener( 'mousemove', this.handle, false );
   },
 
   handle: function( event ) {
-
+    console.log(this.editor);
+    const tool = null;
+    if ( tool && event.type == 'mousedown' ) {
+      console.log( event );
+    }
   },
 
   resize: function() {
@@ -144,6 +151,24 @@ Viewer.prototype = Object.assign( Object.create( EventDispatcher.prototype ), {
   update: function() {
     this.controls.update();
     this.renderer.render( this.scene, this.camera );
+  },
+
+  use: function( tool, event ) {
+    const manipulator = tool.create( this, event );
+    if (manipulator) {
+      manipulator.grasp( event );
+
+      let b = false;
+      do {
+        b = manipulator.manipulating( event );
+      } while ( b );
+
+      manipulator.effect( event );
+
+      const command = this.tool.interpret( manipulator );
+      command.execute();
+      command.log();
+    }
   },
 });
 

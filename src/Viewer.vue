@@ -1,11 +1,9 @@
 <template>
 <div id="container"
-     @dblclick="dbl"
-     @keydown="key"
-     @keyup="key"
-     @mousemove="mmove($event)"
-     @mousedown="mdown($event)"
-     @mouseup="mup($event)" />
+     @dblclick="dbl($event)"
+     @mousemove="handle($event)"
+     @mousedown="handle($event)"
+     @mouseup="handle($event)" />
 </template>
 
 <script>
@@ -17,34 +15,34 @@ import {DirectionalLight} from 'three';
 import {Group} from 'three';
 import {Line} from 'three';
 import {LineBasicMaterial} from 'three';
-import {Mesh} from 'three';
-import {MeshPhongMaterial} from 'three';
 import {OrthographicCamera} from 'three';
 import {Raycaster} from 'three';
 import {Scene} from 'three';
-import {SphereGeometry} from 'three';
 import {Vector2} from 'three';
 import {WebGLRenderer} from 'three';
 
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls';
 
+import {Tool} from './tools/tool.js';
+
 export default {
+  name: 'viewer',
   props: {
-    component: {
-      type: Object,
+    object: {
+      type: Group,
       default: function() {
         return null;
       },
     },
     tool: {
-      type: Object,
+      type: Tool,
       default: function() {
         return null;
       },
     },
   },
   watch: {
-    component: function(newVal, oldVal) {
+    object: function( newVal, oldVal ) {
       if (this.scene) {
         this.scene.remove( oldVal );
         this.scene.add( newVal );
@@ -61,15 +59,12 @@ export default {
       frustum: 1000,
       highlighted: null,
       line: null,
+      manipulator: null,
       max: 500,
-      mouse: new Vector2,
       primary: 0x00bbee,
-      picks: new Group,
-      radius: 0.3,
       raycaster: new Raycaster,
       renderer: new WebGLRenderer,
       scene: new Scene,
-      secondary: 0xff33bb,
       selected: null,
       shift: false,
       start: new Vector2,
@@ -82,82 +77,10 @@ export default {
     this.animate();
   },
   methods: {
-    init: function() {
-      const container = document.getElementById( 'container' );
-
-      this.aspect = window.innerWidth / window.innerHeight;
-
-      this.camera = new OrthographicCamera( this.frustum * this.aspect / -2,
-          this.frustum * this.aspect / 2,
-          this.frustum / 2,
-          this.frustum / -2, 1, 1000 );
-      this.camera.lookAt( 0, 0, 0 );
-      this.camera.zoom = 10;
-      this.camera.position.set( 0, 0, 10 );
-      this.camera.updateProjectionMatrix();
-
-      this.scene.add( new CameraHelper( this.camera ) );
-
-      const ambient = new AmbientLight( this.white, 0.25 );
-      this.scene.add( ambient );
-
-      const keyLight = new DirectionalLight( this.primary, 1.0 );
-      keyLight.position.set( -100, 0, 100 );
-
-      const fillLight = new DirectionalLight( this.secondary, 0.75 );
-      fillLight.position.set( 100, 0, 100 );
-
-      const backLight = new DirectionalLight( this.white, 1.0 );
-      backLight.position.set( 100, 0, -100 ).normalize();
-
-      this.scene.add( keyLight );
-      this.scene.add( fillLight );
-      this.scene.add( backLight );
-
-      this.renderer = new WebGLRenderer();
-      this.renderer.setPixelRatio( window.devicePixelRatio );
-      this.renderer.setSize( window.innerWidth, window.innerHeight );
-      this.renderer.setClearColor( this.black );
-
-      container.appendChild( this.renderer.domElement );
-
-      this.controls = new OrbitControls( this.camera,
-          this.renderer.domElement );
-
-      this.controls.enablePan = false;
-      this.controls.enableDamping = true;
-      this.controls.dampingFactor = 0.1;
-      this.controls.screenSpacePanning = false;
-      this.controls.minDistance = 100;
-      this.controls.maxDistance = 500;
-      this.controls.maxPolarAngle = 2 * Math.PI;
-
-      this.scene.add( this.component );
-
-      this.scene.add( this.picks );
-
-      const positions = new Float32Array( this.max * 3);
-      const geometry = new BufferGeometry;
-      geometry.setAttribute( 'position', new BufferAttribute( positions, 3 ) );
-      geometry.setDrawRange( 0, 0 );
-
-      const material = new LineBasicMaterial(
-          {color: this.primary, linewidth: 5} );
-      this.line = new Line( geometry, material );
-      this.scene.add( this.line );
-
-      window.addEventListener( 'resize', this.resize, false );
-    },
     animate: function() {
       requestAnimationFrame( this.animate );
       this.update();
       this.render();
-    },
-    update: function() {
-      this.controls.update();
-    },
-    render: function() {
-      this.renderer.render( this.scene, this.camera );
     },
     dbl: function( event ) {
       console.log('dbl');
@@ -191,6 +114,33 @@ export default {
         }
       }
     },
+    handle: function( event ) {
+      if (this.manipulator) {
+        if (this.manipulator.manipulating( event )) {
+          // no op
+        } else {
+          console.log('manipulation is done -> ', this.manipulator);
+          this.manipulator.effect( event );
+
+          const command = this.tool.interpret(this.manipulator);
+          if (command) {
+            command.execute();
+
+            if (command.reversible()) {
+              command.log();
+            }
+          }
+
+          this.manipulator = null;
+        }
+      } else if (this.tool && event.shiftKey && event.type == 'mousedown') {
+        console.log('create manipulator for shift+click');
+        this.manipulator = this.tool.create( this, event );
+        if (this.manipulator) {
+          this.manipulator.grasp( event );
+        }
+      }
+    },
     highlight: function() {
       this.raycaster.setFromCamera( this.mouse, this.camera );
 
@@ -217,45 +167,84 @@ export default {
         this.highlighted = null;
       }
     },
-    key: function( event ) {
-      console.log('key( event )');
-      console.log('event.key -> ', event.key);
-      console.log('event.shiftKey -> ', event.shiftKey);
-      console.log('event.keyCode -> ', event.keyCode);
+    init: function() {
+      // initialize order is important
 
-      this.shift = event.shiftKey;
-      this.ctrl = event.ctrlKey;
+      this.aspect = window.innerWidth / window.innerHeight;
 
-      if ( event.keyCode == 46 && this.highlighted ) {
-        this.picks.remove( this.highlighted );
-        this.highlighted = null;
-        this.render();
-      } else if ( this.shift ) {
-        document.body.style.cursor = 'crosshair';
-      } else {
-        document.body.style.cursor = 'default';
-      }
+      this.initCamera();
+
+      this.initLights();
+
+      this.initRenderer();
+
+      this.initControls();
+
+      this.scene.add( this.object );
+
+      const positions = new Float32Array( this.max * 3);
+      const geometry = new BufferGeometry;
+      geometry.setAttribute( 'position', new BufferAttribute( positions, 3 ) );
+      geometry.setDrawRange( 0, 0 );
+
+      const material = new LineBasicMaterial(
+          {color: this.primary, linewidth: 5} );
+      this.line = new Line( geometry, material );
+      this.scene.add( this.line );
+
+      window.addEventListener( 'resize', this.resize, false );
+    },
+    initCamera: function() {
+      this.camera = new OrthographicCamera( this.frustum * this.aspect / -2,
+          this.frustum * this.aspect / 2,
+          this.frustum / 2,
+          this.frustum / -2, 1, 1000 );
+      this.camera.lookAt( 0, 0, 0 );
+      this.camera.zoom = 10;
+      this.camera.position.set( 0, 0, 10 );
+      this.camera.updateProjectionMatrix();
+
+      this.scene.add( new CameraHelper( this.camera ) );
+    },
+    initControls: function() {
+      this.controls = new OrbitControls( this.camera,
+          this.renderer.domElement );
+
+      this.controls.enablePan = false;
+      this.controls.enableDamping = true;
+      this.controls.dampingFactor = 0.1;
+      this.controls.screenSpacePanning = false;
+      this.controls.minDistance = 100;
+      this.controls.maxDistance = 500;
+      this.controls.maxPolarAngle = 2 * Math.PI;
+    },
+    initLights: function() {
+      const ambient = new AmbientLight( this.white, 0.25 );
+
+      const key = new DirectionalLight( this.primary, 1.0 );
+      key.position.set( -100, 0, 100 );
+
+      const fill = new DirectionalLight( this.secondary, 0.75 );
+      fill.position.set( 100, 0, 100 );
+
+      const back = new DirectionalLight( this.white, 1.0 );
+      back.position.set( 100, 0, -100 ).normalize();
+
+      this.scene.add( ambient );
+      this.scene.add( key );
+      this.scene.add( fill );
+      this.scene.add( back );
+    },
+    initRenderer: function() {
+      this.renderer = new WebGLRenderer();
+      this.renderer.setPixelRatio( window.devicePixelRatio );
+      this.renderer.setSize( window.innerWidth, window.innerHeight );
+      this.renderer.setClearColor( this.black );
+
+      container.appendChild( this.renderer.domElement );
     },
     mesh: function() {
-      return this.component.children[0];
-    },
-    mdown: function( event ) {
-      console.log( 'mdown' );
-      const manipulator = this.tool.create( this, event );
-      if (manipulator) {
-        manipulator.grasp( event );
-
-        let b = false;
-        do {
-          b = manipulator.manipulating( event );
-        } while ( b );
-
-        manipulator.effect( event );
-
-        const command = this.tool.interpret( manipulator );
-        command.execute();
-        command.log();
-      }
+      return this.object.children[0];
     },
     mmove: function( event ) {
       console.log( 'mmove' );
@@ -291,26 +280,8 @@ export default {
         }
       }
     },
-    pick: function() {
-      console.log( 'pick' );
-
-      this.raycaster.setFromCamera( this.mouse, this.camera );
-
-      const intersects = this.raycaster.intersectObject( this.mesh() );
-
-      if ( intersects.length > 0 ) {
-        const geometry = new SphereGeometry( this.radius, 32, 32 );
-        const material = new MeshPhongMaterial( {color: this.secondary,
-          specular: 0x111111, shininess: 100} );
-        const sphere = new Mesh( geometry, material );
-        sphere.position.x = intersects[0].point.x;
-        sphere.position.y = intersects[0].point.y;
-        sphere.position.z = intersects[0].point.z;
-
-        this.picks.add( sphere );
-
-        this.render();
-      }
+    render: function() {
+      this.renderer.render( this.scene, this.camera );
     },
     resize: function() {
       console.log( 'resize' );
@@ -324,6 +295,9 @@ export default {
       this.camera.updateProjectionMatrix();
 
       this.renderer.setSize( window.innerWidth, window.innerHeight );
+    },
+    update: function() {
+      this.controls.update();
     },
   },
 };
