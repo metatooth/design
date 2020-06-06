@@ -65,6 +65,7 @@ export default {
       raycaster: new Raycaster,
       renderer: new WebGLRenderer,
       scene: new Scene,
+      secondary: 0xff33bb,
       selected: null,
       shift: false,
       start: new Vector2,
@@ -115,11 +116,10 @@ export default {
       }
     },
     handle: function( event ) {
-      if (this.manipulator) {
+      if (this.tool && this.manipulator) {
         if (this.manipulator.manipulating( event )) {
           // no op
         } else {
-          console.log('manipulation is done -> ', this.manipulator);
           this.manipulator.effect( event );
 
           const command = this.tool.interpret(this.manipulator);
@@ -133,8 +133,7 @@ export default {
 
           this.manipulator = null;
         }
-      } else if (this.tool && event.shiftKey && event.type == 'mousedown') {
-        console.log('create manipulator for shift+click');
+      } else if (this.tool) {
         this.manipulator = this.tool.create( this, event );
         if (this.manipulator) {
           this.manipulator.grasp( event );
@@ -247,7 +246,6 @@ export default {
       return this.object.children[0];
     },
     mmove: function( event ) {
-      console.log( 'mmove' );
       this.mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
       this.mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
 
@@ -262,8 +260,6 @@ export default {
       }
     },
     mup: function( event ) {
-      console.log( 'mup' );
-
       const dx = Math.abs( this.mouse.x - this.start.x );
       const dy = Math.abs( this.mouse.y - this.start.y );
 

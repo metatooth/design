@@ -1,5 +1,7 @@
-import {Group} from 'three';
+import {Mesh} from 'three';
+import {MeshPhongMaterial} from 'three';
 import {Raycaster} from 'three';
+import {SphereGeometry} from 'three';
 import {Vector2} from 'three';
 
 import {DragManip} from './drag-manip.js';
@@ -10,11 +12,9 @@ import {DragManip} from './drag-manip.js';
  * @param {Rubberband} rubberband - used to track mouse movement
  */
 function VertexManip( viewer, rubberband ) {
-  DragManip.call( this );
+  DragManip.call( this, viewer, rubberband );
 
   this.type = 'VertexManip';
-
-  this.picks = null;
 
   this.raycaster = new Raycaster;
 
@@ -35,40 +35,45 @@ VertexManip.prototype = Object.assign( Object.create( DragManip.prototype ), {
    * @return {boolean}
    */
   manipulating: function( event ) {
-    console.log('vertex manip --> ', event.type);
-
-    if ( !this.picks ) {
-      this.picks = new Group;
-      this.viewer.scene.add( this.picks );
-    }
-
     const x = ( event.clientX / window.innerWidth ) * 2 - 1;
     const y = - ( event.clientY / window.innerHeight ) * 2 + 1;
 
-    if ( event.ctrlKey && event.type == 'mousemove' ) {
+    if ( event.type == 'mousemove' ) {
       this.rubberband.track( x, y );
-    } else if ( event.ctrlKey && event.type == 'mousedown' ) {
-      console.log(event.button);
+    } else if ( event.type == 'mousedown' ) {
+      if ( event.button == 0 ) {
+        this.raycaster.setFromCamera( new Vector2( x, y ), this.viewer.camera );
 
-      this.raycaster.setFromCamera( new Vector2( x, y ), this.viewer.camera );
+        const intersects = this.raycaster.intersectObject( this.viewer.mesh() );
 
-      const intersects = this.raycaster.intersectObject( this.viewer.mesh() );
+        if ( intersects.length > 0 ) {
+          const geometry = new SphereGeometry( this.radius,
+              this.div, this.div );
+          const material = new MeshPhongMaterial( {color: this.color,
+            specular: this.specular, shininess: this.shininess} );
+          const sphere = new Mesh( geometry, material );
+          sphere.position.x = intersects[0].point.x;
+          sphere.position.y = intersects[0].point.y;
+          sphere.position.z = intersects[0].point.z;
 
-      if ( intersects.length > 0 ) {
-        const geometry = new SphereGeometry( this.radius, this.div, this.div );
-        const material = new MeshPhongMaterial( {color: this.color,
-          specular: this.specular, shininess: this.shininess} );
-        const sphere = new Mesh( geometry, material );
-        sphere.position.x = intersects[0].point.x;
-        sphere.position.y = intersects[0].point.y;
-        sphere.position.z = intersects[0].point.z;
+          this.viewer.scene.add( sphere );
+        }
+      } else if ( event.button == 1 ) {
+        return false;
+      } else if ( event.button == 2 ) {
+        this.raycaster.setFromCamera( new Vector2( x, y ), this.viewer.camera );
 
-        this.picks.add( sphere );
+        const intersects = this.raycaster.intersectObjects(
+            this.viewer.scene.children );
 
-        this.viewer.render();
+        for ( let i = 0, l = intersects.length; i < l; i++ ) {
+          if ( intersects[i].object.geometry.constructor.name ==
+               'SphereGeometry' ) {
+            this.viewer.scene.remove( intersects[0].object );
+          }
+        }
       }
-    } else if ( !event.ctrlKey || event.type == 'mouseup' ) {
-      this.viewer.scene.remove( this.picks );
+    } else if ( event.type == 'mouseup' ) {
       return false;
     }
     return true;

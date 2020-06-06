@@ -65,8 +65,6 @@ export default {
   },
   methods: {
     key: function( event ) {
-      console.log( event.keyCode, ' -> ', event.type );
-
       if ( event.keyCode == 68 && event.type == 'keydown' ) {
         this.isDraw = true;
         this.isMark = false;
@@ -80,9 +78,11 @@ export default {
         this.tool = new MarkTool;
         document.body.style.cursor = 'crosshair';
       } else if ( event.type == 'keyup' ) {
+        console.log( 'keyup: ', event.keyCode, event );
         this.isDraw = false;
         this.isMark = false;
         this.isViz = true;
+        this.tool = null;
         document.body.style.cursor = 'default';
       }
     },

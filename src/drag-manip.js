@@ -25,8 +25,6 @@ DragManip.prototype = Object.assign( Object.create( Manipulator.prototype ), {
   grasp: function( event ) {
     this.grasp = event;
 
-    console.log(this.rubberband);
-
     const x = ( event.clientX / window.innerWidth ) * 2 - 1;
     const y = - ( event.clientY / window.innerHeight ) * 2 + 1;
     this.rubberband.track( x, y );
@@ -37,7 +35,6 @@ DragManip.prototype = Object.assign( Object.create( Manipulator.prototype ), {
    * @return {boolean}
    */
   manipulating: function( event ) {
-    console.log('drag manip --> ', event.type);
     if ( event.shiftKey && event.type == 'mousemove' ) {
       const x = ( event.clientX / window.innerWidth ) * 2 - 1;
       const y = - ( event.clientY / window.innerHeight ) * 2 + 1;
@@ -52,7 +49,6 @@ DragManip.prototype = Object.assign( Object.create( Manipulator.prototype ), {
    * @param {Event} event - mouseup to end the drag
    */
   effect: function( event ) {
-    console.log('effect -> ', event.type);
   },
 });
 
