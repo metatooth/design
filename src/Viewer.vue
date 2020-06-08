@@ -81,6 +81,7 @@ export default {
       frustum: 1000,
       highlighted: null,
       line: null,
+      linewidth: 5,
       manipulator: null,
       max: 500,
       primary: 0x00bbee,
@@ -154,10 +155,14 @@ export default {
           }
 
           this.manipulator = null;
+          this.controls.reset();
+          this.controls.enabled = true;
         }
       } else if (this.tool) {
         this.manipulator = this.tool.create( this, event );
         if (this.manipulator) {
+          this.controls.saveState();
+          this.controls.enabled = false;
           this.manipulator.grasp( event );
         }
       }
@@ -209,7 +214,7 @@ export default {
       geometry.setDrawRange( 0, 0 );
 
       const material = new LineBasicMaterial(
-          {color: this.primary, linewidth: 5} );
+          {color: this.primary, linewidth: this.linewidth} );
       this.line = new Line( geometry, material );
       this.scene.add( this.line );
 

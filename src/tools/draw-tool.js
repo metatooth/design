@@ -20,11 +20,13 @@
  * WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+import {Raycaster} from 'three';
+import {Vector2} from 'three';
+
 import {Command} from '../commands/command.js';
-import {DragManip} from '../drag-manip.js';
 import {Rubberband} from '../rubberband.js';
+import {ScribbleVertexManip} from '../scribble-vertex-manip.js';
 import {Tool} from './tool.js';
-import {Vector2, Raycaster} from 'three';
 
 /**
  * Description: A tool for drawing.
@@ -59,7 +61,7 @@ DrawTool.prototype = Object.assign( Object.create( Tool.prototype ), {
 
     if ( intersects.length > 0 ) {
       const rubberband = new Rubberband( mouse.x, mouse.y );
-      manipulator = new DragManip( viewer, rubberband );
+      manipulator = new ScribbleVertexManip( viewer, rubberband );
     }
 
     return manipulator;
