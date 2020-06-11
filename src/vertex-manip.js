@@ -29,12 +29,15 @@ import {Vector2} from 'three';
 import {DragManip} from './drag-manip.js';
 
 /**
- * Description: Mousedown. Drag... Mouseup.
- * @param {Viewer} viewer - visualization
- * @param {Rubberband} rubberband - used to track mouse movement
+ * Description: Mousedown event will raycast from mouse to viewer's
+ * mesh. An intersection will append a point object to the root
+ * component.
+ * @param {Viewer} viewer: used for raycasting
+ * @param {GrowingVertices} gv: track mouse movement and collect vertices
+ * @param {Tool} tool: user interaction
  */
-function VertexManip( viewer, rubberband ) {
-  DragManip.call( this, viewer, rubberband );
+function VertexManip( viewer, gv, tool ) {
+  DragManip.call( this, viewer, gv, tool );
 
   this.type = 'VertexManip';
 
@@ -79,6 +82,10 @@ VertexManip.prototype = Object.assign( Object.create( DragManip.prototype ), {
           sphere.position.z = intersects[0].point.z;
 
           this.viewer.scene.add( sphere );
+
+          this.rubberband.addVertex(intersects[0].point.x,
+              intersects[0].point.y,
+              intersects[0].point.z);
         }
       } else if ( event.button == 1 ) {
         return false;

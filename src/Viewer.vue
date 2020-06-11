@@ -1,6 +1,5 @@
 <template>
 <div id="container"
-     @dblclick="dbl($event)"
      @mousemove="handle($event)"
      @mousedown="handle($event)"
      @mouseup="handle($event)" />
@@ -34,7 +33,6 @@ import {BufferAttribute} from 'three';
 import {BufferGeometry} from 'three';
 import {CameraHelper} from 'three';
 import {DirectionalLight} from 'three';
-import {Group} from 'three';
 import {Line} from 'three';
 import {LineBasicMaterial} from 'three';
 import {OrthographicCamera} from 'three';
@@ -45,13 +43,14 @@ import {WebGLRenderer} from 'three';
 
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls';
 
+import {Component} from './components/component.js';
 import {Tool} from './tools/tool.js';
 
 export default {
   name: 'viewer',
   props: {
-    object: {
-      type: Group,
+    component: {
+      type: Component,
       default: function() {
         return null;
       },
@@ -64,7 +63,7 @@ export default {
     },
   },
   watch: {
-    object: function( newVal, oldVal ) {
+    component: function( newVal, oldVal ) {
       if (this.scene) {
         this.scene.remove( oldVal );
         this.scene.add( newVal );
@@ -81,14 +80,14 @@ export default {
       frustum: 1000,
       highlighted: null,
       line: null,
-      linewidth: 5,
+      linewidth: 7,
       manipulator: null,
       max: 500,
       primary: 0x00bbee,
       raycaster: new Raycaster,
       renderer: new WebGLRenderer,
       scene: new Scene,
-      secondary: 0xff33bb,
+      secondary: '#ff33bb',
       selected: null,
       shift: false,
       start: new Vector2,
@@ -106,37 +105,8 @@ export default {
       this.update();
       this.render();
     },
-    dbl: function( event ) {
-      console.log('dbl');
-    },
-    drag: function() {
-      this.raycaster.setFromCamera( this.mouse, this.camera );
-      const intersects = this.raycaster.intersectObject( this.mesh() );
-
-      if ( intersects.length > 0 ) {
-        this.selected.position.x = intersects[0].point.x;
-        this.selected.position.y = intersects[0].point.y;
-        this.selected.position.z = intersects[0].point.z;
-        this.render();
-      }
-    },
-    draw: function() {
-      if (this.count < this.max * 3) {
-        this.raycaster.setFromCamera( this.mouse, this.camera );
-
-        const intersects = this.raycaster.intersectObject( this.mesh() );
-
-        if ( intersects.length > 0 ) {
-          const positions = this.line.geometry.attributes.position.array;
-
-          positions[this.count++] = intersects[0].point.x;
-          positions[this.count++] = intersects[0].point.y;
-          positions[this.count++] = intersects[0].point.z;
-
-          this.line.geometry.setDrawRange( 0, this.count / 3 );
-          this.line.geometry.attributes.position.needsUpdate = true;
-        }
-      }
+    editor: function() {
+      return this.$parent;
     },
     handle: function( event ) {
       if (this.tool && this.manipulator) {
@@ -155,42 +125,13 @@ export default {
           }
 
           this.manipulator = null;
-          this.controls.reset();
-          this.controls.enabled = true;
         }
       } else if (this.tool) {
+        console.log(this.tool.type, ' ~> ', event.type);
         this.manipulator = this.tool.create( this, event );
         if (this.manipulator) {
-          this.controls.saveState();
-          this.controls.enabled = false;
           this.manipulator.grasp( event );
         }
-      }
-    },
-    highlight: function() {
-      this.raycaster.setFromCamera( this.mouse, this.camera );
-
-      const intersects = this.raycaster.intersectObjects( this.picks.children );
-
-      if ( intersects.length > 0 ) {
-        if ( intersects[0].object != this.highlighted ) {
-          if ( this.highlighted ) {
-            this.highlighted.material.color.setHex(
-                this.highlighted.currentHex,
-            );
-          }
-
-          this.highlighted = intersects[0].object;
-          this.highlighted.currentHex =
-            this.highlighted.material.color.getHex();
-          this.highlighted.material.color.set( 0xffff00 );
-        }
-      } else {
-        if ( this.highlighted ) {
-          this.highlighted.material.color.setHex( this.highlighted.currentHex );
-        }
-
-        this.highlighted = null;
       }
     },
     init: function() {
@@ -206,7 +147,7 @@ export default {
 
       this.initControls();
 
-      this.scene.add( this.object );
+      this.scene.add( this.component );
 
       const positions = new Float32Array( this.max * 3);
       const geometry = new BufferGeometry;
@@ -214,8 +155,10 @@ export default {
       geometry.setDrawRange( 0, 0 );
 
       const material = new LineBasicMaterial(
-          {color: this.primary, linewidth: this.linewidth} );
+          {color: this.luminance(this.secondary, 0.2),
+            linewidth: this.linewidth} );
       this.line = new Line( geometry, material );
+
       this.scene.add( this.line );
 
       window.addEventListener( 'resize', this.resize, false );
@@ -269,39 +212,25 @@ export default {
 
       container.appendChild( this.renderer.domElement );
     },
+    luminance: function(hex, lum) {
+      hex = String(hex).replace(/[^0-9a-f]/gi, '');
+      if (hex.length < 6) {
+        hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+      }
+      lum = lum || 0;
+
+      let rgb = '#';
+      let c;
+      for (let i = 0; i < 3; i++) {
+        c = parseInt(hex.substr(i*2, 2), 16);
+        c = Math.round(Math.min(Math.max(0, c+(c*lum)), 255)).toString(16);
+        rgb += ('00'+c).substr(c.length);
+      }
+
+      return rgb;
+    },
     mesh: function() {
-      return this.object.children[0];
-    },
-    mmove: function( event ) {
-      this.mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-      this.mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-
-      if ( this.selected ) {
-        this.drag();
-        this.controls.saveState();
-        this.controls.enabled = false;
-      } else if ( !this.shift ) {
-        this.highlight();
-      } else if ( this.shift ) {
-        this.draw();
-      }
-    },
-    mup: function( event ) {
-      const dx = Math.abs( this.mouse.x - this.start.x );
-      const dy = Math.abs( this.mouse.y - this.start.y );
-
-      if ( dx < this.threshold && dy < this.threshold ) {
-        if ( this.highlighted ) {
-          // Drop
-          this.highlighted.material.color.setHex( this.highlighted.currentHex );
-          this.controls.reset();
-          this.controls.enabled = true;
-          this.selected = this.highlighted = null;
-        } else if ( this.shift ) {
-          // Shift+Click
-
-        }
-      }
+      return this.component.children[0];
     },
     render: function() {
       this.renderer.render( this.scene, this.camera );

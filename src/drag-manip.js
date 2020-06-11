@@ -26,14 +26,16 @@ import {Manipulator} from './manipulator';
  * Description: Mousedown. Drag... Mouseup.
  * @param {Viewer} viewer - for visualization
  * @param {Rubberband} rubberband - used to track mouse movement
+ * @param {Tool} tool - for user interaction
  */
-function DragManip( viewer, rubberband ) {
+function DragManip( viewer, rubberband, tool ) {
   Manipulator.call( this );
 
   this.type = 'DragManip';
 
   this.viewer = viewer;
   this.rubberband = rubberband;
+  this.tool = tool;
 }
 
 DragManip.prototype = Object.assign( Object.create( Manipulator.prototype ), {
@@ -45,6 +47,9 @@ DragManip.prototype = Object.assign( Object.create( Manipulator.prototype ), {
    * @param {Event} event - the mousedown event to start the drag
    */
   grasp: function( event ) {
+    this.viewer.controls.saveState();
+    this.viewer.controls.enabled = false;
+
     this.grasp = event;
 
     const x = ( event.clientX / window.innerWidth ) * 2 - 1;
@@ -71,6 +76,8 @@ DragManip.prototype = Object.assign( Object.create( Manipulator.prototype ), {
    * @param {Event} event - mouseup to end the drag
    */
   effect: function( event ) {
+    this.viewer.controls.reset();
+    this.viewer.controls.enabled = true;
   },
 });
 

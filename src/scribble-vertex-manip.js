@@ -28,10 +28,12 @@ import {VertexManip} from './vertex-manip.js';
 /**
  * Description: Mousedown. Drag... Mouseup.
  * @param {Viewer} viewer - visualization
- * @param {Rubberband} rubberband - used to track mouse movement
+ * @param {GrowingVertices} gv - used to track mouse movement and
+ * collect vertices
+ * @param {Tool} tool: user interaction
  */
-function ScribbleVertexManip( viewer, rubberband ) {
-  VertexManip.call( this, viewer, rubberband );
+function ScribbleVertexManip( viewer, gv, tool ) {
+  VertexManip.call( this, viewer, gv, tool );
 
   this.type = 'ScribbleVertexManip';
 
@@ -61,7 +63,6 @@ ScribbleVertexManip.prototype = Object.assign( Object.create(
 
     if ( event.type == 'mousemove' ) {
       if ( !this.first ) {
-        console.log(' mousemove ');
         this.raycaster.setFromCamera( new Vector2( x, y ), this.viewer.camera );
         const intersects = this.raycaster.intersectObject( this.viewer.mesh() );
 
@@ -74,12 +75,16 @@ ScribbleVertexManip.prototype = Object.assign( Object.create(
 
           this.viewer.line.geometry.setDrawRange( 0, this.viewer.count / 3 );
           this.viewer.line.geometry.attributes.position.needsUpdate = true;
+
+          this.rubberband.addVertex(intersects[0].point.x,
+              intersects[0].point.y,
+              intersects[0].point.z);
         }
 
         this.rubberband.track( x, y );
       }
     } else if ( event.type == 'mousedown' && event.button == 0 ) {
-      console.log(' first mouse down! ');
+      console.log('mouse down!');
       this.first = false;
     } else if ( event.type == 'mouseup' ) {
       return false;

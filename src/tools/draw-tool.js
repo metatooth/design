@@ -23,8 +23,8 @@
 import {Raycaster} from 'three';
 import {Vector2} from 'three';
 
-import {Command} from '../commands/command.js';
-import {Rubberband} from '../rubberband.js';
+import {GrowingVertices} from '../growing-vertices.js';
+import {PasteCmd} from '../commands/paste-cmd.js';
 import {ScribbleVertexManip} from '../scribble-vertex-manip.js';
 import {Tool} from './tool.js';
 
@@ -60,8 +60,8 @@ DrawTool.prototype = Object.assign( Object.create( Tool.prototype ), {
     const intersects = raycaster.intersectObject( viewer.mesh() );
 
     if ( intersects.length > 0 ) {
-      const rubberband = new Rubberband( mouse.x, mouse.y );
-      manipulator = new ScribbleVertexManip( viewer, rubberband );
+      const gv = new GrowingVertices([], [], 0, 0);
+      manipulator = new ScribbleVertexManip( viewer, gv );
     }
 
     return manipulator;
@@ -72,7 +72,7 @@ DrawTool.prototype = Object.assign( Object.create( Tool.prototype ), {
    * @return {Command}
    */
   interpret: function( manipulator ) {
-    return new Command;
+    return new PasteCmd( manipulator.viewer.editor(), [] );
   },
 });
 

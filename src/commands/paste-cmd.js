@@ -20,31 +20,44 @@
  * WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-/**
- * Description: manipulation semantics
- */
-function Manipulator() { }
+import {Command} from './command.js';
 
-Object.assign( Manipulator.prototype, {
-  /**
-   * @param {Event} event - the starting event
-   */
-  grasp: function( event ) {
+/**
+ * Description: paste command
+ * @constructor
+ * @param {Editor} editor: the editor the command acts within
+ * @param {Array} clipboard: an array of Component objects that will
+ * interpret the command
+ */
+function PasteCmd( editor, clipboard ) {
+  Command.call( this, editor, clipboard );
+}
+
+PasteCmd.prototype = Object.assign( Object.create( Command.prototype ), {
+  constructor: PasteCmd,
+
+  isPasteCmd: true,
+
+  executed: false,
+
+  execute: function() {
+    this.editor.component.interpret(this);
+    this.executed = true;
+  },
+
+  unexecute: function() {
+    this.editor.component.uninterpret(this);
+    this.executed = false;
   },
 
   /**
-   * @param {Event} event - the subsequent events
+   * If true, the command can be unexecuted.
    * @return {boolean}
    */
-  manipulating: function( event ) {
-    return false;
+  reversible: function() {
+    return ( this.clipboard.length > 0 );
   },
 
-  /**
-   * @param {Event} event - the final event
-   */
-  effect: function( event ) {
-  },
 });
 
-export {Manipulator};
+export {PasteCmd};
