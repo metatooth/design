@@ -1,1 +1,1 @@
-web: gunicorn --log ./dist
+web: node server.js
