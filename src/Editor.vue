@@ -13,25 +13,6 @@
             <font-awesome-icon icon="download" />
           </a>
         </div>
-        <div class="navbar-item">
-          <div class="control">
-            <label class="radio">
-              <input type="radio" name="mode"
-                     value="view" v-model="mode">
-              <u>V</u>iew
-            </label>
-            <label class="radio">
-              <input type="radio" name="mode"
-                     value="mark" v-model="mode">
-              <u>M</u>ark
-            </label>
-            <label class="radio">
-              <input type="radio" name="mode"
-                     value="draw" v-model="mode">
-              <u>D</u>raw
-            </label>
-          </div>
-        </div>
       </div>
     </nav>
     <Viewer v-bind:component='component' v-bind:tool='tool' />
