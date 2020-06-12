@@ -2,6 +2,12 @@
 <div id="unidraw">
   <div id="logo">
     <img width="200" alt="Metatooth Logo" src="./assets/logo.png">
+    <br/>
+    <span id="copyright">&copy; Metatooth 2020.</span>
+    <br/>
+    <span id="version">Ver. {{version}}</span>
+    <br/>
+    <span id="commit">{{commit}}</span>
   </div>
   <Editor v-bind:asset='asset' />
 </div>
@@ -40,9 +46,14 @@ export default {
   data: function() {
     return {
       asset: '',
+      version: '',
+      commit: '',
     };
   },
   mounted() {
+    this.version = process.env.VUE_APP_VERSION;
+    this.commit = process.env.VUE_APP_COMMIT;
+
     const query = window.location.search;
     const params = new URLSearchParams( query );
     this.asset = params.get( 'asset' );
@@ -57,7 +68,7 @@ export default {
 #logo {
     background-color: transparent;
     position: absolute;
-    bottom: 10px;
+    bottom: -50px;
     width: 100%;
     padding: 10px;
     text-align: center;

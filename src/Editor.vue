@@ -5,8 +5,14 @@
          aria-label="main navigation">
       <div class="navbar-brand">
         <a class="navbar-item" href="https://metatooth.com" target="_blank">
-          <img src="./assets/icon.png" alt="Metatooth">
+          <img src="./assets/logo.png" alt="Metatooth">
         </a>
+        <div class="navbar-item">
+          <a class="button"
+             v-bind:href=assetUrl>
+            <font-awesome-icon icon="download" />
+          </a>
+        </div>
         <div class="navbar-item">
           <div class="control">
             <label class="radio">
@@ -25,13 +31,6 @@
               <u>D</u>raw
             </label>
           </div>
-        </div>
-        <div class="navbar-item">
-          <a class="button is-disabled"
-             v-bind:href=assetUrl
-             v-bind:download=assetName>
-            <font-awesome-icon icon="download" />
-          </a>
         </div>
       </div>
     </nav>
@@ -120,21 +119,31 @@ export default {
         console.log( error );
       });
     },
+    mode: function( newVal, oldVal ) {
+      this.mode = newVal;
+
+      if ( this.mode == 'visualization' ) {
+        this.tool = null;
+        document.body.style.cursor = 'default';
+      } else if ( this.mode == 'mark' ) {
+        this.tool = new MarkTool;
+        document.body.style.cursor = 'crosshair';
+      } else if ( this.mode == 'draw' ) {
+        this.tool = new DrawTool;
+        document.body.style.cursor = 'crosshair';
+      }
+    },
   },
   methods: {
     key: function( event ) {
+      console.log( event.keyCode, event.type );
       if ( event.keyCode == 68 && event.type == 'keydown' ) {
         this.mode = 'draw';
-        this.tool = new DrawTool;
-        document.body.style.cursor = 'crosshair';
       } else if ( event.keyCode == 77 && event.type == 'keydown' ) {
         this.mode = 'mark';
-        this.tool = new MarkTool;
         document.body.style.cursor = 'crosshair';
       } else if ( event.type == 'keyup' ) {
         this.mode = 'visualization';
-        this.tool = null;
-        document.body.style.cursor = 'default';
       }
     },
   },
