@@ -3,11 +3,11 @@
   <div id="logo">
     <img width="200" alt="Metatooth Logo" src="./assets/logo.png">
     <br/>
-    <span id="copyright">&copy; Metatooth 2020.</span>
-    <br/>
-    <span id="version">Ver. {{version}}</span>
-    <br/>
-    <span id="commit">{{commit}}</span>
+    <span id="copyright">&copy; Metatooth 2020</span>
+    --
+    <span id="version">Version {{version}}</span>
+    --
+    <span id="commit">Commit {{commit}}</span>
   </div>
   <Editor v-bind:asset='asset' />
 </div>

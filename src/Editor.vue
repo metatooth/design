@@ -17,8 +17,8 @@
           <div class="control">
             <label class="radio">
               <input type="radio" name="mode"
-                     value="visualization" v-model="mode">
-              Visualization
+                     value="view" v-model="mode">
+              <u>V</u>iew
             </label>
             <label class="radio">
               <input type="radio" name="mode"
@@ -92,7 +92,7 @@ export default {
       isDraw: false,
       isMark: false,
       isViz: true,
-      mode: 'visualization',
+      mode: 'view',
       specular: 0x222222,
       shininess: 40,
       tool: null,
@@ -122,7 +122,7 @@ export default {
     mode: function( newVal, oldVal ) {
       this.mode = newVal;
 
-      if ( this.mode == 'visualization' ) {
+      if ( this.mode == 'view' ) {
         this.tool = null;
         document.body.style.cursor = 'default';
       } else if ( this.mode == 'mark' ) {
@@ -137,13 +137,15 @@ export default {
   methods: {
     key: function( event ) {
       console.log( event.keyCode, event.type );
-      if ( event.keyCode == 68 && event.type == 'keydown' ) {
+      if ( event.keyCode == 86 && event.type == 'keydown' ) {
+        this.mode = 'view';
+      } else if ( event.keyCode == 68 && event.type == 'keydown' ) {
         this.mode = 'draw';
       } else if ( event.keyCode == 77 && event.type == 'keydown' ) {
         this.mode = 'mark';
         document.body.style.cursor = 'crosshair';
       } else if ( event.type == 'keyup' ) {
-        this.mode = 'visualization';
+        this.mode = 'view';
       }
     },
   },
