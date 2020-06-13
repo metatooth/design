@@ -47,8 +47,8 @@ DragManip.prototype = Object.assign( Object.create( Manipulator.prototype ), {
    * @param {Event} event - the mousedown event to start the drag
    */
   grasp: function( event ) {
-    this.viewer.controls.saveState();
     this.viewer.controls.enabled = false;
+    this.viewer.controls.saveState();
 
     this.grasp = event;
 

@@ -8,8 +8,7 @@
           <img src="./assets/logo.png" alt="Metatooth">
         </a>
         <div class="navbar-item">
-          <a class="button"
-             v-bind:href=assetUrl>
+          <a class="button" v-bind:href=assetUrl download>
             <font-awesome-icon icon="download" />
           </a>
         </div>
@@ -65,7 +64,6 @@ export default {
   },
   data: function() {
     return {
-      assetName: '',
       assetUrl: '',
       color: 0x00bbee,
       component: new Component,
@@ -83,7 +81,6 @@ export default {
     asset: function( newVal, oldVal ) {
       const loader = new STLLoader;
       const scope = this;
-      scope.assetName = 'metatooth-asset-' + newVal + '.stl';
       AssetsService.get( newVal ).then(( response ) => {
         loader.load( response.data.data.url, function( geometry ) {
           scope.assetUrl = response.data.data.url;
@@ -117,7 +114,6 @@ export default {
   },
   methods: {
     key: function( event ) {
-      console.log( event.keyCode, event.type );
       if ( event.keyCode == 86 && event.type == 'keydown' ) {
         this.mode = 'view';
       } else if ( event.keyCode == 68 && event.type == 'keydown' ) {

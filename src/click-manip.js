@@ -51,12 +51,13 @@ ClickManip.prototype = Object.assign( Object.create( Manipulator.prototype ), {
   isClickManip: true,
 
   /**
-   * Description: add a sphere to the scene on a mousedown event
-   * @param {Event} event -  the click
+   * Description: checks the mouse position of the event to see if it
+   * intersects with the target mesh.
+   * @param {Event} event - event to check for interesection
    */
   grasp: function( event ) {
-    if ( event.type == 'mousedown' ) {
-      console.log('mousedown');
+    console.log('ClickManip grasp ~> ', event.type);
+    if (event.type == 'mousedown') {
       const mouse = new Vector2;
       mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
       mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;

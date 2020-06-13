@@ -127,7 +127,6 @@ export default {
           this.manipulator = null;
         }
       } else if (this.tool) {
-        console.log(this.tool.type, ' ~> ', event.type);
         this.manipulator = this.tool.create( this, event );
         if (this.manipulator) {
           this.manipulator.grasp( event );
@@ -236,8 +235,6 @@ export default {
       this.renderer.render( this.scene, this.camera );
     },
     resize: function() {
-      console.log( 'resize' );
-
       this.aspect = window.innerWidth / window.innerHeight;
 
       this.camera.left = - this.frustum * this.aspect / 2;

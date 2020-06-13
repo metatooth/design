@@ -68,9 +68,8 @@ export default {
 #logo {
     background-color: transparent;
     position: absolute;
-    bottom: -50px;
+    bottom: 0px;
     width: 100%;
-    padding: 10px;
     text-align: center;
     user-select: none;
     pointer-events: none;

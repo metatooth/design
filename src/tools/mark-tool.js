@@ -54,7 +54,10 @@ MarkTool.prototype = Object.assign( Object.create( Tool.prototype ), {
    * @return {Manipulator}
    */
   create: function( viewer, event ) {
-    return new ClickManip( viewer, this );
+    if (event.type == 'mousedown') {
+      return new ClickManip( viewer, this );
+    }
+    return null;
   },
 
   /**
@@ -62,15 +65,18 @@ MarkTool.prototype = Object.assign( Object.create( Tool.prototype ), {
    * @return {Command}
    */
   interpret: function( manipulator ) {
-    const geometry = new SphereGeometry( this.radius, this.div, this.div );
-    const material = new MeshPhongMaterial( {color: this.color,
-      specular: this.specular, shininess: this.shininess} );
-    const sphere = new Mesh( geometry, material );
-    sphere.position.x = manipulator.point.x;
-    sphere.position.y = manipulator.point.y;
-    sphere.position.z = manipulator.point.z;
+    if (manipulator.found) {
+      const geometry = new SphereGeometry( this.radius, this.div, this.div );
+      const material = new MeshPhongMaterial( {color: this.color,
+        specular: this.specular, shininess: this.shininess} );
+      const sphere = new Mesh( geometry, material );
+      sphere.position.x = manipulator.point.x;
+      sphere.position.y = manipulator.point.y;
+      sphere.position.z = manipulator.point.z;
 
-    return new PasteCmd(manipulator.viewer.editor(), [sphere]);
+      return new PasteCmd(manipulator.viewer.editor(), [sphere]);
+    }
+    return null;
   },
 });
 
