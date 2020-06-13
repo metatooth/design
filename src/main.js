@@ -14,8 +14,6 @@ Vue.component('font-awesome-icon', FontAwesomeIcon);
 
 Vue.config.productionTip = false;
 
-window.unidraw = Unidraw;
-
 new Vue({
-  render: (h) => h(window.unidraw),
+  render: (h) => h(Unidraw),
 }).$mount('#unidraw');

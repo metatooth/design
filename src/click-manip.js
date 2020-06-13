@@ -56,8 +56,10 @@ ClickManip.prototype = Object.assign( Object.create( Manipulator.prototype ), {
    * @param {Event} event - event to check for interesection
    */
   grasp: function( event ) {
-    console.log('ClickManip grasp ~> ', event.type);
     if (event.type == 'mousedown') {
+      this.viewer.controls.enabled = false;
+      this.viewer.controls.saveState();
+
       const mouse = new Vector2;
       mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
       mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
@@ -72,6 +74,15 @@ ClickManip.prototype = Object.assign( Object.create( Manipulator.prototype ), {
       }
     }
   },
+
+  /**
+   * @param {Event} event
+   */
+  effect: function( event ) {
+    this.viewer.controls.reset();
+    this.viewer.controls.enabled = true;
+  },
+
 
 });
 

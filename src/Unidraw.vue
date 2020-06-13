@@ -9,7 +9,7 @@
     --
     <span id="commit">Commit {{commit}}</span>
   </div>
-  <Editor v-bind:asset='asset' />
+  <Editor v-bind:asset='asset' ref="editor"/>
 </div>
 </template>
 
@@ -37,6 +37,7 @@
  */
 
 import Editor from './Editor.vue';
+import {History} from './history.js';
 
 export default {
   name: 'unidraw',
@@ -46,8 +47,10 @@ export default {
   data: function() {
     return {
       asset: '',
-      version: '',
       commit: '',
+      histories: new Map,
+      maxhistlen: 100,
+      version: '',
     };
   },
   mounted() {
@@ -57,6 +60,59 @@ export default {
     const query = window.location.search;
     const params = new URLSearchParams( query );
     this.asset = params.get( 'asset' );
+  },
+  methods: {
+    log: function(command) {
+      if (command.reversible()) {
+        const editor = command.editor;
+        const comp = editor.component;
+
+        if (!this.histories.has(comp)) {
+          this.histories.set(comp, new History);
+        }
+
+        const history = this.histories.get(comp);
+
+        if (history.future.length > 0) {
+          history.future.splice(0, history.future.length);
+        }
+
+        history.past.unshift(command);
+
+        if (history.past.length > this.maxhistlen) {
+          history.past.splice(this.maxhistlen - 1,
+              history.past.length - this.maxhistlen);
+        }
+      }
+    },
+    undo: function(component, n = 1) {
+      if (!this.histories.has(component)) {
+        this.histories.set(component, new History);
+      }
+
+      const history = this.histories.get(component);
+
+      for (let i = 0, l = history.past.length; i < n && i < l; ++i) {
+        const command = history.past.shift();
+        command.unexecute();
+
+        history.future.unshift(command);
+      }
+    },
+    redo: function(component, n = 1) {
+      if (!this.histories.has(component)) {
+        this.histories.set(component, new History);
+      }
+
+      const history = this.histories.get(component);
+
+      for (let i = 0, l = history.future.length; i < n && i < l; ++i) {
+        const command = history.future.shift();
+        command.execute();
+
+        history.past.unshift(command);
+      }
+    },
   },
 };
 </script>

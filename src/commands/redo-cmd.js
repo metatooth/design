@@ -20,39 +20,34 @@
  * WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+import {Command} from './command.js';
+
 /**
- * Description: manipulation semantics
+ * Description: redo command
+ * @constructor
+ * @param {Editor} editor: the editor the command acts within
  */
-function Manipulator() {
-  this.type = 'Manipulator';
+function RedoCmd( editor ) {
+  Command.call( this, editor, null );
 }
 
-Object.assign( Manipulator.prototype, {
-  constructor: Manipulator,
+RedoCmd.prototype = Object.assign( Object.create( Command.prototype ), {
+  constructor: RedoCmd,
 
-  isManipulator: true,
+  isRedoCmd: true,
 
-  /**
-   * @param {Event} event - the starting event
-   */
-  grasp: function( event ) {
-    // no op
+  execute: function() {
+    this.editor.unidraw().redo(this.editor.component);
   },
 
   /**
-   * @param {Event} event - the subsequent events
+   * If true, the command can be unexecuted.
    * @return {boolean}
    */
-  manipulating: function( event ) {
+  reversible: function() {
     return false;
   },
 
-  /**
-   * @param {Event} event - the final event
-   */
-  effect: function( event ) {
-    // no op
-  },
 });
 
-export {Manipulator};
+export {RedoCmd};

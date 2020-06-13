@@ -49,6 +49,8 @@ import {STLLoader} from 'three/examples/jsm/loaders/STLLoader.js';
 import AssetsService from './api-services/assets.js';
 
 import {Component} from './components/component.js';
+import {RedoCmd} from './commands/redo-cmd.js';
+import {UndoCmd} from './commands/undo-cmd.js';
 import {MarkTool} from './tools/mark-tool.js';
 import {DrawTool} from './tools/draw-tool.js';
 
@@ -114,16 +116,27 @@ export default {
   },
   methods: {
     key: function( event ) {
-      if ( event.keyCode == 86 && event.type == 'keydown' ) {
-        this.mode = 'view';
-      } else if ( event.keyCode == 68 && event.type == 'keydown' ) {
-        this.mode = 'draw';
-      } else if ( event.keyCode == 77 && event.type == 'keydown' ) {
-        this.mode = 'mark';
-        document.body.style.cursor = 'crosshair';
+      if (event.type == 'keydown') {
+        if ( event.ctrlKey && event.keyCode == 90) {
+          const undo = new UndoCmd(this);
+          undo.execute();
+        } else if ( (event.ctrlKey && event.keyCode == 89) ||
+            event.keyCode == 115) {
+          const redo = new RedoCmd(this);
+          redo.execute();
+        } else if ( event.keyCode == 86 && event.type == 'keydown' ) {
+          this.mode = 'view';
+        } else if ( event.keyCode == 68 && event.type == 'keydown' ) {
+          this.mode = 'draw';
+        } else if ( event.keyCode == 77 && event.type == 'keydown' ) {
+          this.mode = 'mark';
+        }
       } else if ( event.type == 'keyup' ) {
         this.mode = 'view';
       }
+    },
+    unidraw: function() {
+      return this.$parent;
     },
   },
 };

@@ -20,6 +20,7 @@
  * WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+import {Component} from '../components/component.js';
 import {ClickManip} from '../click-manip.js';
 import {Mesh} from 'three';
 import {MeshPhongMaterial} from 'three';
@@ -74,7 +75,7 @@ MarkTool.prototype = Object.assign( Object.create( Tool.prototype ), {
       sphere.position.y = manipulator.point.y;
       sphere.position.z = manipulator.point.z;
 
-      return new PasteCmd(manipulator.viewer.editor(), [sphere]);
+      return new PasteCmd(manipulator.viewer.editor(), [new Component(sphere)]);
     }
     return null;
   },

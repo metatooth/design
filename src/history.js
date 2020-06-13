@@ -20,39 +20,21 @@
  * WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+
 /**
- * Description: manipulation semantics
+ * Description: maintain a history of past & future commands to allow
+ * for undo & redo operations.
+ * @constructor
  */
-function Manipulator() {
-  this.type = 'Manipulator';
+function History() {
+  this.type = 'History';
+  this.past = [];
+  this.future = [];
 }
 
-Object.assign( Manipulator.prototype, {
-  constructor: Manipulator,
+History.prototype = Object.create( Object.assign, {
 
-  isManipulator: true,
 
-  /**
-   * @param {Event} event - the starting event
-   */
-  grasp: function( event ) {
-    // no op
-  },
-
-  /**
-   * @param {Event} event - the subsequent events
-   * @return {boolean}
-   */
-  manipulating: function( event ) {
-    return false;
-  },
-
-  /**
-   * @param {Event} event - the final event
-   */
-  effect: function( event ) {
-    // no op
-  },
 });
 
-export {Manipulator};
+export {History};

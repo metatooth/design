@@ -55,7 +55,7 @@ PasteCmd.prototype = Object.assign( Object.create( Command.prototype ), {
    * @return {boolean}
    */
   reversible: function() {
-    return ( this.clipboard.length > 0 );
+    return ( this.clipboard && this.clipboard.length > 0 );
   },
 
 });
