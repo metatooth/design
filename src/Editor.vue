@@ -104,7 +104,7 @@ export default {
       } else if ( this.mode == this.modes[1] ) {
         this.tool = new MarkTool;
         document.body.style.cursor = 'crosshair';
-      } else if ( this.mode == this.modes[2] {
+      } else if ( this.mode == this.modes[2] ) {
         this.tool = new DrawTool;
         document.body.style.cursor = 'crosshair';
       }

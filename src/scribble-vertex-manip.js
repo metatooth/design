@@ -68,12 +68,12 @@ ScribbleVertexManip.prototype = Object.assign( Object.create(
         const intersects = this.raycaster.intersectObject( this.viewer.mesh() );
 
         if ( intersects.length > 0 ) {
-          this.rubberband.addVertex(intersects[0].point)
+          this.rubberband.addVertex(intersects[0].point);
         }
 
         this.rubberband.track( this.mouse );
       } else {
-          this.first = false;
+        this.first = false;
       }
     } else if ( event.type == 'mouseup' ) {
       return false;
