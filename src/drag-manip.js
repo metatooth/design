@@ -52,9 +52,9 @@ DragManip.prototype = Object.assign( Object.create( Manipulator.prototype ), {
 
     this.grasp = event;
 
-    const x = ( event.clientX / window.innerWidth ) * 2 - 1;
-    const y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-    this.rubberband.track( x, y );
+    this.origx = ( event.clientX / window.innerWidth ) * 2 - 1;
+    this.origy = - ( event.clientY / window.innerHeight ) * 2 + 1;
+    this.rubberband.track( this.origx, this.origy );
   },
 
   /**
@@ -62,11 +62,11 @@ DragManip.prototype = Object.assign( Object.create( Manipulator.prototype ), {
    * @return {boolean}
    */
   manipulating: function( event ) {
-    if ( event.shiftKey && event.type == 'mousemove' ) {
+    if ( event.type == 'mousemove' ) {
       const x = ( event.clientX / window.innerWidth ) * 2 - 1;
       const y = - ( event.clientY / window.innerHeight ) * 2 + 1;
       this.rubberband.track( x, y );
-    } else if ( !event.shiftKey || event.type == 'mouseup' ) {
+    } else if ( event.type == 'mouseup' ) {
       return false;
     }
     return true;

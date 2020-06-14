@@ -7,7 +7,7 @@
         <a class="navbar-item" href="https://metatooth.com" target="_blank">
           <img src="./assets/logo.png" alt="Metatooth">
         </a>
-        <div class="navbar-item">
+        <div v_if=isLoaded class="navbar-item">
           <a class="button" v-bind:href=assetUrl download>
             <font-awesome-icon icon="download" />
           </a>
@@ -66,13 +66,11 @@ export default {
   },
   data: function() {
     return {
-      assetUrl: '',
+      assetUrl: null,
       color: 0x00bbee,
-      component: new Component,
+      component: null,
       isLoaded: false,
-      isDraw: false,
-      isMark: false,
-      isViz: true,
+      modes: ['view', 'mark', 'draw'],
       mode: 'view',
       specular: 0x222222,
       shininess: 40,
@@ -100,15 +98,13 @@ export default {
       });
     },
     mode: function( newVal, oldVal ) {
-      this.mode = newVal;
-
-      if ( this.mode == 'view' ) {
+      if ( this.mode == this.modes[0] ) {
         this.tool = null;
         document.body.style.cursor = 'default';
-      } else if ( this.mode == 'mark' ) {
+      } else if ( this.mode == this.modes[1] ) {
         this.tool = new MarkTool;
         document.body.style.cursor = 'crosshair';
-      } else if ( this.mode == 'draw' ) {
+      } else if ( this.mode == this.modes[2] {
         this.tool = new DrawTool;
         document.body.style.cursor = 'crosshair';
       }
@@ -125,14 +121,14 @@ export default {
           const redo = new RedoCmd(this);
           redo.execute();
         } else if ( event.keyCode == 86 && event.type == 'keydown' ) {
-          this.mode = 'view';
+          this.mode = this.modes[0];
         } else if ( event.keyCode == 68 && event.type == 'keydown' ) {
-          this.mode = 'draw';
+          this.mode = this.modes[1];
         } else if ( event.keyCode == 77 && event.type == 'keydown' ) {
-          this.mode = 'mark';
+          this.mode = this.modes[2];
         }
       } else if ( event.type == 'keyup' ) {
-        this.mode = 'view';
+        this.mode = this.modes[0];
       }
     },
     unidraw: function() {

@@ -41,6 +41,7 @@ function ClickManip( viewer, tool ) {
   this.viewer = viewer;
   this.tool = tool;
 
+  this.raycaster = new Raycaster;
   this.found = false;
   this.point = new Vector3;
 }
@@ -64,9 +65,8 @@ ClickManip.prototype = Object.assign( Object.create( Manipulator.prototype ), {
       mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
       mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
 
-      const raycaster = new Raycaster;
-      raycaster.setFromCamera( mouse, this.viewer.camera );
-      const intersects = raycaster.intersectObject( this.viewer.mesh() );
+      this.raycaster.setFromCamera( mouse, this.viewer.camera );
+      const intersects = this.raycaster.intersectObject( this.viewer.mesh() );
 
       if ( intersects.length > 0 ) {
         this.point = intersects[0].point;

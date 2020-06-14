@@ -25,9 +25,15 @@
  * graphical components.
  * @constructor
  */
-function Tool() { }
+function Tool() {
+  this.type = 'Tool';
+}
 
 Object.assign( Tool.prototype, {
+  constructor: Tool,
+
+  isTool: true,
+
   /**
    * @param {Event} event - the starting event
    * @return {Manipulator}
@@ -45,7 +51,7 @@ Object.assign( Tool.prototype, {
   },
 
   /**
-    * @return {Object3D}
+    * @return {Component}
     */
   component: function() {
     return null;

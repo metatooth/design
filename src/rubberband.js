@@ -25,12 +25,13 @@
 /**
  * Description: track normalized screen coordinates
  * @constructor
- * @param {Float} x - the initial x coordinate
- * @param {Float} y - the initial y coordinate
+ * @param {Vector2} vec2 - the initial x, y coordinates
  */
-function Rubberband( x, y ) {
-  this.offx = x;
-  this.offy = y;
+function Rubberband( vec2 ) {
+  this.type = 'Rubberband';
+
+  this.offx = vec2.x;
+  this.offy = vec2.y;
 }
 
 Object.assign( Rubberband.prototype, {
@@ -40,13 +41,13 @@ Object.assign( Rubberband.prototype, {
   isRubberband: true,
 
   /**
-   * @param {Float} x - the current x coordinate
-   * @param {Float} y - the current y coordinate
+   * @param {Vector2} vec2 - the x, y coordinates
    */
-  track: function( x, y ) {
-    this.trackx = x;
-    this.tracky = y;
+  track: function( vec2 ) {
+    this.trackx = vec2.x;
+    this.tracky = vec2.y;
   },
+
 });
 
 export {Rubberband};

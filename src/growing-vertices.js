@@ -64,11 +64,9 @@ GrowingVertices.prototype = Object.assign( Object.create(
 
   /**
    * Description: Inserts a vertex (x, y, z) into the list at this.curPt
-   * @param {Float} vx: the x value
-   * @param {Float} vy: the y value
-   * @param {Float} vz: the z value
+   * @param {Vector3} v: the vertex to add
    */
-  addVertex: function( vx, vy, vz ) {
+  addVertex: function( v ) {
     ++this.curPt;
 
     for (let i = this.count, l = this.curPt; i > l; --i) {
@@ -77,9 +75,9 @@ GrowingVertices.prototype = Object.assign( Object.create(
       this.z[i] = this.z[i-1];
     }
 
-    this.x[this.curPt-1] = vx;
-    this.y[this.curPt-1] = vy;
-    this.z[this.curPt-1] = vz;
+    this.x[this.curPt-1] = v.x;
+    this.y[this.curPt-1] = v.y;
+    this.z[this.curPt-1] = v.z;
 
     ++this.count;
     this.check();
@@ -87,13 +85,11 @@ GrowingVertices.prototype = Object.assign( Object.create(
 
   /**
    * Description: Appends a vertex (x,y,z) to end of buffer.
-   * @param {Float} vx: the x value
-   * @param {Float} vy: the y value
-   * @param {Float} vz: the z value
+   * @param {Vector3} v: the vertex to append
    */
-  appendVertex: function( vx, vy, vz ) {
+  appendVertex: function( v ) {
     this.curPt = this.count;
-    this.addVertex(vx, vy, vz);
+    this.addVertex(v);
   },
 
   /**

@@ -38,6 +38,7 @@ function ScribbleVertexManip( viewer, gv, tool ) {
   this.type = 'ScribbleVertexManip';
 
   this.raycaster = new Raycaster;
+  this.mouse = new Vector2;
 
   this.first = true;
 
@@ -58,34 +59,22 @@ ScribbleVertexManip.prototype = Object.assign( Object.create(
    * @return {boolean}
    */
   manipulating: function( event ) {
-    const x = ( event.clientX / window.innerWidth ) * 2 - 1;
-    const y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+    this.mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+    this.mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
 
     if ( event.type == 'mousemove' ) {
       if ( !this.first ) {
-        this.raycaster.setFromCamera( new Vector2( x, y ), this.viewer.camera );
+        this.raycaster.setFromCamera( this.mouse, this.viewer.camera );
         const intersects = this.raycaster.intersectObject( this.viewer.mesh() );
 
         if ( intersects.length > 0 ) {
-          const positions = this.viewer.line.geometry.attributes.position.array;
-
-          positions[this.viewer.count++] = intersects[0].point.x;
-          positions[this.viewer.count++] = intersects[0].point.y;
-          positions[this.viewer.count++] = intersects[0].point.z;
-
-          this.viewer.line.geometry.setDrawRange( 0, this.viewer.count / 3 );
-          this.viewer.line.geometry.attributes.position.needsUpdate = true;
-
-          this.rubberband.addVertex(intersects[0].point.x,
-              intersects[0].point.y,
-              intersects[0].point.z);
+          this.rubberband.addVertex(intersects[0].point)
         }
 
-        this.rubberband.track( x, y );
+        this.rubberband.track( this.mouse );
+      } else {
+          this.first = false;
       }
-    } else if ( event.type == 'mousedown' && event.button == 0 ) {
-      console.log('mouse down!');
-      this.first = false;
     } else if ( event.type == 'mouseup' ) {
       return false;
     }

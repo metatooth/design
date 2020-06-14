@@ -20,9 +20,6 @@
  * WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-import {Raycaster} from 'three';
-import {Vector2} from 'three';
-
 import {GrowingVertices} from '../growing-vertices.js';
 import {PasteCmd} from '../commands/paste-cmd.js';
 import {ScribbleVertexManip} from '../scribble-vertex-manip.js';
@@ -49,22 +46,11 @@ DrawTool.prototype = Object.assign( Object.create( Tool.prototype ), {
    * @return {Manipulator}
    */
   create: function( viewer, event ) {
-    let manipulator = null;
-
-    const mouse = new Vector2;
-    mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-    mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-
-    const raycaster = new Raycaster;
-    raycaster.setFromCamera( mouse, viewer.camera );
-    const intersects = raycaster.intersectObject( viewer.mesh() );
-
-    if ( intersects.length > 0 ) {
+    if (event.type == 'mousedown') {
       const gv = new GrowingVertices([], [], 0, 0);
-      manipulator = new ScribbleVertexManip( viewer, gv );
+      return new ScribbleVertexManip( viewer, gv );
     }
-
-    return manipulator;
+    return null;
   },
 
   /**
