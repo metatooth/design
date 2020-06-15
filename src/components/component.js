@@ -20,7 +20,7 @@
  * WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-import {Group} from 'three';
+import {Object3D} from 'three';
 
 import {DragManip} from '../drag-manip.js';
 
@@ -32,12 +32,12 @@ import {DragManip} from '../drag-manip.js';
  * @param {Object3D} object3d: the 3D object this component tracks
  */
 function Component(object3d) {
-  Group.call(this);
+  Object3D.call(this);
   if (object3d) this.add(object3d);
   this.type = 'Component';
 }
 
-Component.prototype = Object.assign( Object.create( Group.prototype ), {
+Component.prototype = Object.assign( Object.create( Object3D.prototype ), {
   constructor: Component,
 
   isComponent: true,

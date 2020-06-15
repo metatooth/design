@@ -20,6 +20,8 @@
  * WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+import {Vector3} from 'three';
+
 import {Manipulator} from './manipulator';
 
 /**
@@ -36,6 +38,8 @@ function DragManip( viewer, rubberband, tool ) {
   this.viewer = viewer;
   this.rubberband = rubberband;
   this.tool = tool;
+
+  this.orig = new Vector3;
 }
 
 DragManip.prototype = Object.assign( Object.create( Manipulator.prototype ), {
@@ -44,17 +48,29 @@ DragManip.prototype = Object.assign( Object.create( Manipulator.prototype ), {
   isDragManip: true,
 
   /**
+   * Track the mouse location in world coordinates with the rubberband.
+   * @param {Event} event - use the client X & Y
+   */
+  unproject: function( event ) {
+    this.orig.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+    this.orig.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+    this.orig.z = -1;
+
+    this.orig.unproject( this.viewer.camera );
+
+    this.rubberband.track( this.orig );
+  },
+
+  /**
    * @param {Event} event - the mousedown event to start the drag
    */
   grasp: function( event ) {
     this.viewer.controls.enabled = false;
     this.viewer.controls.saveState();
 
-    this.grasp = event;
+    this.unproject(event);
 
-    this.origx = ( event.clientX / window.innerWidth ) * 2 - 1;
-    this.origy = - ( event.clientY / window.innerHeight ) * 2 + 1;
-    this.rubberband.track( this.origx, this.origy );
+    this.viewer.scene.add(this.rubberband);
   },
 
   /**
@@ -63,9 +79,7 @@ DragManip.prototype = Object.assign( Object.create( Manipulator.prototype ), {
    */
   manipulating: function( event ) {
     if ( event.type == 'mousemove' ) {
-      const x = ( event.clientX / window.innerWidth ) * 2 - 1;
-      const y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-      this.rubberband.track( x, y );
+      this.unproject( event );
     } else if ( event.type == 'mouseup' ) {
       return false;
     }
@@ -76,6 +90,8 @@ DragManip.prototype = Object.assign( Object.create( Manipulator.prototype ), {
    * @param {Event} event - mouseup to end the drag
    */
   effect: function( event ) {
+    this.viewer.scene.remove(this.rubberband);
+
     this.viewer.controls.reset();
     this.viewer.controls.enabled = true;
   },

@@ -22,30 +22,75 @@
  * OF THIS SOFTWARE.
  */
 
+import {BufferAttribute} from 'three';
+import {BufferGeometry} from 'three';
+import {Line} from 'three';
+import {LineBasicMaterial} from 'three';
+import {Vector3} from 'three';
+
 /**
- * Description: track normalized screen coordinates
+ * Description: rubberbanding graphical objects
  * @constructor
- * @param {Vector2} vec2 - the initial x, y coordinates
+ * @param {Vector3} vec: the initial x, y, z coordinates
  */
-function Rubberband( vec2 ) {
+function Rubberband( vec ) {
+  Line.call(this);
   this.type = 'Rubberband';
 
-  this.offx = vec2.x;
-  this.offy = vec2.y;
+  this.off = null;
+  this.tracked = null;
+
+  if (vec) {
+    this.off = vec.clone();
+  }
+
+  const positions = new Float32Array( 6 );
+  this.geometry = new BufferGeometry;
+  this.geometry.setAttribute( 'position', new BufferAttribute( positions, 3 ) );
+  this.geometry.setDrawRange( 0, 0 );
+
+  this.material = new LineBasicMaterial({color: 0xff7700, linewidth: 1});
 }
 
-Object.assign( Rubberband.prototype, {
+Rubberband.prototype = Object.assign( Object.create( Line.prototype ), {
 
   constructor: Rubberband,
 
   isRubberband: true,
 
   /**
-   * @param {Vector2} vec2 - the x, y coordinates
+   * @param {Vector3} vec - the x, y, z coordinates
    */
-  track: function( vec2 ) {
-    this.trackx = vec2.x;
-    this.tracky = vec2.y;
+  track: function( vec ) {
+    if (!this.tracked) {
+      this.tracked = new Vector3;
+    }
+
+    this.tracked.x = vec.x;
+    this.tracked.y = vec.y;
+    this.tracked.z = vec.z;
+
+    if (!this.off) {
+      this.off = this.tracked.clone();
+    }
+
+    if (this.off.distanceTo(this.tracked) > 0) {
+      const positions = this.geometry.attributes.position.array;
+
+      positions[0] = this.off.x;
+      positions[1] = this.off.y;
+      positions[2] = this.off.z;
+
+      positions[3] = this.tracked.x;
+      positions[4] = this.tracked.y;
+      positions[5] = this.tracked.z;
+
+      this.geometry.setDrawRange( 0, 2 );
+    } else {
+      this.geometry.setDrawRange( 0, 0 );
+    }
+
+    this.geometry.attributes.position.needsUpdate = true;
   },
 
 });

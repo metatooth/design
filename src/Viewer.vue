@@ -29,16 +29,11 @@
  */
 
 import {AmbientLight} from 'three';
-import {BufferAttribute} from 'three';
-import {BufferGeometry} from 'three';
+import {AxesHelper} from 'three';
 import {CameraHelper} from 'three';
 import {DirectionalLight} from 'three';
-import {Line} from 'three';
-import {LineBasicMaterial} from 'three';
 import {OrthographicCamera} from 'three';
-import {Raycaster} from 'three';
 import {Scene} from 'three';
-import {Vector2} from 'three';
 import {WebGLRenderer} from 'three';
 
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls';
@@ -76,7 +71,6 @@ export default {
       black: 0x2d2d2d,
       camera: null,
       controls: null,
-      count: 0,
       frustum: 1000,
       highlighted: null,
       line: null,
@@ -84,15 +78,16 @@ export default {
       manipulator: null,
       max: 500,
       primary: 0x00bbee,
-      raycaster: new Raycaster,
       renderer: new WebGLRenderer,
       scene: new Scene,
       secondary: '#ff33bb',
-      selected: null,
-      shift: false,
-      start: new Vector2,
       threshold: 5,
+      pink: 0xff33bb,
+      cyan: 0x00bbee,
+      malachite: 0x00dd77,
+      orange: 0xff7700,
       white: 0xffffff,
+      jet: 0x2d2d2d,
     };
   },
   mounted() {
@@ -146,20 +141,6 @@ export default {
 
       this.initControls();
 
-      this.scene.add( this.component );
-
-      const positions = new Float32Array( this.max * 3);
-      const geometry = new BufferGeometry;
-      geometry.setAttribute( 'position', new BufferAttribute( positions, 3 ) );
-      geometry.setDrawRange( 0, 0 );
-
-      const material = new LineBasicMaterial(
-          {color: this.luminance(this.secondary, 0.2),
-            linewidth: this.linewidth} );
-      this.line = new Line( geometry, material );
-
-      this.scene.add( this.line );
-
       window.addEventListener( 'resize', this.resize, false );
     },
     initCamera: function() {
@@ -173,6 +154,8 @@ export default {
       this.camera.updateProjectionMatrix();
 
       this.scene.add( new CameraHelper( this.camera ) );
+
+      this.scene.add( new AxesHelper( 10 ) );
     },
     initControls: function() {
       this.controls = new OrbitControls( this.camera,
