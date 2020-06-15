@@ -127,9 +127,9 @@ export default {
           redo.execute();
         } else if ( event.keyCode == 86 ) {
           this.mode = this.modes[0];
-        } else if ( event.keyCode == 68 ) {
-          this.mode = this.modes[1];
         } else if ( event.keyCode == 77 ) {
+          this.mode = this.modes[1];
+        } else if ( event.keyCode == 68 ) {
           this.mode = this.modes[2];
         } else if ( event.keyCode == 83 ) {
           this.mode = this.modes[3];

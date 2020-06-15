@@ -39,7 +39,7 @@ function DragManip( viewer, rubberband, tool ) {
   this.rubberband = rubberband;
   this.tool = tool;
 
-  this.orig = new Vector3;
+  this.mouse = new Vector3;
 }
 
 DragManip.prototype = Object.assign( Object.create( Manipulator.prototype ), {
@@ -52,13 +52,13 @@ DragManip.prototype = Object.assign( Object.create( Manipulator.prototype ), {
    * @param {Event} event - use the client X & Y
    */
   unproject: function( event ) {
-    this.orig.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-    this.orig.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-    this.orig.z = -1;
+    this.mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+    this.mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+    this.mouse.z = -1;
 
-    this.orig.unproject( this.viewer.camera );
+    this.mouse.unproject( this.viewer.camera );
 
-    this.rubberband.track( this.orig );
+    this.rubberband.track( this.mouse );
   },
 
   /**

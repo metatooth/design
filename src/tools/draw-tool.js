@@ -20,6 +20,12 @@
  * WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+import {BufferGeometry} from 'three';
+import {BufferAttribute} from 'three';
+import {Line} from 'three';
+import {LineBasicMaterial} from 'three';
+
+import {Component} from '../components/component.js';
 import {GrowingVertices} from '../growing-vertices.js';
 import {PasteCmd} from '../commands/paste-cmd.js';
 import {ScribbleVertexManip} from '../scribble-vertex-manip.js';
@@ -33,6 +39,9 @@ function DrawTool() {
   Tool.call( this );
 
   this.type = 'DrawTool';
+
+  this.color = 0xff33bb;
+  this.linewidth = 5;
 }
 
 DrawTool.prototype = Object.assign( Object.create( Tool.prototype ), {
@@ -47,8 +56,7 @@ DrawTool.prototype = Object.assign( Object.create( Tool.prototype ), {
    */
   create: function( viewer, event ) {
     if (event.type == 'mousedown') {
-      const gv = new GrowingVertices([], [], 0, 0);
-      return new ScribbleVertexManip( viewer, gv );
+      return new ScribbleVertexManip( viewer, new GrowingVertices, this );
     }
     return null;
   },
@@ -58,7 +66,25 @@ DrawTool.prototype = Object.assign( Object.create( Tool.prototype ), {
    * @return {Command}
    */
   interpret: function( manipulator ) {
-    return new PasteCmd( manipulator.viewer.editor(), [] );
+    if (manipulator.rubberband.count > 0) {
+      const doomed = manipulator.rubberband.geometry.attributes.position.array;
+
+      const positions = new Float32Array( manipulator.rubberband.count );
+      for (let i = 0, l = manipulator.rubberband.count; i < l; ++i) {
+        positions[i] = doomed[i];
+      }
+
+      const geometry = new BufferGeometry();
+      geometry.setAttribute( 'position', new BufferAttribute( positions, 3 ) );
+      geometry.setDrawRange( 0, manipulator.rubberband.count / 3 );
+      const material = new LineBasicMaterial({color: this.color,
+        linewidth: this.linewidth});
+
+      const line = new Line( geometry, material );
+
+      return new PasteCmd( manipulator.viewer.editor(), [new Component(line)] );
+    }
+    return null;
   },
 });
 

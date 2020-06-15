@@ -55,23 +55,43 @@ ScribbleVertexManip.prototype = Object.assign( Object.create(
   isScribbleVertexManip: true,
 
   /**
+   * Track points on the mesh under the mouse location.
+   * @param {Event} event - use the client X & Y
+   */
+  raycast: function(event) {
+    this.mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+    this.mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+
+    this.rubberband.track( this.mouse );
+
+    this.raycaster.setFromCamera( this.mouse, this.viewer.camera );
+    const intersects = this.raycaster.intersectObject( this.viewer.mesh() );
+
+    if ( intersects.length > 0 ) {
+      this.rubberband.addVertex(intersects[0].point);
+    }
+  },
+
+  /**
+   * @param {Event} event - the mousedown event to start the drag
+   */
+  grasp: function( event ) {
+    this.viewer.controls.enabled = false;
+    this.viewer.controls.saveState();
+
+    this.raycast(event);
+
+    this.viewer.scene.add(this.rubberband);
+  },
+
+  /**
    * @param {Event} event - is dragging
    * @return {boolean}
    */
   manipulating: function( event ) {
-    this.mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-    this.mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-
     if ( event.type == 'mousemove' ) {
       if ( !this.first ) {
-        this.raycaster.setFromCamera( this.mouse, this.viewer.camera );
-        const intersects = this.raycaster.intersectObject( this.viewer.mesh() );
-
-        if ( intersects.length > 0 ) {
-          this.rubberband.addVertex(intersects[0].point);
-        }
-
-        this.rubberband.track( this.mouse );
+        this.raycast(event);
       } else {
         this.first = false;
       }

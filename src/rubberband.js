@@ -39,6 +39,8 @@ function Rubberband( vec ) {
 
   this.off = null;
   this.tracked = null;
+  this.color = 0xff7700;
+  this.linewidth = 1;
 
   if (vec) {
     this.off = vec.clone();
@@ -49,7 +51,8 @@ function Rubberband( vec ) {
   this.geometry.setAttribute( 'position', new BufferAttribute( positions, 3 ) );
   this.geometry.setDrawRange( 0, 0 );
 
-  this.material = new LineBasicMaterial({color: 0xff7700, linewidth: 1});
+  this.material = new LineBasicMaterial({color: this.color,
+    linewidth: this.linewidth});
 }
 
 Rubberband.prototype = Object.assign( Object.create( Line.prototype ), {

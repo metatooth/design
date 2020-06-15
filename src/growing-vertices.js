@@ -22,38 +22,34 @@
  * OF THIS SOFTWARE.
  */
 
+import {BufferGeometry} from 'three';
+import {BufferAttribute} from 'three';
+import {LineBasicMaterial} from 'three';
+
 import {Rubberband} from './rubberband.js';
 
 /**
  * Description: GrowingVertices are rubberbands defined by a set of vertices
  * that can grow dynamically in number.
  * @constructor
- * @param {Float32Array} px: x buffer
- * @param {Float32Array} py: y buffer
- * @param {Float32Array} pz: z buffer
- * @param {Integer} n: size of x, y, z buffers
- * @param {Integer} pt: current point index
+ * @param {Vector3} vec: the first vertex
  */
-function GrowingVertices(px, py, pz, n, pt) {
-  Rubberband.call(this, 0, 0);
+function GrowingVertices(vec) {
+  Rubberband.call(this, vec);
 
   this.type = 'GrowingVertices';
+  this.count = 0;
+  this.max = 500;
+  this.color = 0xff7700;
+  this.linewidth = 5;
 
-  pt = (pt < 0) ? n : pt;
+  const positions = new Float32Array( this.max * 3 );
+  this.geometry = new BufferGeometry;
+  this.geometry.setAttribute( 'position', new BufferAttribute( positions, 3 ) );
+  this.geometry.setDrawRange( 0, this.count );
 
-  this.origbufsize = this.count = n;
-  this.bufsize = Math.max(2*n, 50);
-  this.origPt = this.curPt = pt;
-
-  this.x = new Float32Array(this.bufsize);
-  this.y = new Float32Array(this.bufsize);
-  this.z = new Float32Array(this.bufsize);
-
-  for (let i = 0, l = this.count; i < l; ++i) {
-    this.x[i] = px[i];
-    this.y[i] = py[i];
-    this.z[i] = pz[i];
-  }
+  this.material = new LineBasicMaterial({color: this.color,
+    linewidth: this.linewidth});
 }
 
 GrowingVertices.prototype = Object.assign( Object.create(
@@ -67,67 +63,36 @@ GrowingVertices.prototype = Object.assign( Object.create(
    * @param {Vector3} v: the vertex to add
    */
   addVertex: function( v ) {
-    ++this.curPt;
+    const positions = this.geometry.attributes.position.array;
 
-    for (let i = this.count, l = this.curPt; i > l; --i) {
-      this.x[i] = this.x[i-1];
-      this.y[i] = this.y[i-1];
-      this.z[i] = this.z[i-1];
-    }
+    positions[this.count++] = v.x;
+    positions[this.count++] = v.y;
+    positions[this.count++] = v.z;
 
-    this.x[this.curPt-1] = v.x;
-    this.y[this.curPt-1] = v.y;
-    this.z[this.curPt-1] = v.z;
+    this.geometry.setDrawRange( 0, this.count / 3 );
+    this.geometry.attributes.position.needsUpdate = true;
 
-    ++this.count;
     this.check();
-  },
-
-  /**
-   * Description: Appends a vertex (x,y,z) to end of buffer.
-   * @param {Vector3} v: the vertex to append
-   */
-  appendVertex: function( v ) {
-    this.curPt = this.count;
-    this.addVertex(v);
   },
 
   /**
    * Removes the last vertex from the list
    */
   removeVertex: function() {
-    this.count = Math.max(0, this.count-1);
-    this.curPt = Math.max(0, this.curPt-1);
-
-    for (let i = this.curPt, l = this.count; i < l; ++i) {
-      this.x[i] = this.x[i+1];
-      this.y[i] = this.y[i+1];
-      this.z[i] = this.z[i+1];
-    }
+    this.count -= 3;
+    this.geometry.setDrawRange( 0, this.count / 3 );
+    this.geometry.attributes.position.needsUpdate = true;
   },
 
   /**
    * Check buffers and resize if necessary
    */
   check: function() {
-    if (this.count + 1 >= this.bufsize) {
-      this.bufsize *= 2;
-
-      const nx = new Float32Array(this.bufsize);
-      const ny = new Float32Array(this.bufsize);
-      const nz = new Float32Array(this.bufsize);
-
-      for (let i = 0, l = this.count; i < l; ++i) {
-        nx[i] = this.x[i];
-        ny[i] = this.y[i];
-        nz[i] = this.z[i];
-      }
-
-      this.x = nx;
-      this.y = ny;
-      this.z = nz;
+    if (this.count + 1 >= this.max) {
+      console.log('Buffer Overflow!');
     }
   },
+
 });
 
 export {GrowingVertices};
