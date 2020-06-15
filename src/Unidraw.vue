@@ -46,7 +46,7 @@ export default {
   },
   data: function() {
     return {
-      asset: '',
+      asset: null,
       commit: '',
       histories: new Map,
       maxhistlen: 100,
@@ -59,7 +59,9 @@ export default {
 
     const query = window.location.search;
     const params = new URLSearchParams( query );
-    this.asset = params.get( 'asset' );
+    if (params.get('asset')) {
+      this.asset = params.get( 'asset' );
+    }
   },
   methods: {
     log: function(command) {

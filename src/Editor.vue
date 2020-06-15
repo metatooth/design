@@ -68,7 +68,7 @@ export default {
     return {
       assetUrl: null,
       color: 0x00bbee,
-      component: null,
+      component: new Component,
       isLoaded: false,
       modes: ['view', 'mark', 'draw'],
       mode: 'view',
