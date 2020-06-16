@@ -20,8 +20,8 @@
  * WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-import {Rubberband} from '../rubberband.js';
-import {DragManip} from '../drag-manip.js';
+import {Rubberband} from '../rubberbands/rubberband.js';
+import {DragManip} from '../manipulators/drag-manip.js';
 import {Tool} from './tool.js';
 
 /**

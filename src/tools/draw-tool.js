@@ -26,9 +26,9 @@ import {Line} from 'three';
 import {LineBasicMaterial} from 'three';
 
 import {Component} from '../components/component.js';
-import {GrowingVertices} from '../growing-vertices.js';
+import {GrowingVertices} from '../rubberbands/growing-vertices.js';
 import {PasteCmd} from '../commands/paste-cmd.js';
-import {ScribbleVertexManip} from '../scribble-vertex-manip.js';
+import {ScribbleVertexManip} from '../manipulators/scribble-vertex-manip.js';
 import {Tool} from './tool.js';
 
 /**

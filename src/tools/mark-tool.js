@@ -21,7 +21,7 @@
  */
 
 import {Component} from '../components/component.js';
-import {ClickManip} from '../click-manip.js';
+import {ClickManip} from '../manipulators/click-manip.js';
 import {Mesh} from 'three';
 import {MeshPhongMaterial} from 'three';
 import {PasteCmd} from '../commands/paste-cmd.js';

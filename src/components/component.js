@@ -22,7 +22,7 @@
 
 import {Object3D} from 'three';
 
-import {DragManip} from '../drag-manip.js';
+import {DragManip} from '../manipulators/drag-manip.js';
 
 /**
  * Description: Component - class of objects that are edited to
