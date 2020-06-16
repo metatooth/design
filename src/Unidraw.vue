@@ -1,7 +1,7 @@
 <template>
 <div id="unidraw">
   <div id="logo">
-    <img width="200" alt="Metatooth Logo" src="./assets/logo.png">
+    <img width="145" alt="Metatooth Logo" src="./assets/logo.png">
     <br/>
     <span id="copyright">&copy; Metatooth 2020</span>
     --

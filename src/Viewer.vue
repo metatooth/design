@@ -29,8 +29,6 @@
  */
 
 import {AmbientLight} from 'three';
-import {AxesHelper} from 'three';
-import {CameraHelper} from 'three';
 import {DirectionalLight} from 'three';
 import {OrthographicCamera} from 'three';
 import {Scene} from 'three';
@@ -38,6 +36,7 @@ import {WebGLRenderer} from 'three';
 
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls';
 
+import {CameraHelper} from './camera-helper.js';
 import {Component} from './components/component.js';
 import {Tool} from './tools/tool.js';
 
@@ -154,8 +153,6 @@ export default {
       this.camera.updateProjectionMatrix();
 
       this.scene.add( new CameraHelper( this.camera ) );
-
-      this.scene.add( new AxesHelper( 10 ) );
     },
     initControls: function() {
       this.controls = new OrbitControls( this.camera,
