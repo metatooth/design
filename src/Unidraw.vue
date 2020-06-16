@@ -4,9 +4,9 @@
     <img width="145" alt="Metatooth Logo" src="./assets/logo.png">
     <br/>
     <span id="copyright">&copy; Metatooth 2020</span>
-    --
+    <br/>
     <span id="version">Version {{version}}</span>
-    --
+    <br/>
     <span id="commit">Commit {{commit}}</span>
   </div>
   <Editor v-bind:asset='asset' ref="editor"/>
@@ -61,6 +61,8 @@ export default {
     const params = new URLSearchParams( query );
     if (params.get('asset')) {
       this.asset = params.get( 'asset' );
+    } else if (process.env.VUE_APP_DEFAULT_ASSET) {
+      this.asset = process.env.VUE_APP_DEFAULT_ASSET;
     }
   },
   methods: {
@@ -127,8 +129,9 @@ export default {
     background-color: transparent;
     position: absolute;
     bottom: 0px;
-    width: 100%;
-    text-align: center;
+    margin: 10px;
+    text-align: right;
+    width: 95%;
     user-select: none;
     pointer-events: none;
     z-index: 1;
