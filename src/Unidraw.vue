@@ -66,6 +66,14 @@ export default {
     }
   },
   methods: {
+    clearHistory: function(comp) {
+      if (!this.histories.has(comp)) {
+        const history = this.histories.get(comp);
+
+        history.past.splice(0, history.past.length);
+        history.future.splice(0, history.future.length);
+      }
+    },
     log: function(command) {
       if (command.reversible()) {
         const editor = command.editor;
@@ -77,9 +85,7 @@ export default {
 
         const history = this.histories.get(comp);
 
-        if (history.future.length > 0) {
-          history.future.splice(0, history.future.length);
-        }
+        history.future.splice(0, history.future.length);
 
         history.past.unshift(command);
 

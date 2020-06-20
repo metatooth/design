@@ -52,6 +52,7 @@ import {STLLoader} from 'three/examples/jsm/loaders/STLLoader.js';
 import AssetsService from './api-services/assets.js';
 
 import {Component} from './components/component.js';
+import {SaveAsCmd} from './commands/save-as-cmd.js';
 import {RedoCmd} from './commands/redo-cmd.js';
 import {UndoCmd} from './commands/undo-cmd.js';
 import {MarkTool} from './tools/mark-tool.js';
@@ -117,12 +118,16 @@ export default {
   },
   methods: {
     key: function( event ) {
+      console.log( event.key, event.keyCode );
       if (event.type == 'keydown') {
-        if ( event.ctrlKey && event.keyCode == 90) {
+        if ( event.keyCode == 32) {
+          const saveas = new SaveAsCmd(this);
+          saveas.execute();
+        } else if ( event.ctrlKey && event.keyCode == 90 ) {
           const undo = new UndoCmd(this);
           undo.execute();
-        } else if ( (event.ctrlKey && event.keyCode == 89) ||
-            event.keyCode == 115) {
+        } else if ( ( event.ctrlKey && event.keyCode == 89 ) ||
+            event.keyCode == 115 ) {
           const redo = new RedoCmd(this);
           redo.execute();
         } else if ( event.keyCode == 86 ) {
