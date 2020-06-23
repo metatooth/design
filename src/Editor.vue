@@ -44,20 +44,14 @@
  * WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-import {Mesh} from 'three';
-import {MeshPhongMaterial} from 'three';
-
-import {STLLoader} from 'three/examples/jsm/loaders/STLLoader.js';
-
-import AssetsService from './api-services/assets.js';
-
-import {Component} from './components/component.js';
-import {SaveAsCmd} from './commands/save-as-cmd.js';
-import {RedoCmd} from './commands/redo-cmd.js';
-import {UndoCmd} from './commands/undo-cmd.js';
-import {MarkTool} from './tools/mark-tool.js';
+import {ComponentNameVar} from './component-name-var.js';
 import {DrawTool} from './tools/draw-tool.js';
+import {MarkTool} from './tools/mark-tool.js';
+import {ModifiedStatusVar} from './modified-status-var.js';
+import {RedoCmd} from './commands/redo-cmd.js';
+import {SaveAsCmd} from './commands/save-as-cmd.js';
 import {SelectTool} from './tools/select-tool.js';
+import {UndoCmd} from './commands/undo-cmd.js';
 
 import Viewer from './Viewer.vue';
 
@@ -72,33 +66,26 @@ export default {
   data: function() {
     return {
       assetUrl: null,
-      color: 0x00bbee,
       component: null,
       modes: ['view', 'mark', 'draw', 'select'],
       mode: 'view',
-      specular: 0x222222,
-      shininess: 40,
+      modified: new ModifiedStatusVar,
+      name: new ComponentNameVar,
       tool: null,
     };
   },
   watch: {
     asset: function( newVal, oldVal ) {
-      const loader = new STLLoader;
+      const catalog = this.unidraw().catalog;
       const scope = this;
-      AssetsService.get( newVal ).then(( response ) => {
-        loader.load( response.data.data.url, function( geometry ) {
-          scope.assetUrl = response.data.data.url;
-          const material = new MeshPhongMaterial( {color: scope.color,
-            specular: scope.specular,
-            shininess: scope.shininess} );
-          const mesh = new Mesh( geometry, material );
-          mesh.translation = geometry.center();
-          scope.component = new Component(mesh);
-          document.body.style.cursor = 'default';
-        });
-      }).catch(( error ) => {
-        console.log( error );
+      catalog.retrieve(newVal).then((response) => {
+        scope.component = response;
       });
+    },
+    component: function( newVal, oldVal ) {
+      if (newVal) {
+        document.body.style.cursor = 'default';
+      }
     },
     mode: function( newVal, oldVal ) {
       if ( this.mode == this.modes[0] ) {

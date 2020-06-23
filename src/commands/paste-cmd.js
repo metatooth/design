@@ -31,6 +31,7 @@ import {Command} from './command.js';
  */
 function PasteCmd( editor, clipboard ) {
   Command.call( this, editor, clipboard );
+  this.type = 'PasteCmd';
 }
 
 PasteCmd.prototype = Object.assign( Object.create( Command.prototype ), {

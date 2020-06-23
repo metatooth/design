@@ -44,8 +44,6 @@ SaveAsCmd.prototype = Object.assign( Object.create( Command.prototype ), {
     const scope = this;
     const exporter = new GLTFExporter;
     exporter.parse(this.editor.component, function( gltf ) {
-      console.log( gltf );
-
       AWS.config.update({
         region: process.env.VUE_APP_AWS_REGION,
         credentials: new AWS.CognitoIdentityCredentials({
@@ -70,12 +68,7 @@ SaveAsCmd.prototype = Object.assign( Object.create( Command.prototype ), {
       const year = dateObj.getUTCFullYear();
 
       const md5sum = md5(gltf);
-      const gltfName = year + '/' + month + '/' + day + '/' + md5sum +
-          '.gltf';
-      const gltfKey = encodeURIComponent(gltfName);
-
-      console.log(gltfName);
-      console.log(gltfKey);
+      const gltfName = year + '/' + month + '/' + day + '/' + md5sum + '.gltf';
 
       const params = {
         Bucket: process.env.VUE_APP_S3_BUCKET_NAME,
@@ -93,9 +86,6 @@ SaveAsCmd.prototype = Object.assign( Object.create( Command.prototype ), {
         if (err) {
           console.log(err, data);
         } else {
-          console.log(data['Key']);
-          console.log(data['ETag']);
-          console.log(data['Bucket']);
           const params = {data: {
             name: scope.editor.component.name,
             url: data['Location'],
@@ -105,11 +95,10 @@ SaveAsCmd.prototype = Object.assign( Object.create( Command.prototype ), {
             s3key: data['Key'],
             etag: data['ETag'],
           }};
-          console.log(params);
           AssetsService.create(params).then(( response ) => {
             console.log( response );
           }).catch(( error ) => {
-            console.log('ERR ', error );
+            console.log( error );
           });
         }
       });

@@ -37,6 +37,8 @@
  */
 
 import Editor from './Editor.vue';
+
+import {Catalog} from './catalog.js';
 import {History} from './history.js';
 
 export default {
@@ -47,6 +49,7 @@ export default {
   data: function() {
     return {
       asset: null,
+      catalog: new Catalog,
       commit: '',
       histories: new Map,
       maxhistlen: 100,
