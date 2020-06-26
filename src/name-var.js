@@ -20,43 +20,25 @@
  * WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-import {Command} from './command.js';
+import {StateVar} from './state-var.js';
 
 /**
- * Description: save as command
+ * Description: state variables allow for dataflow and
+ * component-component commuinication
  * @constructor
- * @param {Editor} editor: the editor the command acts within
+ * @param {String} name: the name to track
  */
-function SaveAsCmd( editor ) {
-  Command.call( this, editor, null );
-  this.type = 'SaveAsCmd';
+function NameVar(name) {
+  StateVar.call(this);
+  this.type = 'NameVar';
+  this.name = name;
 }
 
-SaveAsCmd.prototype = Object.assign( Object.create( Command.prototype ), {
-  constructor: SaveAsCmd,
+NameVar.prototype = Object.assign( Object.create( StateVar.prototype ), {
+  constructor: NameVar,
 
-  isSaveAsCmd: true,
-
-  execute: function() {
-    const comp = this.editor.component;
-    const modifvar = this.editor.modified;
-    const namevar = this.editor.name;
-    const unidraw = this.editor.unidraw();
-
-    this.editor.unidraw().catalog.save(comp, name)
-        .then((ok) => {
-          if (ok) {
-            console.log(modifvar);
-            console.log(namevar);
-            console.log(unidraw);
-            modifvar.status = false;
-            unidraw.clearHistory(comp);
-            namevar.updateName();
-          }
-          resolve(ok);
-        });
-  },
+  isNameVar: true,
 
 });
 
-export {SaveAsCmd};
+export {NameVar};

@@ -49,7 +49,7 @@ import {DrawTool} from './tools/draw-tool.js';
 import {MarkTool} from './tools/mark-tool.js';
 import {ModifiedStatusVar} from './modified-status-var.js';
 import {RedoCmd} from './commands/redo-cmd.js';
-import {SaveAsCmd} from './commands/save-as-cmd.js';
+import {SaveCmd} from './commands/save-cmd.js';
 import {SelectTool} from './tools/select-tool.js';
 import {UndoCmd} from './commands/undo-cmd.js';
 
@@ -69,18 +69,19 @@ export default {
       component: null,
       modes: ['view', 'mark', 'draw', 'select'],
       mode: 'view',
-      modified: new ModifiedStatusVar,
-      name: new ComponentNameVar,
+      modified: null,
+      name: null,
       tool: null,
     };
   },
   watch: {
     asset: function( newVal, oldVal ) {
-      const catalog = this.unidraw().catalog;
-      const scope = this;
-      catalog.retrieve(newVal).then((response) => {
-        scope.component = response;
-      });
+      this.unidraw().catalog.retrieve(newVal, newVal)
+          .then((response) => {
+            this.component = response;
+            this.modified = new ModifiedStatusVar(response);
+            this.name = new ComponentNameVar(response, this.$parent.catalog);
+          });
     },
     component: function( newVal, oldVal ) {
       if (newVal) {
@@ -108,8 +109,8 @@ export default {
       console.log( event.key, event.keyCode );
       if (event.type == 'keydown') {
         if ( event.keyCode == 32) {
-          const saveas = new SaveAsCmd(this);
-          saveas.execute();
+          const save = new SaveCmd(this);
+          save.execute();
         } else if ( event.ctrlKey && event.keyCode == 90 ) {
           const undo = new UndoCmd(this);
           undo.execute();

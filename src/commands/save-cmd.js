@@ -21,42 +21,34 @@
  */
 
 import {Command} from './command.js';
+import {SaveAsCmd} from './save-as-cmd.js';
 
 /**
- * Description: save as command
+ * Description: save command
  * @constructor
  * @param {Editor} editor: the editor the command acts within
  */
-function SaveAsCmd( editor ) {
+function SaveCmd( editor ) {
   Command.call( this, editor, null );
-  this.type = 'SaveAsCmd';
+  this.type = 'SaveCmd';
 }
 
-SaveAsCmd.prototype = Object.assign( Object.create( Command.prototype ), {
-  constructor: SaveAsCmd,
+SaveCmd.prototype = Object.assign( Object.create( Command.prototype ), {
+  constructor: SaveCmd,
 
-  isSaveAsCmd: true,
+  isSaveCmd: true,
 
   execute: function() {
-    const comp = this.editor.component;
-    const modifvar = this.editor.modified;
-    const namevar = this.editor.name;
-    const unidraw = this.editor.unidraw();
-
-    this.editor.unidraw().catalog.save(comp, name)
-        .then((ok) => {
-          if (ok) {
-            console.log(modifvar);
-            console.log(namevar);
-            console.log(unidraw);
-            modifvar.status = false;
-            unidraw.clearHistory(comp);
-            namevar.updateName();
-          }
-          resolve(ok);
-        });
+    // const modified = this.editor.modifiedStatusVar;
+    const compName = this.editor.ComponentNameVar;
+    const name = (compName) ? compName.name : undefined;
+    console.log(name);
+    if (name === undefined) {
+      const saveas = new SaveAsCmd(this.editor);
+      saveas.execute();
+    }
   },
 
 });
 
-export {SaveAsCmd};
+export {SaveCmd};

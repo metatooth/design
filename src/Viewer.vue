@@ -72,6 +72,7 @@ export default {
       controls: null,
       frustum: 1000,
       highlighted: null,
+      index: null,
       line: null,
       linewidth: 7,
       manipulator: null,
@@ -209,7 +210,18 @@ export default {
       return rgb;
     },
     mesh: function() {
-      return this.component.children[0];
+      if (this.index == null) {
+        this.index = 0;
+        console.log(this.component);
+        while (this.component.children[this.index]) {
+          console.log(this.component.children[this.index].type);
+          if (this.component.children[this.index].type == 'Mesh') {
+            break;
+          }
+          this.index++;
+        }
+      }
+      return this.component.children[this.index];
     },
     render: function() {
       this.renderer.render( this.scene, this.camera );

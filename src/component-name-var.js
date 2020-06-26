@@ -20,43 +20,37 @@
  * WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-import {Command} from './command.js';
+import {NameVar} from './name-var.js';
 
 /**
- * Description: save as command
+ * Description: state variables allow for dataflow and
+ * component-component commuinication
  * @constructor
- * @param {Editor} editor: the editor the command acts within
+ * @param {Component} component
+ * @param {Catalog} catalog
  */
-function SaveAsCmd( editor ) {
-  Command.call( this, editor, null );
-  this.type = 'SaveAsCmd';
+function ComponentNameVar(component, catalog) {
+  NameVar.call(this, catalog.name(component));
+  this.type = 'ComponentNameVar';
+  this.component = component;
+  this.catalog = catalog;
 }
 
-SaveAsCmd.prototype = Object.assign( Object.create( Command.prototype ), {
-  constructor: SaveAsCmd,
+ComponentNameVar.prototpye =
+    Object.assign( Object.create( NameVar.prototype ), {
+      constructor: ComponentNameVar,
 
-  isSaveAsCmd: true,
+      isComponentNameVar: true,
 
-  execute: function() {
-    const comp = this.editor.component;
-    const modifvar = this.editor.modified;
-    const namevar = this.editor.name;
-    const unidraw = this.editor.unidraw();
+      updateName: function() {
+        if (!this.component) {
+          this.name = null;
+        } else {
+          const name = this.catalog.name(this.component);
+          console.log('updateName ~> ', name);
+          this.name = name;
+        }
+      },
+    });
 
-    this.editor.unidraw().catalog.save(comp, name)
-        .then((ok) => {
-          if (ok) {
-            console.log(modifvar);
-            console.log(namevar);
-            console.log(unidraw);
-            modifvar.status = false;
-            unidraw.clearHistory(comp);
-            namevar.updateName();
-          }
-          resolve(ok);
-        });
-  },
-
-});
-
-export {SaveAsCmd};
+export {ComponentNameVar};
