@@ -143,11 +143,14 @@ Object.assign( Catalog.prototype, {
         console.log('scene.children ', children);
         console.log('scene.children.length ', children.length);
 
-        for (let i = 0, l = children.length; i < l; i++) {
-          console.log(children[i]);
-          component.add(children[i]);
+        console.log('only.children ', only.children);
+        console.log('only.children.length ', only.children.length);
+
+        while (only.children.length > 0) {
+          component.add(only.children[0]);
         }
       }
+
       console.log('name ~> ', name);
       const newname = name + '/revisions/' + data.number;
       console.log('newname ~> ', newname);
