@@ -21,7 +21,7 @@
  */
 
 import {S3} from './api-services/s3.js';
-import AssetsService from './api-services/assets.js';
+import {HTTP} from './api-services/http-common.js';
 import * as md5 from 'blueimp-md5';
 
 import {Mesh} from 'three';
@@ -51,16 +51,28 @@ Object.assign( Catalog.prototype, {
 
   isCatalog: true,
 
+  create: function(component, name) {
+    return new Promise((resolve, reject) => {
+      this.exportGltf(component)
+          .then((gltf) => this.makeUri(gltf))
+          .then((resp) => this.upload(resp))
+          .then((data) => this.makeJson(data))
+          .then((json) => this.jsonCreate(json, name))
+          .then((resp) => resolve(resp));
+    });
+  },
+
   exists: function(name) {
 
   },
 
   forget: function(component) {
-    const iter = this.compMap.keys();
+    const iter = this.compMap.entries();
     let result = iter.next();
     while (!result.done) {
-      if (result.value == component) {
-        this.compMap.delete(result.name);
+      console.log('forgot? ', result);
+      if (result.value[1] == component) {
+        this.compMap.delete(result.value[0]);
         break;
       }
       result = iter.next();
@@ -71,22 +83,23 @@ Object.assign( Catalog.prototype, {
     const iter = this.compMap.keys();
     let result = iter.next();
     while (!result.done) {
-      if (result.value == component) {
-        return result.name;
+      if (this.compMap.get(result.value) == component) {
+        return result.value;
       }
       result = iter.next();
     }
   },
 
-  retrieve: function(name, component) {
+  retrieve: function(name) {
     return new Promise((resolve, reject) => {
       if (!this.compMap.has(name)) {
-        this.loadAssetJson(name)
-            .then((data) => this.loadAsset(data.url))
-            .then((mesh) => this.createComponent(name, mesh))
-            .then((component) => resolve(component))
-            .catch((error) => console.log(error));
+        this.jsonRetrieve(name)
+            .then((data) => this.loadData(data))
+            .then((resp) => this.createComponent(name, resp.data, resp.object))
+            .then((comp) => resolve(comp));
       } else {
+        console.log('name is ', name);
+        console.log('we already got one! ', this.compMap.get(name));
         resolve(this.compMap.get(name));
       }
     });
@@ -97,10 +110,9 @@ Object.assign( Catalog.prototype, {
       this.exportGltf(component)
           .then((gltf) => this.makeUri(gltf))
           .then((resp) => this.upload(resp))
-          .then((data) => this.createAssetJson(data))
-          .then((params) => this.createAsset(params))
-          .then((data) => resolve(true))
-          .catch((error) => console.log(error));
+          .then((data) => this.makeJson(data))
+          .then((json) => this.jsonSave(json, name))
+          .then((resp) => resolve(resp));
     });
   },
 
@@ -112,74 +124,38 @@ Object.assign( Catalog.prototype, {
     return false;
   },
 
+  writable: function(name) {
+
+  },
+
   /** protected? */
 
-  createAsset: function(params) {
-    console.log('createAsset ~> ', params);
-    return AssetsService.create(params)
-        .then((response) => {
-          return response.data.data;
-        });
-  },
-
-  createAssetJson: function(data) {
-    console.log('createAssetJson ~> ', data);
+  createComponent: function(name, data, object) {
     return new Promise((resolve, reject) => {
-      const params = {data: {
-        url: data['Location'],
-        mime_type: 'model/gltf+json',
-        service: 's3',
-        bucket: data['Bucket'],
-        s3key: data['Key'],
-        etag: data['ETag'],
-      }};
-      resolve(params);
-    });
-  },
+      const component = new Component();
 
-  createComponent: function(name, object) {
-    console.log('createComponent ', name, object);
-    return new Promise((resolve, reject) => {
-      if (object.type == 'Mesh') {
-        const component = new Component(object);
-        this.compMap.set(name, component);
-        resolve(component);
+      const children = object.scene.children;
+      const only = object.scene.children[0];
+
+      if (only.name == '<STL_BINARY>') {
+        component.add(only.children[0]);
       } else {
-        const component = new Component();
-        console.log(object.scene.children.length);
-        for (let i = 0, l = object.scene.children.length; i < l; ++i) {
-          if (object.scene.children[i].name == '<STL_BINARY>') {
-            component.add(object.scene.children[i].children[0]);
-          } else {
-            component.add(object.scene.children[i]);
-          }
+        console.log('scene.children ', children);
+        console.log('scene.children.length ', children.length);
+
+        for (let i = 0, l = children.length; i < l; i++) {
+          console.log(children[i]);
+          component.add(children[i]);
         }
-        this.compMap.set(name, component);
-        resolve(component);
       }
-    });
-  },
-
-  createName: function(gltf) {
-    console.log('createName ~> ', gltf);
-    return new Promise((resolve, reject) => {
-      const dateObj = new Date;
-      let month = dateObj.getUTCMonth() + 1;
-
-      if (month < 10) {
-        month = '0' + month;
-      }
-
-      let day = dateObj.getUTCDate();
-
-      if (day < 10) {
-        day = '0' + day;
-      }
-
-      const year = dateObj.getUTCFullYear();
-
-      const md5sum = md5(gltf);
-      resolve(year + '/' + month + '/' + day + '/' + md5sum + '.gltf');
+      console.log('name ~> ', name);
+      const newname = name + '/revisions/' + data.number;
+      console.log('newname ~> ', newname);
+      console.log(this.compMap.size);
+      this.compMap.set(name, component);
+      console.log(this.compMap.size);
+      console.log(this.compMap);
+      resolve(component);
     });
   },
 
@@ -188,9 +164,72 @@ Object.assign( Catalog.prototype, {
     const exporter = new GLTFExporter;
     return new Promise((resolve, reject) => {
       exporter.parse(component, (gltf) => {
+        console.log(gltf);
         resolve(gltf);
       });
     });
+  },
+
+  jsonCreate: function(data, name) {
+    console.log('JSON CREATE');
+    console.log(data);
+    console.log(name);
+    const postpath = name + '/revisions';
+    console.log('postpath ~> ', postpath);
+
+    return HTTP.post(postpath, data)
+        .then((response) => {
+          console.log('jsonCreate ~> HTTP.post ~> ', response);
+          console.log(response.data.number);
+
+          console.log(this.compMap.size);
+          console.log(this.compMap);
+          const newname = postpath + '/' + response.data.locator;
+          console.log(name);
+          const comp = this.compMap.get(name);
+          console.log(comp);
+          this.forget(comp);
+          console.log(this.compMap.size);
+          console.log(this.compMap);
+          console.log('newname ~> ', newname);
+          this.compMap.set(newname, comp);
+          console.log(this.compMap.size);
+          console.log(this.compMap);
+
+          return true;
+        })
+        .catch((error) => {
+          console.log('error at jsonCreate: ', error);
+          return false;
+        });
+  },
+
+  jsonRetrieve: function(name) {
+    console.log('JSON RETRIEVE');
+    console.log(name);
+    return HTTP.get( name )
+        .then((response) => {
+          const latest = response.data.data.revisions.length - 1;
+          console.log(latest);
+          console.log(response.data.data.revisions[latest]);
+          return response.data.data.revisions[latest];
+        });
+  },
+
+  jsonSave: function(data, name) {
+    console.log('JSON SAVE');
+    console.log(data);
+    console.log(name);
+    return HTTP.put(name, data)
+        .then((response) => {
+          console.log('jsonSave ~> HTTP.put ~> ', response);
+          console.log(response);
+          return true;
+        })
+        .catch((error) => {
+          console.log('error at jsonSave: ', error);
+          return false;
+        });
   },
 
   upload: function(resp) {
@@ -198,29 +237,37 @@ Object.assign( Catalog.prototype, {
     return s3.upload(resp.data, resp.uri);
   },
 
-  loadAssetJson: function(asset) {
-    return AssetsService.get( asset )
-        .then((response) => {
-          return response.data.data;
-        });
-  },
-
-  loadAsset: function(url) {
-    console.log('loadAsset ~> ', url);
+  loadData: function(data) {
+    const url = data.location;
+    console.log('loadData ~> ', url);
     return new Promise((resolve, reject) => {
       const m = url.match(/\.\w+$/);
       console.log(m[0]);
       if (m[0] == '.stl') {
-        resolve(this.loadStlAsset(url));
+        this.loadStl(url)
+            .then((resp) => {
+              const params = {
+                data: data,
+                object: resp,
+              };
+              resolve(params);
+            });
       } else if (m[0] == '.gltf' || m[0] == '.glb') {
-        resolve(this.loadGltfAsset(url));
+        this.loadGltf(url)
+            .then((resp) => {
+              const params = {
+                data: data,
+                object: resp,
+              };
+              resolve(params);
+            });
       } else {
         reject(new Error('Unknown file extension ', m[0]));
       }
     });
   },
 
-  loadStlAsset: function(url) {
+  loadStl: function(url) {
     const loader = new STLLoader;
     const scope = this;
     return new Promise((resolve, reject) => {
@@ -235,12 +282,27 @@ Object.assign( Catalog.prototype, {
     });
   },
 
-  loadGltfAsset: function(url) {
+  loadGltf: function(url) {
     const loader = new GLTFLoader;
     return new Promise((resolve, reject) => {
       loader.load(url, function(gltf) {
         resolve(gltf);
       }, undefined, reject);
+    });
+  },
+
+  makeJson: function(data) {
+    console.log('makeJson ~> ', data);
+    return new Promise((resolve, reject) => {
+      const params = {data: {
+        location: data['Location'],
+        mime_type: 'model/gltf+json',
+        service: 's3',
+        bucket: data['Bucket'],
+        s3key: data['Key'],
+        etag: data['ETag'],
+      }};
+      resolve(params);
     });
   },
 
@@ -267,7 +329,6 @@ Object.assign( Catalog.prototype, {
         uri: year + '/' + month + '/' + day + '/' + md5sum + '.gltf'});
     });
   },
-
 });
 
 export {Catalog};

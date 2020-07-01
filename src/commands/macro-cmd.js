@@ -20,43 +20,49 @@
  * WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-import {NameVar} from './name-var.js';
+import {Command} from './command.js';
 
 /**
- * Description: state variables allow for dataflow and
- * component-component commuinication
+ * Description: command containing a sequence of other commands to execute
  * @constructor
- * @param {Component} component
- * @param {Catalog} catalog
+ * @param {Editor} editor: the editor the command acts within
+ * @param {Command} c1
+ * @param {Command} c2
  */
-function ComponentNameVar(component, catalog) {
-  NameVar.call(this, catalog.name(component));
-  this.type = 'ComponentNameVar';
-  this.component = component;
-  this.catalog = catalog;
-
-  if (this.component) {
-    const name = this.catalog.name(this.component);
-    console.log('set name ~> ', name);
-    this.name = name;
-  }
+function MacroCmd( editor, c1, c2 ) {
+  Command.call( this, editor );
+  this.type = 'MacroCmd';
+  this.cmds = [];
+  if (c1) this.cmds.unshift(c1);
+  if (c2) this.cmds.unshift(c2);
 }
 
-ComponentNameVar.prototpye =
-    Object.assign( Object.create( NameVar.prototype ), {
-      constructor: ComponentNameVar,
+MacroCmd.prototype = Object.assign( Object.create( Command.prototype ), {
+  constructor: MacroCmd,
 
-      isComponentNameVar: true,
+  isMacroCmd: true,
 
-      updateName: function() {
-        if (!this.component) {
-          this.name = null;
-        } else {
-          const name = this.catalog.name(this.component);
-          console.log('updateName ~> ', name);
-          this.name = name;
-        }
-      },
-    });
+  execute: function() {
+    for (let i = 0, l = this.cmds.length; i < l; ++i) {
+      this.cmds[i].execute();
+    }
+  },
 
-export {ComponentNameVar};
+  unexecute: function() {
+    for (let i = 0, l = this.cmds.length; i < l; ++i) {
+      this.cmds[i].unexecute();
+    }
+  },
+
+  reversible: function() {
+    for (let i = 0, l = this.cmds.length; i < l; ++i) {
+      if (this.cmds[i].reversible()) {
+        return true;
+      }
+    }
+    return false;
+  },
+
+});
+
+export {MacroCmd};

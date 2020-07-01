@@ -9,7 +9,7 @@
     <br/>
     <span id="commit">Commit {{commit}}</span>
   </div>
-  <Editor v-bind:asset='asset' ref="editor"/>
+  <Editor v-bind:plan='plan' ref="editor"/>
 </div>
 </template>
 
@@ -41,6 +41,9 @@ import Editor from './Editor.vue';
 import {Catalog} from './catalog.js';
 import {History} from './history.js';
 
+import {DirtyCmd} from './commands/dirty-cmd.js';
+import {MacroCmd} from './commands/macro-cmd.js';
+
 export default {
   name: 'unidraw',
   components: {
@@ -48,11 +51,11 @@ export default {
   },
   data: function() {
     return {
-      asset: null,
       catalog: new Catalog,
       commit: '',
       histories: new Map,
       maxhistlen: 100,
+      plan: null,
       version: '',
     };
   },
@@ -62,10 +65,10 @@ export default {
 
     const query = window.location.search;
     const params = new URLSearchParams( query );
-    if (params.get('asset')) {
-      this.asset = params.get( 'asset' );
-    } else if (process.env.VUE_APP_DEFAULT_ASSET) {
-      this.asset = process.env.VUE_APP_DEFAULT_ASSET;
+    if (params.get('plan')) {
+      this.plan = '/plans/' + params.get( 'plan' );
+    } else if (process.env.VUE_APP_DEFAULT_PLAN) {
+      this.plan = '/plans/' + process.env.VUE_APP_DEFAULT_PLAN;
     }
   },
   methods: {
@@ -89,6 +92,12 @@ export default {
         const history = this.histories.get(comp);
 
         history.future.splice(0, history.future.length);
+
+        if (editor.modified && !editor.modified.modified) {
+          const dirtycmd = new DirtyCmd(editor);
+          dirtycmd.execute();
+          command = new MacroCmd(editor, command, dirtycmd);
+        }
 
         history.past.unshift(command);
 

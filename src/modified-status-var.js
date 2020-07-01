@@ -20,20 +20,27 @@
  * WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+import {StateVar} from './state-var.js';
+
 /**
- * Description: state variables allow for dataflow and
- * component-component commuinication
+ * Description: modified-status state variable
  * @constructor
+ * @param {Component} component
+ * @param {Boolean} modified
  */
-function ModifiedStatusVar() {
+function ModifiedStatusVar(component, modified) {
+  StateVar.call(this);
   this.type = 'ModifiedStatusVar';
+  this.component = component;
+  this.modified = modified;
 }
 
-Object.assign( ModifiedStatusVar.prototype, {
-  constructor: ModifiedStatusVar,
+ModifiedStatusVar.prototype =
+  Object.assign( Object.create( StateVar.prototype ), {
+    constructor: ModifiedStatusVar,
 
-  isModifiedStatusVar: true,
+    isModifiedStatusVar: true,
 
-});
+  });
 
 export {ModifiedStatusVar};

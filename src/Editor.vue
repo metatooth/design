@@ -7,14 +7,6 @@
         <a class="navbar-item" href="https://metatooth.com" target="_blank">
           <img src="./assets/logo.png" alt="Metatooth">
         </a>
-        <div v-if=component class="navbar-item">
-          <a class="button"
-            ref="download"
-            v-bind:href=assetUrl
-            download>
-            <font-awesome-icon icon="download" />
-          </a>
-        </div>
       </div>
     </nav>
     <Viewer v-bind:component='component' v-bind:tool='tool' />
@@ -61,11 +53,10 @@ export default {
     Viewer,
   },
   props: {
-    asset: String,
+    plan: String,
   },
   data: function() {
     return {
-      assetUrl: null,
       component: null,
       modes: ['view', 'mark', 'draw', 'select'],
       mode: 'view',
@@ -75,12 +66,14 @@ export default {
     };
   },
   watch: {
-    asset: function( newVal, oldVal ) {
-      this.unidraw().catalog.retrieve(newVal, newVal)
+    plan: function( newVal, oldVal ) {
+      this.unidraw().catalog.retrieve(newVal)
           .then((response) => {
+            console.log(response);
             this.component = response;
-            this.modified = new ModifiedStatusVar(response);
-            this.name = new ComponentNameVar(response, this.$parent.catalog);
+            this.modified = new ModifiedStatusVar(this.component);
+            this.name = new ComponentNameVar(this.component,
+                this.$parent.catalog);
           });
     },
     component: function( newVal, oldVal ) {

@@ -20,43 +20,44 @@
  * WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-import {NameVar} from './name-var.js';
+import {Command} from './command.js';
 
 /**
- * Description: state variables allow for dataflow and
- * component-component commuinication
- * @constructor
- * @param {Component} component
- * @param {Catalog} catalog
+ * Description: command sets the modified flag for the root component
+ * @param {Editor} editor: the editor the command acts within
  */
-function ComponentNameVar(component, catalog) {
-  NameVar.call(this, catalog.name(component));
-  this.type = 'ComponentNameVar';
-  this.component = component;
-  this.catalog = catalog;
-
-  if (this.component) {
-    const name = this.catalog.name(this.component);
-    console.log('set name ~> ', name);
-    this.name = name;
-  }
+function DirtyCmd( editor ) {
+  Command.call( this, editor, null );
+  this.type = 'DirtyCmd';
 }
 
-ComponentNameVar.prototpye =
-    Object.assign( Object.create( NameVar.prototype ), {
-      constructor: ComponentNameVar,
+DirtyCmd.prototype = Object.assign( Object.create( Command.prototype ), {
+  constructor: DirtyCmd,
 
-      isComponentNameVar: true,
+  isDirtyCmd: true,
 
-      updateName: function() {
-        if (!this.component) {
-          this.name = null;
-        } else {
-          const name = this.catalog.name(this.component);
-          console.log('updateName ~> ', name);
-          this.name = name;
-        }
-      },
-    });
+  reverse: false,
 
-export {ComponentNameVar};
+  execute: function() {
+    if (this.reverse) {
+      this.reverse = false;
+      this.unexecute();
+      this.reverse = true;
+    } else {
+      if (this.editor.modified) this.editor.modified.modified = true;
+    }
+  },
+
+  unexecute: function() {
+    if (this.reverse) {
+      this.reverse = false;
+      this.execute();
+      this.reverse = true;
+    } else {
+      if (this.editor.modified) this.editor.modified.modified = false;
+    }
+  },
+
+});
+
+export {DirtyCmd};

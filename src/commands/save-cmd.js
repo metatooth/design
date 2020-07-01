@@ -39,13 +39,35 @@ SaveCmd.prototype = Object.assign( Object.create( Command.prototype ), {
   isSaveCmd: true,
 
   execute: function() {
-    // const modified = this.editor.modifiedStatusVar;
-    const compName = this.editor.ComponentNameVar;
+    const modified = this.editor.modified;
+    const compName = this.editor.name;
     const name = (compName) ? compName.name : undefined;
-    console.log(name);
+    console.log('THE NAME XXX ', name);
     if (name === undefined) {
       const saveas = new SaveAsCmd(this.editor);
       saveas.execute();
+    } else if (modified && modified.modified) {
+      const catalog = this.editor.$parent.catalog;
+
+      catalog.retrieve(name)
+          .then((comp) => catalog.save(comp, name))
+          .then((ok) => {
+            console.log('ok? ', ok);
+            if (ok) {
+              if (modified) modified.modified = false;
+              console.log(name);
+              const comp = catalog.compMap.get(name);
+              console.log(comp);
+              this.editor.unidraw().clearHistory(comp);
+            } else {
+              const saveas = new SaveAsCmd(this.editor);
+              saveas.execute();
+            }
+          })
+          .catch((error) => {
+            console.log('save-cmd catch @ execute');
+            console.log(error);
+          });
     }
   },
 

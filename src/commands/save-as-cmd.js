@@ -39,21 +39,29 @@ SaveAsCmd.prototype = Object.assign( Object.create( Command.prototype ), {
 
   execute: function() {
     const comp = this.editor.component;
-    const modifvar = this.editor.modified;
     const namevar = this.editor.name;
+    const oldname = namevar.name;
+
+    const modifvar = this.editor.modified;
     const unidraw = this.editor.unidraw();
 
-    this.editor.unidraw().catalog.save(comp, name)
+    console.log('catalog.create with ', oldname);
+
+    unidraw.catalog.create(comp, oldname)
         .then((ok) => {
           if (ok) {
             console.log(modifvar);
             console.log(namevar);
             console.log(unidraw);
-            modifvar.status = false;
+            modifvar.modified = false;
             unidraw.clearHistory(comp);
-            namevar.updateName();
+            console.log(unidraw.catalog.compMap);
+            const name = unidraw.catalog.name(comp);
+            console.log(name);
+            namevar.name = name;
+          } else {
+            console.log('save as -- not ok!');
           }
-          resolve(ok);
         });
   },
 
