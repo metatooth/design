@@ -22,6 +22,7 @@
 
 import {Raycaster} from 'three';
 import {Vector2} from 'three';
+import {Vector3} from 'three';
 
 import {VertexManip} from './vertex-manip.js';
 
@@ -68,7 +69,11 @@ ScribbleVertexManip.prototype = Object.assign( Object.create(
     const intersects = this.raycaster.intersectObject( this.viewer.mesh() );
 
     if ( intersects.length > 0 ) {
-      this.rubberband.addVertex(intersects[0].point);
+      const a = intersects[0].face.a;
+      const positions = this.viewer.mesh().geometry.getAttribute('position');
+      this.rubberband.addVertex(new Vector3(positions.array[3*a],
+          positions.array[3*a+1],
+          positions.array[3*a+2]));
     }
   },
 

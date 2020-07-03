@@ -95,7 +95,7 @@ Object.assign( Catalog.prototype, {
       if (!this.compMap.has(name)) {
         this.jsonRetrieve(name)
             .then((data) => this.loadData(data))
-            .then((resp) => this.createComponent(name, resp.data, resp.object))
+            .then((object) => this.createComponent(name, object))
             .then((comp) => resolve(comp));
       } else {
         console.log('name is ', name);
@@ -130,34 +130,21 @@ Object.assign( Catalog.prototype, {
 
   /** protected? */
 
-  createComponent: function(name, data, object) {
+  createComponent: function(name, object) {
     return new Promise((resolve, reject) => {
       const component = new Component();
 
-      const children = object.scene.children;
       const only = object.scene.children[0];
 
       if (only.name == '<STL_BINARY>') {
         component.add(only.children[0]);
       } else {
-        console.log('scene.children ', children);
-        console.log('scene.children.length ', children.length);
-
-        console.log('only.children ', only.children);
-        console.log('only.children.length ', only.children.length);
-
         while (only.children.length > 0) {
           component.add(only.children[0]);
         }
       }
 
-      console.log('name ~> ', name);
-      const newname = name + '/revisions/' + data.number;
-      console.log('newname ~> ', newname);
-      console.log(this.compMap.size);
       this.compMap.set(name, component);
-      console.log(this.compMap.size);
-      console.log(this.compMap);
       resolve(component);
     });
   },
@@ -242,28 +229,13 @@ Object.assign( Catalog.prototype, {
 
   loadData: function(data) {
     const url = data.location;
-    console.log('loadData ~> ', url);
     return new Promise((resolve, reject) => {
       const m = url.match(/\.\w+$/);
       console.log(m[0]);
       if (m[0] == '.stl') {
-        this.loadStl(url)
-            .then((resp) => {
-              const params = {
-                data: data,
-                object: resp,
-              };
-              resolve(params);
-            });
+        resolve(this.loadStl(url));
       } else if (m[0] == '.gltf' || m[0] == '.glb') {
-        this.loadGltf(url)
-            .then((resp) => {
-              const params = {
-                data: data,
-                object: resp,
-              };
-              resolve(params);
-            });
+        resolve(this.loadGltf(url));
       } else {
         reject(new Error('Unknown file extension ', m[0]));
       }

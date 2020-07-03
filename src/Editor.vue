@@ -36,8 +36,11 @@
  * WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+import {Vector3} from 'three';
+
 import {ComponentNameVar} from './component-name-var.js';
 import {DrawTool} from './tools/draw-tool.js';
+import {DijkstraCmd} from './commands/dijkstra-cmd.js';
 import {MarkTool} from './tools/mark-tool.js';
 import {ModifiedStatusVar} from './modified-status-var.js';
 import {RedoCmd} from './commands/redo-cmd.js';
@@ -101,7 +104,20 @@ export default {
     key: function( event ) {
       console.log( event.key, event.keyCode );
       if (event.type == 'keydown') {
-        if ( event.keyCode == 32) {
+        if ( event.keyCode == 32 ) {
+          const geometry = this.component.children[0].children[0].geometry;
+          const positions = geometry.getAttribute('position');
+          const last = (positions.count - 1) * 3;
+          console.log(last);
+          const source = new Vector3(positions.array[0],
+              positions.array[1],
+              positions.array[2]);
+          const target = new Vector3(positions.array[last],
+              positions.array[last + 1],
+              positions.array[last + 2]);
+          const dijkstra = new DijkstraCmd(this, source, target);
+          dijkstra.execute();
+        } else if ( event.ctrlKey && event.keyCode == 83 ) {
           const save = new SaveCmd(this);
           save.execute();
         } else if ( event.ctrlKey && event.keyCode == 90 ) {
