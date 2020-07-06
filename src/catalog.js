@@ -134,14 +134,20 @@ Object.assign( Catalog.prototype, {
     return new Promise((resolve, reject) => {
       const component = new Component();
 
-      const only = object.scene.children[0];
+      console.log(object);
 
-      if (only.name == '<STL_BINARY>') {
-        component.add(only.children[0]);
-      } else {
-        while (only.children.length > 0) {
+      if (object.scene) {
+        const only = object.scene.children[0];
+
+        if (only.name == '<STL_BINARY>') {
           component.add(only.children[0]);
+        } else {
+          while (only.children.length > 0) {
+            component.add(only.children[0]);
+          }
         }
+      } else if (object.type == 'Mesh') {
+        component.add(object);
       }
 
       this.compMap.set(name, component);

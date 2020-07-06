@@ -105,7 +105,13 @@ export default {
       console.log( event.key, event.keyCode );
       if (event.type == 'keydown') {
         if ( event.keyCode == 32 ) {
-          const geometry = this.component.children[0].children[0].geometry;
+          console.log(this.component);
+          let geometry = null;
+          if (this.component.children[0].children.length) {
+            geometry = this.component.children[0].children[0].geometry;
+          } else {
+            geometry = this.component.children[1].children[0].geometry;
+          }
           const positions = geometry.getAttribute('position');
           const last = (positions.count - 1) * 3;
           console.log(last);
@@ -118,6 +124,7 @@ export default {
           const dijkstra = new DijkstraCmd(this, source, target);
           dijkstra.execute();
         } else if ( event.ctrlKey && event.keyCode == 83 ) {
+          event.preventDefault();
           const save = new SaveCmd(this);
           save.execute();
         } else if ( event.ctrlKey && event.keyCode == 90 ) {
