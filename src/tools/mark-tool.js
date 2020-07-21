@@ -20,7 +20,7 @@
  * WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-import {Component} from '../components/component.js';
+import {Component} from '../component.js';
 import {ClickManip} from '../manipulators/click-manip.js';
 import {Mesh} from 'three';
 import {MeshPhongMaterial} from 'three';

@@ -8,6 +8,17 @@
           <img src="./assets/logo.png" alt="Metatooth">
         </a>
       </div>
+      <div class="navbar-menu">
+        <div class="navbar-start">
+        </div>
+        <div class="navbar-end">
+          <div class="navbar-item" v-if=assetUrl>
+            <a class="button"  v-bind:href=assetUrl>
+              <font-awesome-icon icon="download" />
+            </a>
+          </div>
+        </div>
+      </div>
     </nav>
     <Viewer v-bind:component='component' v-bind:tool='tool' />
   </div>
@@ -56,10 +67,11 @@ export default {
     Viewer,
   },
   props: {
-    plan: String,
+    uri: String,
   },
   data: function() {
     return {
+      assetUrl: null,
       component: null,
       modes: ['view', 'mark', 'draw', 'select'],
       mode: 'view',
@@ -69,14 +81,17 @@ export default {
     };
   },
   watch: {
-    plan: function( newVal, oldVal ) {
+    uri: function( newVal, oldVal ) {
       this.unidraw().catalog.retrieve(newVal)
           .then((response) => {
             console.log(response);
             this.component = response;
-            this.modified = new ModifiedStatusVar(this.component);
             this.name = new ComponentNameVar(this.component,
                 this.$parent.catalog);
+            this.modified = new ModifiedStatusVar(this.component);
+            if (this.component.children[0].type === 'Mesh') {
+              this.assetUrl = this.component.children[0].sourceUrl;
+            }
           });
     },
     component: function( newVal, oldVal ) {
@@ -105,42 +120,54 @@ export default {
       console.log( event.key, event.keyCode );
       if (event.type == 'keydown') {
         if ( event.keyCode == 32 ) {
+          // SPACE
           console.log(this.component);
           let geometry = null;
-          if (this.component.children[0].children.length) {
-            geometry = this.component.children[0].children[0].geometry;
-          } else {
-            geometry = this.component.children[1].children[0].geometry;
+          for (let i = 0, l = this.component.children.length; i < l; i++) {
+            if (this.component.children[i].type === 'Mesh') {
+              continue;
+            }
+
+            geometry = this.component.children[i].children[0].geometry;
+            const positions = geometry.getAttribute('position');
+            const last = (positions.count - 1) * 3;
+            console.log(last);
+            for (let j = 0, l = (positions.count - 1) * 3; j < l; j++) {
+              const source = new Vector3(positions.array[j],
+                  positions.array[j+1],
+                  positions.array[j+2]);
+              const target = new Vector3(positions.array[j+3],
+                  positions.array[j+4],
+                  positions.array[j+5]);
+              const dijkstra = new DijkstraCmd(this, source, target);
+              dijkstra.execute();
+            }
           }
-          const positions = geometry.getAttribute('position');
-          const last = (positions.count - 1) * 3;
-          console.log(last);
-          const source = new Vector3(positions.array[0],
-              positions.array[1],
-              positions.array[2]);
-          const target = new Vector3(positions.array[last],
-              positions.array[last + 1],
-              positions.array[last + 2]);
-          const dijkstra = new DijkstraCmd(this, source, target);
-          dijkstra.execute();
         } else if ( event.ctrlKey && event.keyCode == 83 ) {
+          // Ctrl+S
           event.preventDefault();
           const save = new SaveCmd(this);
           save.execute();
         } else if ( event.ctrlKey && event.keyCode == 90 ) {
+          // Ctrl+Z
           const undo = new UndoCmd(this);
           undo.execute();
         } else if ( ( event.ctrlKey && event.keyCode == 89 ) ||
             event.keyCode == 115 ) {
+          // Ctrl+Y or F4
           const redo = new RedoCmd(this);
           redo.execute();
         } else if ( event.keyCode == 86 ) {
+          // V - View
           this.mode = this.modes[0];
         } else if ( event.keyCode == 77 ) {
+          // M - Mark
           this.mode = this.modes[1];
         } else if ( event.keyCode == 68 ) {
+          // D - Draw
           this.mode = this.modes[2];
         } else if ( event.keyCode == 83 ) {
+          // S - Select
           this.mode = this.modes[3];
         }
       } else if ( event.type == 'keyup' ) {

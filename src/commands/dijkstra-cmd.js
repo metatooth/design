@@ -4,7 +4,7 @@ import {BufferAttribute} from 'three';
 import {Line} from 'three';
 import {LineBasicMaterial} from 'three';
 
-import {Component} from '../components/component.js';
+import {Component} from '../component.js';
 
 import {Command} from './command.js';
 import {PasteCmd} from './paste-cmd.js';
@@ -14,10 +14,9 @@ import {Graph} from '../graph.js';
 /**
  * Description: dijkstra command
  * @constructor
- * @param {Editor} editor: the editor the command acts within
- * @param {Vector3} source: starting point
- * @param {Vector3} target: finish point
- * interpret the command
+ * @param {Editor} editor the editor the command acts within
+ * @param {Vector3} source starting point
+ * @param {Vector3} target finish point
  */
 function DijkstraCmd( editor, source, target ) {
   Command.call( this, editor );
@@ -45,7 +44,12 @@ DijkstraCmd.prototype = Object.assign( Object.create( Command.prototype ), {
       }
     }
 
-    const positions = mesh.geometry.toNonIndexed().getAttribute('position');
+    let positions = null;
+    if (mesh.geometry.index) {
+      positions = mesh.geometry.toNonIndexed().getAttribute('position');
+    } else {
+      positions = mesh.geometry.getAttribute('position');
+    }
 
     console.log('positions ', positions.count);
 
@@ -74,28 +78,33 @@ DijkstraCmd.prototype = Object.assign( Object.create( Command.prototype ), {
     console.log(graph);
     console.log(((new Date) - now), 'ms elapsed.');
 
-    const results = this.dijkstra(graph,
-        this.source,
-        this.target);
-    console.log('Done. ', ((new Date) - now), 'ms elapsed.');
-    console.log(results);
-    const newPositions = new Float32Array(3*results.length);
-    for (let i = 0, l = results.length; i < l; i++) {
-      newPositions[3*i] = results[i].x;
-      newPositions[3*i+1] = results[i].y;
-      newPositions[3*i+2] = results[i].z;
+    console.log('source vector3', this.source);
+    console.log('target vector3', this.target);
+
+    if (!this.source.equals(this.target)) {
+      const results = this.dijkstra(graph, this.source, this.target);
+      console.log('Done. ', ((new Date) - now), 'ms elapsed.');
+
+      console.log('Found path of length', results.length);
+
+      const newPositions = new Float32Array(3*results.length);
+      for (let i = 0, l = results.length; i < l; i++) {
+        newPositions[3*i] = results[i].x;
+        newPositions[3*i+1] = results[i].y;
+        newPositions[3*i+2] = results[i].z;
+      }
+
+      const geometry = new BufferGeometry();
+      geometry.setAttribute( 'position',
+          new BufferAttribute( newPositions, 3 ));
+      geometry.setDrawRange( 0, results.length );
+      const material = new LineBasicMaterial({color: 0x00bbee,
+        linewidth: 5});
+
+      const line = new Line( geometry, material );
+      const cmd = new PasteCmd( this.editor, [new Component(line)] );
+      cmd.execute();
     }
-    console.log(newPositions);
-
-    const geometry = new BufferGeometry();
-    geometry.setAttribute( 'position', new BufferAttribute( newPositions, 3 ));
-    geometry.setDrawRange( 0, results.length );
-    const material = new LineBasicMaterial({color: 0x00bbee,
-      linewidth: 5});
-
-    const line = new Line( geometry, material );
-    const cmd = new PasteCmd( this.editor, [new Component(line)] );
-    cmd.execute();
   },
 
   unexecute: function() {
@@ -109,8 +118,14 @@ DijkstraCmd.prototype = Object.assign( Object.create( Command.prototype ), {
     return true;
   },
 
-  /** should be #protected **/
-
+  /**
+   * Perform Dijkstra's algorithm
+   * @protected
+   * @param {Graph} graph
+   * @param {Vector3} source
+   * @param {Vector3} target
+   * @return {Vector3[]}
+   */
   dijkstra: function(graph, source, target) {
     const dist = new Map;
     const prev = new Map;
@@ -125,11 +140,13 @@ DijkstraCmd.prototype = Object.assign( Object.create( Command.prototype ), {
     const sid = graph.id(source);
     const tid = graph.id(target);
 
+    console.log('source id', sid);
+    console.log('target id', tid);
+
     dist.set(sid, 0);
 
-    console.log(Q.size);
     while (Q.size > 0) {
-      if (Q.size % 10000 == 0) console.log(Q.size);
+      console.log('** Q size **', Q.size);
       let distU = Infinity;
       let uid = null;
       dist.forEach(function(value, key, map) {
@@ -139,8 +156,10 @@ DijkstraCmd.prototype = Object.assign( Object.create( Command.prototype ), {
         }
       });
 
-      if (!Q.delete(uid)) console.log('Q deletion failed!');
-      if (!dist.delete(uid)) console.log('dist deletion failed!');
+      console.log('min u', uid);
+
+      if (!Q.delete(uid)) console.log('Q deletion failed!', uid);
+      if (!dist.delete(uid)) console.log('dist deletion failed!', uid);
 
       if (uid === tid) break;
 

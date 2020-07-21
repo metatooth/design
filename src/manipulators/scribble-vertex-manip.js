@@ -65,15 +65,22 @@ ScribbleVertexManip.prototype = Object.assign( Object.create(
 
     this.rubberband.track( this.mouse );
 
-    this.raycaster.setFromCamera( this.mouse, this.viewer.camera );
-    const intersects = this.raycaster.intersectObject( this.viewer.mesh() );
+    const points = this.rubberband.points();
 
-    if ( intersects.length > 0 ) {
-      const a = intersects[0].face.a;
-      const positions = this.viewer.mesh().geometry.getAttribute('position');
-      this.rubberband.addVertex(new Vector3(positions.array[3*a],
-          positions.array[3*a+1],
-          positions.array[3*a+2]));
+    console.log(points);
+
+    for (let i = 0, l = points.length; i < l; i++) {
+      this.raycaster.setFromCamera( this.mouse, this.viewer.camera );
+      const intersects = this.raycaster.intersectObject( this.viewer.mesh() );
+
+      if ( intersects.length > 0 ) {
+        console.log(intersects[0]);
+        const a = intersects[0];
+        const positions = this.viewer.mesh().geometry.getAttribute('position');
+        this.rubberband.addVertex(new Vector3(positions.array[3*a],
+            positions.array[3*a+1],
+            positions.array[3*a+2]));
+      }
     }
   },
 

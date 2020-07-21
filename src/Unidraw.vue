@@ -1,15 +1,13 @@
 <template>
 <div id="unidraw">
-  <div id="logo">
-    <img width="145" alt="Metatooth Logo" src="./assets/logo.png">
-    <br/>
+  <div id="meta">
     <span id="copyright">&copy; Metatooth 2020</span>
     <br/>
     <span id="version">Version {{version}}</span>
     <br/>
     <span id="commit">Commit {{commit}}</span>
   </div>
-  <Editor v-bind:plan='plan' ref="editor"/>
+  <Editor v-bind:uri='uri' ref="editor"/>
 </div>
 </template>
 
@@ -55,7 +53,7 @@ export default {
       commit: '',
       histories: new Map,
       maxhistlen: 100,
-      plan: null,
+      uri: null,
       version: '',
     };
   },
@@ -65,10 +63,12 @@ export default {
 
     const query = window.location.search;
     const params = new URLSearchParams( query );
-    if (params.get('plan')) {
-      this.plan = '/plans/' + params.get( 'plan' );
+    if (params.get('asset')) {
+      this.uri = '/assets/' + params.get('asset');
+    } else if (params.get('plan')) {
+      this.uri = '/plans/' + params.get( 'plan' );
     } else if (process.env.VUE_APP_DEFAULT_PLAN) {
-      this.plan = '/plans/' + process.env.VUE_APP_DEFAULT_PLAN;
+      this.uri = '/plans/' + process.env.VUE_APP_DEFAULT_PLAN;
     }
   },
   methods: {
@@ -143,8 +143,9 @@ export default {
 #app {
     background-color: #2d2d2d;
 }
-#logo {
+#meta {
     background-color: transparent;
+    color: #fdfdfd;
     position: absolute;
     bottom: 0px;
     margin: 10px;

@@ -31,7 +31,7 @@ import {STLLoader} from 'three/examples/jsm/loaders/STLLoader.js';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
 import {GLTFExporter} from 'three/examples/jsm/exporters/GLTFExporter.js';
 
-import {Component} from './components/component.js';
+import {Component} from './component.js';
 
 /**
  * Description: manages persistent information
@@ -205,10 +205,14 @@ Object.assign( Catalog.prototype, {
     console.log(name);
     return HTTP.get( name )
         .then((response) => {
-          const latest = response.data.data.revisions.length - 1;
-          console.log(latest);
-          console.log(response.data.data.revisions[latest]);
-          return response.data.data.revisions[latest];
+          if (response.data.data.url) {
+            return response.data.data;
+          } else {
+            const latest = response.data.data.revisions.length - 1;
+            console.log(latest);
+            console.log(response.data.data.revisions[latest]);
+            return response.data.data.revisions[latest];
+          }
         });
   },
 
@@ -234,7 +238,7 @@ Object.assign( Catalog.prototype, {
   },
 
   loadData: function(data) {
-    const url = data.location;
+    const url = data.url || data.location;
     return new Promise((resolve, reject) => {
       const m = url.match(/\.\w+$/);
       console.log(m[0]);
@@ -258,6 +262,7 @@ Object.assign( Catalog.prototype, {
           shininess: scope.shininess} );
         const mesh = new Mesh( geometry, material );
         mesh.translation = geometry.center();
+        mesh.sourceUrl = url;
         resolve(mesh);
       }, undefined, reject);
     });

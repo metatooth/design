@@ -5,7 +5,7 @@
 function Graph() {
   this.type = 'Graph';
   this.adjacency = new Map;
-  this.size = 100;
+  this.size = 20;
   this.vertices = [this.size];
   for (let i = 0; i < this.size; i++) {
     this.vertices[i] = [this.size];
@@ -17,6 +17,7 @@ function Graph() {
     }
   }
   this.count = 0;
+  this.epsilon = 1e-06;
 }
 
 Object.assign( Graph.prototype, {
@@ -31,7 +32,7 @@ Object.assign( Graph.prototype, {
 
     let found = false;
     for (let q = 0, l = this.vertices[i][j][k].length; q < l; q++) {
-      if (this.vertices[i][j][k][q].equals(v)) {
+      if (this.vertices[i][j][k][q].distanceTo(v) < this.epsilon) {
         found = true;
         break;
       }
@@ -60,9 +61,11 @@ Object.assign( Graph.prototype, {
     const k = Math.floor(v.z) + this.size/2;
 
     let id = {};
+
     for (let q = 0, l = this.vertices[i][j][k].length; q < l; q++) {
       if (this.vertices[i][j][k][q].equals(v)) {
         id = {i: i, j: j, k: k, index: q};
+        break;
       }
     }
 

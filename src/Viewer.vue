@@ -37,7 +37,7 @@ import {WebGLRenderer} from 'three';
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls';
 
 import {CameraHelper} from './camera-helper.js';
-import {Component} from './components/component.js';
+import {Component} from './component.js';
 import {Tool} from './tools/tool.js';
 
 export default {

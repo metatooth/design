@@ -40,7 +40,8 @@ function Rubberband( vec ) {
   this.off = null;
   this.tracked = null;
   this.color = 0xff7700;
-  this.linewidth = 1;
+  this.linewidth = 3;
+  this.epsilon = 0.1;
 
   if (vec) {
     this.off = vec.clone();
@@ -62,6 +63,34 @@ Rubberband.prototype = Object.assign( Object.create( Line.prototype ), {
   isRubberband: true,
 
   /**
+   *  Gets a set of points, sampled at epsilon.
+   * @return {Float32Array}
+   */
+  points: function() {
+    const dx = (this.tracked.x - this.off.x) * this.epsilon;
+    const dy = (this.tracked.y - this.off.y) * this.epsilon;
+    const dz = (this.tracked.z - this.off.z) * this.epsilon;
+
+    const totalDist = this.tracked.distanceTo(this.off);
+
+    const start = this.tracked.clone();
+
+    const points = new Float32Array(totalDist / this.epsilon * 3 + 1);
+
+    console.log(totalDist);
+    console.log(this.epsilon);
+
+    console.log(totalDist / this.epsilon);
+
+    for (let i = 0, l = totalDist / this.epsilon; i < l; i++) {
+      points[i].x = start + dx * i;
+      points[i].y = start + dy * i;
+      points[i].z = start + dz * i;
+    }
+    return points;
+  },
+
+  /**
    * @param {Vector3} vec - the x, y, z coordinates
    */
   track: function( vec ) {
@@ -71,14 +100,23 @@ Rubberband.prototype = Object.assign( Object.create( Line.prototype ), {
 
     this.tracked.x = vec.x;
     this.tracked.y = vec.y;
-    this.tracked.z = vec.z;
+    this.tracked.z = vec.z || 0;
 
     if (!this.off) {
       this.off = this.tracked.clone();
     }
 
-    if (this.off.distanceTo(this.tracked) > 0) {
+    if (this.off.distanceTo(this.tracked) > this.epsilon) {
       const positions = this.geometry.attributes.position.array;
+
+      const dx = this.tracked.x - this.off.x;
+      const dy = this.tracked.y - this.off.y;
+      const dz = this.tracked.z - this.off.z;
+
+      const step = new Vector3(dx, dy, dz);
+
+      console.log(step);
+      console.log(this.epsilon * step);
 
       positions[0] = this.off.x;
       positions[1] = this.off.y;

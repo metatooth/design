@@ -25,7 +25,7 @@ import {BufferAttribute} from 'three';
 import {Line} from 'three';
 import {LineBasicMaterial} from 'three';
 
-import {Component} from '../components/component.js';
+import {Component} from '../component.js';
 import {GrowingVertices} from '../rubberbands/growing-vertices.js';
 import {PasteCmd} from '../commands/paste-cmd.js';
 import {ScribbleVertexManip} from '../manipulators/scribble-vertex-manip.js';
