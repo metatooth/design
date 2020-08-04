@@ -28,6 +28,7 @@
     "@fortawesome/fontawesome-svg-core": "^1.2.28",
     "@fortawesome/free-solid-svg-icons": "^5.13.0",
     "@fortawesome/vue-fontawesome": "^0.1.9",
+    "@seregpie/three.text-sprite": "^2.0.0",
     "aws-sdk": "^2.699.0",
     "axios": "^0.19.2",
     "blueimp-md5": "^2.16.0",
@@ -36,6 +37,9 @@
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "fs": "0.0.1-security",
+    "node-sass": "^4.14.1",
+    "sass": "^1.26.10",
+    "sass-loader": "^9.0.2",
     "three": "^0.116.1",
     "vue": "^2.6.11"
   }

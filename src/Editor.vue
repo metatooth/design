@@ -8,19 +8,30 @@
           <img src="./assets/logo.png" alt="Metatooth">
         </a>
       </div>
-      <div class="navbar-menu">
+      <div class="navbar-menu" v-if=assetUrl>
         <div class="navbar-start">
+          <user-control
+            v-for="control in controls"
+            v-bind:key="control.id"
+            v-bind:keyLabel="control.id"
+            v-bind:keyCode="control.id"
+            v-bind:label="control.label"
+            v-bind:icon="control.icon"
+            v-bind:active="control.active">
+          </user-control>
         </div>
         <div class="navbar-end">
-          <div class="navbar-item" v-if=assetUrl>
-            <a class="button"  v-bind:href=assetUrl>
-              <font-awesome-icon icon="download" />
+          <div class="navbar-item">
+            <a class="button" v-bind:href=assetUrl download>
+              <span class="icon">
+                <font-awesome-icon icon="download"/>
+              </span>
             </a>
           </div>
         </div>
       </div>
     </nav>
-    <Viewer v-bind:component='component' v-bind:tool='tool' />
+    <Viewer v-bind:component='component' v-bind:tool='tool' ref="viewer"/>
   </div>
 </template>
 
@@ -50,20 +61,20 @@
 import {Vector3} from 'three';
 
 import {ComponentNameVar} from './component-name-var.js';
-import {DrawTool} from './tools/draw-tool.js';
 import {DijkstraCmd} from './commands/dijkstra-cmd.js';
-import {MarkTool} from './tools/mark-tool.js';
+import {MeasureTool} from './tools/measure-tool.js';
 import {ModifiedStatusVar} from './modified-status-var.js';
 import {RedoCmd} from './commands/redo-cmd.js';
 import {SaveCmd} from './commands/save-cmd.js';
-import {SelectTool} from './tools/select-tool.js';
 import {UndoCmd} from './commands/undo-cmd.js';
 
+import UserControl from './UserControl.vue';
 import Viewer from './Viewer.vue';
 
 export default {
   name: 'editor',
   components: {
+    UserControl,
     Viewer,
   },
   props: {
@@ -73,18 +84,23 @@ export default {
     return {
       assetUrl: null,
       component: null,
-      modes: ['view', 'mark', 'draw', 'select'],
-      mode: 'view',
       modified: null,
       name: null,
       tool: null,
+      controls: [
+        {id: 'v', tool: null,
+          label: 'view', icon: 'glasses', cursor: 'default',
+          active: true},
+        {id: 'm', tool: new MeasureTool,
+          label: 'measure', icon: 'ruler', cursor: 'crosshair',
+          active: false},
+      ],
     };
   },
   watch: {
     uri: function( newVal, oldVal ) {
-      this.unidraw().catalog.retrieve(newVal)
+      this.$parent.catalog.retrieve(newVal)
           .then((response) => {
-            console.log(response);
             this.component = response;
             this.name = new ComponentNameVar(this.component,
                 this.$parent.catalog);
@@ -95,30 +111,30 @@ export default {
           });
     },
     component: function( newVal, oldVal ) {
-      if (newVal) {
-        document.body.style.cursor = 'default';
-      }
-    },
-    mode: function( newVal, oldVal ) {
-      if ( this.mode == this.modes[0] ) {
-        this.tool = null;
-        document.body.style.cursor = 'default';
-      } else if ( this.mode == this.modes[1] ) {
-        this.tool = new MarkTool;
-        document.body.style.cursor = 'crosshair';
-      } else if ( this.mode == this.modes[2] ) {
-        this.tool = new DrawTool;
-        document.body.style.cursor = 'crosshair';
-      } else if ( this.mode == this.modes[3] ) {
-        this.tool = new SelectTool;
-        document.body.style.cursor = 'crosshair';
-      }
+      document.body.style.cursor = 'default';
     },
   },
   methods: {
+    activate: function(key) {
+      this.tool = null;
+      for (let i = 0, l = this.controls.length; i < l; i++) {
+        this.controls[i].active = false;
+        if (key === this.controls[i].id) {
+          document.body.style.cursor = this.controls[i].cursor;
+          this.tool = this.controls[i].tool;
+          this.controls[i].active = true;
+        }
+      }
+    },
     key: function( event ) {
-      console.log( event.key, event.keyCode );
       if (event.type == 'keydown') {
+        for (let i = 0, l = this.controls.length; i < l; i++) {
+          if (event.key === this.controls[i].id) {
+            this.activate(event.key);
+            return;
+          }
+        }
+
         if ( event.keyCode == 32 ) {
           // SPACE
           console.log(this.component);
@@ -157,21 +173,7 @@ export default {
           // Ctrl+Y or F4
           const redo = new RedoCmd(this);
           redo.execute();
-        } else if ( event.keyCode == 86 ) {
-          // V - View
-          this.mode = this.modes[0];
-        } else if ( event.keyCode == 77 ) {
-          // M - Mark
-          this.mode = this.modes[1];
-        } else if ( event.keyCode == 68 ) {
-          // D - Draw
-          this.mode = this.modes[2];
-        } else if ( event.keyCode == 83 ) {
-          // S - Select
-          this.mode = this.modes[3];
         }
-      } else if ( event.type == 'keyup' ) {
-        this.mode = this.modes[0];
       }
     },
     unidraw: function() {

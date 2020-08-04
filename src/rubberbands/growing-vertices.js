@@ -89,7 +89,20 @@ GrowingVertices.prototype = Object.assign( Object.create(
    */
   check: function() {
     if (this.count + 1 >= this.max) {
-      console.log('Buffer Overflow!');
+      this.max *= 2;
+
+      const positions = new Float32Array( this.max * 3);
+      for (let i = 0, l = this.geometry.attributes.position.array.length;
+        i < l;
+        i++) {
+        positions[i] = this.geometry.attributes.position.array[i];
+      }
+
+      this.geometry.setAttribute( 'position',
+          new BufferAttribute( positions, 3 ) );
+      this.geometry.setDrawRange( 0, this.count );
+
+      this.geometry.attributes.position.needsUpdate = true;
     }
   },
 

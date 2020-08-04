@@ -106,7 +106,7 @@ export default {
     handle: function( event ) {
       if (this.tool && this.manipulator) {
         if (this.manipulator.manipulating( event )) {
-          // no op
+          console.log('// no op');
         } else {
           this.manipulator.effect( event );
 
@@ -212,9 +212,7 @@ export default {
     mesh: function() {
       if (this.index == null) {
         this.index = 0;
-        console.log(this.component);
         while (this.component.children[this.index]) {
-          console.log(this.component.children[this.index].type);
           if (this.component.children[this.index].type == 'Mesh') {
             break;
           }

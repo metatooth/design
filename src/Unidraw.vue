@@ -139,7 +139,18 @@ export default {
 };
 </script>
 
-<style>
+<style lang="scss">
+$pink: #ff33bb;
+$cyan: #00bbee;
+$green: #00dd77;
+$orange: #ff7700;
+$white: #fdfdfd;
+$jet: #2d2d2d;
+
+$primary: $green;
+
+@import 'bulma';
+
 #app {
     background-color: #2d2d2d;
 }

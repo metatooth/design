@@ -2,13 +2,17 @@ import Vue from 'vue';
 
 import Unidraw from './Unidraw.vue';
 
-import './../node_modules/bulma/css/bulma.css';
-
 import {library} from '@fortawesome/fontawesome-svg-core';
 import {faDownload} from '@fortawesome/free-solid-svg-icons';
+import {faGlasses} from '@fortawesome/free-solid-svg-icons';
+import {faPenSquare} from '@fortawesome/free-solid-svg-icons';
+import {faRuler} from '@fortawesome/free-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/vue-fontawesome';
 
 library.add(faDownload);
+library.add(faGlasses);
+library.add(faPenSquare);
+library.add(faRuler);
 
 Vue.component('font-awesome-icon', FontAwesomeIcon);
 
