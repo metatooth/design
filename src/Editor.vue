@@ -1,5 +1,5 @@
 <template>
-  <div id="editor" @keydown="key($event)" @keyup="key($event)">
+  <div class="editor" @keydown="key($event)" @keyup="key($event)">
     <nav class="navbar is-fixed-top is-transparent"
          role="navigation"
          aria-label="main navigation">
@@ -97,13 +97,18 @@ export default {
       ],
     };
   },
+  computed: {
+    unidraw: function() {
+      return this.$parent;
+    },
+  },
   watch: {
     uri: function( newVal, oldVal ) {
-      this.$parent.catalog.retrieve(newVal)
+      this.unidraw.catalog.retrieve(newVal)
           .then((response) => {
             this.component = response;
             this.name = new ComponentNameVar(this.component,
-                this.$parent.catalog);
+                this.unidraw.catalog);
             this.modified = new ModifiedStatusVar(this.component);
             if (this.component.children[0].type === 'Mesh') {
               this.assetUrl = this.component.children[0].sourceUrl;
@@ -175,9 +180,6 @@ export default {
           redo.execute();
         }
       }
-    },
-    unidraw: function() {
-      return this.$parent;
     },
   },
 };

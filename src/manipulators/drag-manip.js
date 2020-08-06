@@ -42,8 +42,6 @@ function DragManip( viewer, rubberband, tool ) {
   this.label = null;
   this.mouse = new Vector3;
   this.dimension = 25;
-  this.banner = 50;
-  this.epsilon = 1e-02;
 }
 
 DragManip.prototype = Object.assign( Object.create( Manipulator.prototype ), {
@@ -57,8 +55,7 @@ DragManip.prototype = Object.assign( Object.create( Manipulator.prototype ), {
    */
   unproject: function( event ) {
     this.mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-    this.mouse.y = - ( ( event.clientY - this.banner ) /
-window.innerHeight ) * 2 + 1;
+    this.mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
     this.mouse.z = -1;
 
     this.mouse.unproject( this.viewer.camera );
@@ -67,6 +64,7 @@ window.innerHeight ) * 2 + 1;
 
     if (!this.label) {
       this.label = document.createElement('div');
+      this.label.style.pointerEvents = 'none';
       this.label.style.position = 'absolute';
       this.label.style.margin = '0px';
       this.label.style.backgroundColor = '#fdfdfd';
@@ -78,21 +76,17 @@ window.innerHeight ) * 2 + 1;
       document.body.appendChild(this.label);
     }
 
-    const dist = this.rubberband.distance();
-    if (Math.abs(dist) > this.epsilon) {
-      this.label.innerHTML = dist.toFixed(1);
+    this.label.innerHTML = this.rubberband.distance().toFixed(1);
 
-      const mid = this.rubberband.midpoint();
+    const mid = this.rubberband.midpoint();
 
-      mid.project( this.viewer.camera );
+    mid.project( this.viewer.camera );
 
-      const x = window.innerWidth*((mid.x + 1)/2) - (this.label.offsetWidth/2.);
-      const y = window.innerHeight*((-mid.y + 1)/2) + this.banner -
-        (this.label.offsetHeight/2.);
+    const x = window.innerWidth*((mid.x+1)/2) - (this.label.offsetWidth/2.);
+    const y = window.innerHeight*((-mid.y+1)/2) + (this.label.offsetHeight/2.);
 
-      this.label.style.top = y + 'px';
-      this.label.style.left = x + 'px';
-    }
+    this.label.style.top = y + 'px';
+    this.label.style.left = x + 'px';
   },
 
   /**
