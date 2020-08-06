@@ -1,8 +1,10 @@
 <template>
-<div id="container"
+<div class="viewer"
      @mousemove="handle($event)"
      @mousedown="handle($event)"
-     @mouseup="handle($event)" />
+     @mouseup="handle($event)">
+  <canvas ref="canvas"></canvas>
+</div>
 </template>
 
 <script>
@@ -84,11 +86,17 @@ export default {
       pink: 0xff33bb,
       primary: 0x00bbee,
       renderer: new WebGLRenderer,
+      resized: false,
       scene: new Scene,
       secondary: '#ff33bb',
       threshold: 5,
       white: 0xffffff,
     };
+  },
+  computed: {
+    editor: function() {
+      return this.$parent;
+    },
   },
   mounted() {
     this.init();
@@ -96,17 +104,15 @@ export default {
   },
   methods: {
     animate: function() {
-      requestAnimationFrame( this.animate );
+      if (this.resized) this.resize();
       this.update();
       this.render();
-    },
-    editor: function() {
-      return this.$parent;
+      requestAnimationFrame( this.animate );
     },
     handle: function( event ) {
       if (this.tool && this.manipulator) {
         if (this.manipulator.manipulating( event )) {
-          // no op
+          console.log('// no op');
         } else {
           this.manipulator.effect( event );
 
@@ -129,7 +135,7 @@ export default {
       }
     },
     init: function() {
-      // initialize order is important
+      // initialization order is important
 
       this.aspect = window.innerWidth / window.innerHeight;
 
@@ -141,7 +147,7 @@ export default {
 
       this.initControls();
 
-      window.addEventListener( 'resize', this.resize, false );
+      window.addEventListener( 'resize', this.isResized, false );
     },
     initCamera: function() {
       this.camera = new OrthographicCamera( this.frustum * this.aspect / -2,
@@ -185,12 +191,12 @@ export default {
       this.scene.add( back );
     },
     initRenderer: function() {
-      this.renderer = new WebGLRenderer();
+      this.renderer = new WebGLRenderer({canvas: this.$refs.canvas});
       this.renderer.setPixelRatio( window.devicePixelRatio );
-      this.renderer.setSize( window.innerWidth, window.innerHeight );
       this.renderer.setClearColor( this.black );
-
-      container.appendChild( this.renderer.domElement );
+    },
+    isResized: function() {
+      this.resized = true;
     },
     luminance: function(hex, lum) {
       hex = String(hex).replace(/[^0-9a-f]/gi, '');
@@ -212,9 +218,7 @@ export default {
     mesh: function() {
       if (this.index == null) {
         this.index = 0;
-        console.log(this.component);
         while (this.component.children[this.index]) {
-          console.log(this.component.children[this.index].type);
           if (this.component.children[this.index].type == 'Mesh') {
             break;
           }
@@ -224,18 +228,24 @@ export default {
       return this.component.children[this.index];
     },
     render: function() {
+      this.resize();
       this.renderer.render( this.scene, this.camera );
     },
     resize: function() {
-      this.aspect = window.innerWidth / window.innerHeight;
+      this.resized = false;
+
+      const width = this.$refs.canvas.clientWidth;
+      const height = this.$refs.canvas.clientHeight;
+
+      this.renderer.setSize( width, height, false );
+
+      this.aspect = width / height;
 
       this.camera.left = - this.frustum * this.aspect / 2;
       this.camera.right = this.frustum * this.aspect / 2;
       this.camera.top = this.frustum / 2;
       this.camera.bottom = this.frustum / -2;
       this.camera.updateProjectionMatrix();
-
-      this.renderer.setSize( window.innerWidth, window.innerHeight );
     },
     update: function() {
       this.controls.update();
@@ -245,8 +255,4 @@ export default {
 </script>
 
 <style>
-  canvas {
-    width: 95%;
-    height: 95%;
-  }
 </style>

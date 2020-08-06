@@ -63,31 +63,21 @@ Rubberband.prototype = Object.assign( Object.create( Line.prototype ), {
   isRubberband: true,
 
   /**
-   *  Gets a set of points, sampled at epsilon.
-   * @return {Float32Array}
+   * Returns distance between tracked points on screen.
+* @return {Float32}
    */
-  points: function() {
-    const dx = (this.tracked.x - this.off.x) * this.epsilon;
-    const dy = (this.tracked.y - this.off.y) * this.epsilon;
-    const dz = (this.tracked.z - this.off.z) * this.epsilon;
+  distance: function() {
+    return this.tracked.distanceTo(this.off);
+  },
 
-    const totalDist = this.tracked.distanceTo(this.off);
-
-    const start = this.tracked.clone();
-
-    const points = new Float32Array(totalDist / this.epsilon * 3 + 1);
-
-    console.log(totalDist);
-    console.log(this.epsilon);
-
-    console.log(totalDist / this.epsilon);
-
-    for (let i = 0, l = totalDist / this.epsilon; i < l; i++) {
-      points[i].x = start + dx * i;
-      points[i].y = start + dy * i;
-      points[i].z = start + dz * i;
-    }
-    return points;
+  /**
+   * Returns mid-point between tracked points on screen.
+   * @return {Vector3}
+   */
+  midpoint: function() {
+    return new Vector3((this.off.x + this.tracked.x) / 2.0,
+        (this.off.y + this.tracked.y) / 2.0,
+        (this.off.z + this.tracked.z) / 2.0);
   },
 
   /**
@@ -108,15 +98,6 @@ Rubberband.prototype = Object.assign( Object.create( Line.prototype ), {
 
     if (this.off.distanceTo(this.tracked) > this.epsilon) {
       const positions = this.geometry.attributes.position.array;
-
-      const dx = this.tracked.x - this.off.x;
-      const dy = this.tracked.y - this.off.y;
-      const dz = this.tracked.z - this.off.z;
-
-      const step = new Vector3(dx, dy, dz);
-
-      console.log(step);
-      console.log(this.epsilon * step);
 
       positions[0] = this.off.x;
       positions[1] = this.off.y;

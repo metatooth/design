@@ -39,7 +39,9 @@ function DragManip( viewer, rubberband, tool ) {
   this.rubberband = rubberband;
   this.tool = tool;
 
+  this.label = null;
   this.mouse = new Vector3;
+  this.dimension = 25;
 }
 
 DragManip.prototype = Object.assign( Object.create( Manipulator.prototype ), {
@@ -59,6 +61,32 @@ DragManip.prototype = Object.assign( Object.create( Manipulator.prototype ), {
     this.mouse.unproject( this.viewer.camera );
 
     this.rubberband.track( this.mouse );
+
+    if (!this.label) {
+      this.label = document.createElement('div');
+      this.label.style.pointerEvents = 'none';
+      this.label.style.position = 'absolute';
+      this.label.style.margin = '0px';
+      this.label.style.backgroundColor = '#fdfdfd';
+      this.label.style.padding = '0px 5px 0px';
+      this.label.style.borderStyle = 'dotted';
+      this.label.style.borderWidth = '3px';
+      this.label.style.borderColor = '#ff7700';
+
+      document.body.appendChild(this.label);
+    }
+
+    this.label.innerHTML = this.rubberband.distance().toFixed(1);
+
+    const mid = this.rubberband.midpoint();
+
+    mid.project( this.viewer.camera );
+
+    const x = window.innerWidth*((mid.x+1)/2) - (this.label.offsetWidth/2.);
+    const y = window.innerHeight*((-mid.y+1)/2) + (this.label.offsetHeight/2.);
+
+    this.label.style.top = y + 'px';
+    this.label.style.left = x + 'px';
   },
 
   /**
@@ -80,7 +108,7 @@ DragManip.prototype = Object.assign( Object.create( Manipulator.prototype ), {
   manipulating: function( event ) {
     if ( event.type == 'mousemove' ) {
       this.unproject( event );
-    } else if ( event.type == 'mouseup' ) {
+    } else if (event.type == 'mouseup' ) {
       return false;
     }
     return true;
@@ -90,6 +118,8 @@ DragManip.prototype = Object.assign( Object.create( Manipulator.prototype ), {
    * @param {Event} event - mouseup to end the drag
    */
   effect: function( event ) {
+    document.body.removeChild(this.label);
+
     this.viewer.scene.remove(this.rubberband);
 
     this.viewer.controls.reset();

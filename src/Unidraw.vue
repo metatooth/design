@@ -1,6 +1,6 @@
 <template>
-<div id="unidraw">
-  <div id="meta">
+<div class="unidraw">
+  <div class="meta">
     <span id="copyright">&copy; Metatooth 2020</span>
     <br/>
     <span id="version">Version {{version}}</span>
@@ -139,13 +139,22 @@ export default {
 };
 </script>
 
-<style>
+<style lang="scss">
+$pink: #ff33bb;
+$cyan: #00bbee;
+$green: #00dd77;
+$orange: #ff7700;
+$white: #fdfdfd;
+$jet: #2d2d2d;
+
+@import 'bulma';
+
 #app {
-    background-color: #2d2d2d;
+    background-color: $jet;
 }
-#meta {
+.meta {
     background-color: transparent;
-    color: #fdfdfd;
+    color: $white;
     position: absolute;
     bottom: 0px;
     margin: 10px;
@@ -154,5 +163,17 @@ export default {
     user-select: none;
     pointer-events: none;
     z-index: 1;
+}
+.editor {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+}
+.editor>* {
+  flex: 1 1 50%;
+}
+canvas {
+ width: 100%;
+  height: 100%;
 }
 </style>

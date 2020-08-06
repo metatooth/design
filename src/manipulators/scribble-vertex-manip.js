@@ -61,27 +61,20 @@ ScribbleVertexManip.prototype = Object.assign( Object.create(
    */
   raycast: function(event) {
     this.mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-    this.mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+    this.mouse.y = - ( ( event.clientY - 50 ) / window.innerHeight ) * 2 + 1;
 
-    this.rubberband.track( this.mouse );
+    this.raycaster.setFromCamera( this.mouse, this.viewer.camera );
+    const intersects = this.raycaster.intersectObject( this.viewer.mesh() );
 
-    const points = this.rubberband.points();
-
-    console.log(points);
-
-    for (let i = 0, l = points.length; i < l; i++) {
-      this.raycaster.setFromCamera( this.mouse, this.viewer.camera );
-      const intersects = this.raycaster.intersectObject( this.viewer.mesh() );
-
-      if ( intersects.length > 0 ) {
-        console.log(intersects[0]);
-        const a = intersects[0];
-        const positions = this.viewer.mesh().geometry.getAttribute('position');
-        this.rubberband.addVertex(new Vector3(positions.array[3*a],
-            positions.array[3*a+1],
-            positions.array[3*a+2]));
-      }
+    if ( intersects.length > 0 ) {
+      this.rubberband.addVertex( intersects[0].point.x,
+          intersects[0].point.y,
+          intersects[0].point.z );
     }
+
+    const p = new Vector3( this.mouse.x, this.mouse.y, -1 );
+    p.unproject( this.viewer.camera );
+    this.rubberband.track( p );
   },
 
   /**
@@ -108,6 +101,7 @@ ScribbleVertexManip.prototype = Object.assign( Object.create(
         this.first = false;
       }
     } else if ( event.type == 'mouseup' ) {
+      this.viewer.scene.remove(this.rubberband);
       return false;
     }
     return true;
