@@ -1,38 +1,43 @@
 <template>
-  <div class="editor" @keydown="key($event)" @keyup="key($event)">
-    <nav class="navbar is-fixed-top is-transparent"
-         role="navigation"
-         aria-label="main navigation">
-      <div class="navbar-brand">
-        <a class="navbar-item" href="https://metatooth.com" target="_blank">
-          <img src="./assets/logo.png" alt="Metatooth">
+<div @keydown="key($event)" @keyup="key($event)">
+  <Viewer v-bind:component='component' v-bind:tool='tool' ref="viewer"/>
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <div class="navbar-item">
+        <a href="https://metatooth.com" target="_blank">
+          <img src="./assets/logo.png" width="30" alt="Metatooth">
         </a>
       </div>
-      <div class="navbar-menu" v-if=assetUrl>
-        <div class="navbar-start">
-          <user-control
-            v-for="control in controls"
-            v-bind:key="control.id"
-            v-bind:keyLabel="control.id"
-            v-bind:keyCode="control.id"
-            v-bind:label="control.label"
-            v-bind:icon="control.icon"
-            v-bind:active="control.active">
-          </user-control>
-        </div>
-        <div class="navbar-end">
-          <div class="navbar-item">
-            <a class="button" v-bind:href=assetUrl download>
-              <span class="icon">
-                <font-awesome-icon icon="download"/>
-              </span>
-            </a>
-          </div>
+    </div>
+    <div class="navbar-menu">
+      <div class="navbar-start">
+        <user-control
+          v-for="control in controls"
+          v-bind:key="control.id"
+          v-bind:keyLabel="control.id"
+          v-bind:keyCode="control.id"
+          v-bind:label="control.label"
+          v-bind:icon="control.icon"
+          v-bind:active="control.active">
+        </user-control>
+      </div>
+      <div class="navbar-end">
+        <div class="navbar-item">
+          <a class="button disabled" v-bind:href=assetUrl download>
+            <span class="icon">
+              <font-awesome-icon icon="download"/>
+            </span>
+          </a>
         </div>
       </div>
-    </nav>
-    <Viewer v-bind:component='component' v-bind:tool='tool' ref="viewer"/>
+    </div>
+  </nav>
+  <div class="meta">
+    <span>&copy; Metatooth 2020</span><br/>
+    <span>Version {{version}}</span><br/>
+    <span>Commit {{commit}}</span><br/>
   </div>
+</div>
 </template>
 
 <script>
@@ -53,7 +58,7 @@
  * INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS.
  * IN NO EVENT SHALL STANFORD BE LIABLE FOR ANY SPECIAL, INDIRECT OR
  * CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE,
- * DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+    * DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
  * OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION
  * WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
@@ -62,11 +67,11 @@ import {Vector3} from 'three';
 
 import {ComponentNameVar} from './component-name-var.js';
 import {DijkstraCmd} from './commands/dijkstra-cmd.js';
-import {MeasureTool} from './tools/measure-tool.js';
 import {ModifiedStatusVar} from './modified-status-var.js';
 import {RedoCmd} from './commands/redo-cmd.js';
 import {SaveCmd} from './commands/save-cmd.js';
 import {UndoCmd} from './commands/undo-cmd.js';
+import {MeasureTool} from './tools/measure-tool.js';
 
 import UserControl from './UserControl.vue';
 import Viewer from './Viewer.vue';
@@ -79,14 +84,13 @@ export default {
   },
   props: {
     uri: String,
+    version: String,
+    commit: String,
   },
   data: function() {
     return {
       assetUrl: null,
       component: null,
-      modified: null,
-      name: null,
-      tool: null,
       controls: [
         {id: 'v', tool: null,
           label: 'view', icon: 'glasses', cursor: 'default',
@@ -95,6 +99,9 @@ export default {
           label: 'measure', icon: 'ruler', cursor: 'crosshair',
           active: false},
       ],
+      modified: null,
+      name: null,
+      tool: null,
     };
   },
   computed: {
@@ -185,6 +192,24 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
+.navbar {
+  background-color: #fefefe;
+  position: absolute;
+  top: 0px;
+  width: 100%;
+}
+.meta {
+  background-color: transparent;
+  color: #fefefe;
+  position: absolute;
+  bottom: 0px;
+  margin: 10px;
+  width: calc(100vw - 40px);
+  text-align: right;
+  user-select: none;
+  pointer-events: none;
+  z-index: 1;
+}
 </style>
 

@@ -56,6 +56,7 @@ Object.assign( Tool.prototype, {
   component: function() {
     return null;
   },
+
 });
 
 export {Tool};

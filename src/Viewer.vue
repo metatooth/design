@@ -1,10 +1,9 @@
 <template>
-<div class="viewer"
-     @mousemove="handle($event)"
-     @mousedown="handle($event)"
-     @mouseup="handle($event)">
-  <canvas ref="canvas"></canvas>
-</div>
+<canvas ref="canvas"
+        @mousemove="handle($event)"
+        @mousedown="handle($event)"
+        @mouseup="handle($event)">
+</canvas>
 </template>
 
 <script>
@@ -35,6 +34,7 @@ import {DirectionalLight} from 'three';
 import {OrthographicCamera} from 'three';
 import {Scene} from 'three';
 import {WebGLRenderer} from 'three';
+import {Vector3} from 'three';
 
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls';
 
@@ -68,7 +68,6 @@ export default {
   },
   data: function() {
     return {
-      aspect: 0.0,
       black: 0x2d2d2d,
       camera: null,
       controls: null,
@@ -86,7 +85,7 @@ export default {
       pink: 0xff33bb,
       primary: 0x00bbee,
       renderer: new WebGLRenderer,
-      resized: false,
+      resized: true,
       scene: new Scene,
       secondary: '#ff33bb',
       threshold: 5,
@@ -112,7 +111,7 @@ export default {
     handle: function( event ) {
       if (this.tool && this.manipulator) {
         if (this.manipulator.manipulating( event )) {
-          console.log('// no op');
+          // no op
         } else {
           this.manipulator.effect( event );
 
@@ -137,8 +136,6 @@ export default {
     init: function() {
       // initialization order is important
 
-      this.aspect = window.innerWidth / window.innerHeight;
-
       this.initCamera();
 
       this.initLights();
@@ -150,10 +147,13 @@ export default {
       window.addEventListener( 'resize', this.isResized, false );
     },
     initCamera: function() {
-      this.camera = new OrthographicCamera( this.frustum * this.aspect / -2,
-          this.frustum * this.aspect / 2,
-          this.frustum / 2,
-          this.frustum / -2, 1, 1000 );
+      const width = this.$refs.canvas.clientWidth;
+      const height = this.$refs.canvas.clientHeight;
+
+      this.camera = new OrthographicCamera( width / -2,
+          width / 2,
+          height / 2,
+          height / -2, 1, 1000 );
       this.camera.lookAt( 0, 0, 0 );
       this.camera.zoom = 10;
       this.camera.position.set( 0, 0, 10 );
@@ -162,8 +162,7 @@ export default {
       this.scene.add( new CameraHelper( this.camera ) );
     },
     initControls: function() {
-      this.controls = new OrbitControls( this.camera,
-          this.renderer.domElement );
+      this.controls = new OrbitControls(this.camera, this.renderer.domElement);
 
       this.controls.enablePan = false;
       this.controls.enableDamping = true;
@@ -228,24 +227,39 @@ export default {
       return this.component.children[this.index];
     },
     render: function() {
-      this.resize();
       this.renderer.render( this.scene, this.camera );
     },
     resize: function() {
       this.resized = false;
 
+      const canvas = this.renderer.domElement;
+
       const width = this.$refs.canvas.clientWidth;
       const height = this.$refs.canvas.clientHeight;
 
-      this.renderer.setSize( width, height, false );
+      if (canvas.width !== width || canvas.height !== height) {
+        canvas.width = width;
+        canvas.height = height;
 
-      this.aspect = width / height;
+        this.renderer.setSize(width, height, false);
 
-      this.camera.left = - this.frustum * this.aspect / 2;
-      this.camera.right = this.frustum * this.aspect / 2;
-      this.camera.top = this.frustum / 2;
-      this.camera.bottom = this.frustum / -2;
-      this.camera.updateProjectionMatrix();
+        this.camera.left = width / -2;
+        this.camera.right = width / 2;
+        this.camera.top = height / 2;
+        this.camera.bottom = height / -2;
+        this.camera.updateProjectionMatrix();
+      }
+    },
+    unproject: function( x, y ) {
+      const mouse = new Vector3;
+
+      mouse.x = ( x / this.$refs.canvas.clientWidth ) * 2 - 1;
+      mouse.y = - (y / this.$refs.canvas.clientHeight ) * 2 + 1;
+      mouse.z = -1;
+
+      mouse.unproject( this.camera );
+
+      return mouse;
     },
     update: function() {
       this.controls.update();
@@ -255,4 +269,9 @@ export default {
 </script>
 
 <style>
+canvas {
+display: block;
+height: 100vh;
+width: 100vw;
+}
 </style>

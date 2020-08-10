@@ -76,11 +76,13 @@ DragManip.prototype = Object.assign( Object.create( Manipulator.prototype ), {
       document.body.appendChild(this.label);
     }
 
-    this.label.innerHTML = this.rubberband.distance().toFixed(1);
+    const curr = this.rubberband.current();
 
-    const mid = this.rubberband.midpoint();
+    this.label.innerHTML = curr[0].distanceTo(curr[1]).toFixed(1);
 
-    mid.project( this.viewer.camera );
+    const mid = this.rubberband.midpoint(curr[0], curr[1]);
+
+    mid.unproject( this.viewer.camera );
 
     const x = window.innerWidth*((mid.x+1)/2) - (this.label.offsetWidth/2.);
     const y = window.innerHeight*((-mid.y+1)/2) + (this.label.offsetHeight/2.);
@@ -96,7 +98,9 @@ DragManip.prototype = Object.assign( Object.create( Manipulator.prototype ), {
     this.viewer.controls.enabled = false;
     this.viewer.controls.saveState();
 
-    this.unproject(event);
+    const p = this.viewer.unproject( event.clientX, event.clientY );
+    this.rubberband.track( p );
+    console.log('grasp p', p.x, p.y, p.z);
 
     this.viewer.scene.add(this.rubberband);
   },
@@ -107,7 +111,9 @@ DragManip.prototype = Object.assign( Object.create( Manipulator.prototype ), {
    */
   manipulating: function( event ) {
     if ( event.type == 'mousemove' ) {
-      this.unproject( event );
+      const p = this.viewer.unproject( event.clientX, event.clientY );
+      console.log('manipulating p', p.x, p.y, p.z);
+      this.rubberband.track( p );
     } else if (event.type == 'mouseup' ) {
       return false;
     }
@@ -118,8 +124,6 @@ DragManip.prototype = Object.assign( Object.create( Manipulator.prototype ), {
    * @param {Event} event - mouseup to end the drag
    */
   effect: function( event ) {
-    document.body.removeChild(this.label);
-
     this.viewer.scene.remove(this.rubberband);
 
     this.viewer.controls.reset();

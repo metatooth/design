@@ -1,16 +1,16 @@
 <template>
-  <div class="navbar-item">
-    <div class="button" v-bind:class="classObject" v-on:click="clicked()">
-      <span class="icon">
-        <font-awesome-icon :icon="icon" />
-      </span>
-      <span>
-        <strong>
-          <u>{{ keyCode.toUpperCase() }}</u>{{ label.substr(1) }}
-        </strong>
-      </span>
-    </div>
+<div class="navbar-item">
+  <div class="button" v-bind:class="classObject" v-on:click="clicked()">
+    <span class="icon">
+      <font-awesome-icon :icon="icon" />
+    </span>
+    <span>
+      <strong>
+        <u>{{ keyCode.toUpperCase() }}</u>{{ label.substr(1) }}
+      </strong>
+    </span>
   </div>
+</div>
 </template>
 
 <script>
@@ -53,5 +53,5 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 </style>
