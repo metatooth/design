@@ -1,5 +1,5 @@
 import {DragManip} from '../manipulators/drag-manip.js';
-import {RubberLine} from '../rubberbands/rubber-line.js';
+import {RubberRuler} from '../rubberbands/rubber-ruler.js';
 import {Tool} from './tool.js';
 
 /**
@@ -25,7 +25,7 @@ MeasureTool.prototype = Object.assign( Object.create( Tool.prototype ), {
   create: function( viewer, event ) {
     if (event.type == 'mousedown') {
       const v = viewer.unproject( event.clientX, event.clientY );
-      return new DragManip( viewer, new RubberLine(v, v), this );
+      return new DragManip( viewer, new RubberRuler(viewer, v, v), this );
     }
     return null;
   },

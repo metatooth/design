@@ -90,10 +90,6 @@ RubberLine.prototype = Object.assign( Object.create( Rubberband.prototype ), {
     } else {
       const positions = this.line.geometry.attributes.position.array;
 
-      positions[0] = curr[0].x;
-      positions[1] = curr[0].y;
-      positions[2] = curr[0].z;
-
       positions[3] = curr[1].x;
       positions[4] = curr[1].y;
       positions[5] = curr[1].z;

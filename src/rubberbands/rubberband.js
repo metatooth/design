@@ -22,7 +22,7 @@
  * OF THIS SOFTWARE.
  */
 
-import {Object3D} from 'three';
+import {Group} from 'three';
 import {Vector3} from 'three';
 
 /**
@@ -31,14 +31,14 @@ import {Vector3} from 'three';
  * @param {Vector3} offset an x, y, z offset
  */
 function Rubberband( offset ) {
-  Object3D.call(this);
+  Group.call(this);
   this.type = 'Rubberband';
 
   this.offset = (offset !== undefined) ? offset.clone() : null;
   this.tracked = null;
 }
 
-Rubberband.prototype = Object.assign( Object.create( Object3D.prototype ), {
+Rubberband.prototype = Object.assign( Object.create( Group.prototype ), {
 
   constructor: Rubberband,
 
