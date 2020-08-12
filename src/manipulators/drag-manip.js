@@ -20,8 +20,6 @@
  * WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-import {Vector3} from 'three';
-
 import {Manipulator} from './manipulator';
 
 /**
@@ -40,8 +38,6 @@ function DragManip( viewer, rubberband, tool ) {
   this.tool = tool;
 
   this.label = null;
-  this.mouse = new Vector3;
-  this.dimension = 25;
 }
 
 DragManip.prototype = Object.assign( Object.create( Manipulator.prototype ), {
@@ -80,7 +76,9 @@ DragManip.prototype = Object.assign( Object.create( Manipulator.prototype ), {
    * @param {Event} event - mouseup to end the drag
    */
   effect: function( event ) {
-    document.body.removeChild(this.rubberband.label);
+    if (this.rubberband.label) {
+      document.body.removeChild(this.rubberband.label);
+    }
     this.viewer.scene.remove(this.rubberband);
 
     this.viewer.controls.reset();

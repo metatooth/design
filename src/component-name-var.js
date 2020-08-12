@@ -37,7 +37,6 @@ function ComponentNameVar(component, catalog) {
 
   if (this.component) {
     const name = this.catalog.name(this.component);
-    console.log('set name ~> ', name);
     this.name = name;
   }
 }
@@ -53,7 +52,6 @@ ComponentNameVar.prototpye =
           this.name = null;
         } else {
           const name = this.catalog.name(this.component);
-          console.log('updateName ~> ', name);
           this.name = name;
         }
       },

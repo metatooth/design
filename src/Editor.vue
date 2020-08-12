@@ -67,11 +67,13 @@ import {Vector3} from 'three';
 
 import {ComponentNameVar} from './component-name-var.js';
 import {DijkstraCmd} from './commands/dijkstra-cmd.js';
+import {DrawTool} from './tools/draw-tool.js';
+import {MeasureTool} from './tools/measure-tool.js';
 import {ModifiedStatusVar} from './modified-status-var.js';
+import {PickTool} from './tools/pick-tool.js';
 import {RedoCmd} from './commands/redo-cmd.js';
 import {SaveCmd} from './commands/save-cmd.js';
 import {UndoCmd} from './commands/undo-cmd.js';
-import {MeasureTool} from './tools/measure-tool.js';
 
 import UserControl from './UserControl.vue';
 import Viewer from './Viewer.vue';
@@ -97,6 +99,12 @@ export default {
           active: true},
         {id: 'm', tool: new MeasureTool,
           label: 'measure', icon: 'ruler', cursor: 'crosshair',
+          active: false},
+        {id: 'p', tool: new PickTool,
+          label: 'pick', icon: 'crosshairs', cursor: 'crosshair',
+          active: false},
+        {id: 'd', tool: new DrawTool,
+          label: 'draw', icon: 'pen-square', cursor: 'crosshair',
           active: false},
       ],
       modified: null,

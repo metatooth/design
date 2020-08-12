@@ -44,9 +44,16 @@ function RubberLine( fixed, moving, off ) {
   this.moving = (moving) ? moving.clone() : null;
   this.tracked = (moving) ? moving.clone() : null;
 
-  this.line = null;
-  this.color = 0xff7700;
-  this.linewidth = 3;
+  const positions = new Float32Array( 6 );
+
+  const geometry = new BufferGeometry;
+  geometry.setAttribute( 'position', new BufferAttribute( positions, 3 ) );
+  geometry.setDrawRange( 0, 0 );
+
+  const material = new LineBasicMaterial({color: 0xff7700, linewidth: 3});
+
+  this.line = new Line(geometry, material);
+  this.add(this.line);
 }
 
 RubberLine.prototype = Object.assign( Object.create( Rubberband.prototype ), {
@@ -66,36 +73,19 @@ RubberLine.prototype = Object.assign( Object.create( Rubberband.prototype ), {
   update: function() {
     const curr = this.current();
 
-    if (!this.line) {
-      const positions = new Float32Array( 6 );
+    const positions = this.line.geometry.attributes.position.array;
 
-      positions[0] = curr[0].x;
-      positions[1] = curr[0].y;
-      positions[2] = curr[0].z;
+    positions[0] = curr[0].x;
+    positions[1] = curr[0].y;
+    positions[2] = curr[0].z;
 
-      positions[3] = curr[1].x;
-      positions[4] = curr[1].y;
-      positions[5] = curr[1].z;
+    positions[3] = curr[1].x;
+    positions[4] = curr[1].y;
+    positions[5] = curr[1].z;
 
-      const geometry = new BufferGeometry;
-      geometry.setAttribute( 'position', new BufferAttribute( positions, 3 ) );
-      geometry.setDrawRange( 0, 2 );
+    this.line.geometry.setDrawRange( 0, 2 );
 
-      const material = new LineBasicMaterial({color: this.color,
-        linewidth: this.linewidth});
-
-      this.line = new Line(geometry, material);
-
-      this.add(this.line);
-    } else {
-      const positions = this.line.geometry.attributes.position.array;
-
-      positions[3] = curr[1].x;
-      positions[4] = curr[1].y;
-      positions[5] = curr[1].z;
-
-      this.line.geometry.attributes.position.needsUpdate = true;
-    }
+    this.line.geometry.attributes.position.needsUpdate = true;
   },
 
 });

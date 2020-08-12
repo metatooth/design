@@ -56,7 +56,8 @@ DrawTool.prototype = Object.assign( Object.create( Tool.prototype ), {
    */
   create: function( viewer, event ) {
     if (event.type == 'mousedown') {
-      return new ScribbleVertexManip( viewer, new GrowingVertices, this );
+      const v = viewer.unproject( event.clientX, event.clientY );
+      return new ScribbleVertexManip( viewer, new GrowingVertices(v), this );
     }
     return null;
   },
@@ -67,7 +68,8 @@ DrawTool.prototype = Object.assign( Object.create( Tool.prototype ), {
    */
   interpret: function( manipulator ) {
     if (manipulator.rubberband.count > 0) {
-      const doomed = manipulator.rubberband.geometry.attributes.position.array;
+      const doomed =
+manipulator.rubberband.points.geometry.attributes.position.array;
 
       const positions = new Float32Array( manipulator.rubberband.count );
       for (let i = 0, l = manipulator.rubberband.count; i < l; ++i) {
@@ -82,7 +84,7 @@ DrawTool.prototype = Object.assign( Object.create( Tool.prototype ), {
 
       const line = new Line( geometry, material );
 
-      return new PasteCmd( manipulator.viewer.editor(), [new Component(line)] );
+      return new PasteCmd( manipulator.viewer.editor, [new Component(line)] );
     }
     return null;
   },

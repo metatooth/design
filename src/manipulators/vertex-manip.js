@@ -46,36 +46,38 @@ VertexManip.prototype = Object.assign( Object.create( DragManip.prototype ), {
   isVertexManip: true,
 
   /**
+   * @param {Event} event - the mousedown event to start the drag
+   */
+  grasp: function( event ) {
+    DragManip.prototype.grasp.call(this, event);
+
+    const p1 = this.viewer.ndc( event.clientX, event.clientY );
+    this.raycaster.setFromCamera( p1, this.viewer.camera );
+    const intersects = this.raycaster.intersectObject( this.viewer.mesh() );
+
+    if ( intersects.length > 0 ) {
+      this.rubberband.addVertex(intersects[0].point);
+    }
+  },
+
+  /**
    * @param {Event} event - is dragging
    * @return {boolean}
    */
   manipulating: function( event ) {
-    this.mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-    this.mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-
     if ( event.type == 'mousemove' ) {
-      this.rubberband.track( this.mouse );
+      const p = this.viewer.unproject( event.clientX, event.clientY );
+      this.rubberband.track( p );
     } else if ( event.type == 'mousedown' ) {
-      this.raycaster.setFromCamera( this.mouse, this.viewer.camera );
+      const p = this.viewer.ndc( event.clientX, event.clientY );
+      this.raycaster.setFromCamera( p, this.viewer.camera );
       const intersects = this.raycaster.intersectObject( this.viewer.mesh() );
 
-      if ( event.button == 0 ) {
-        if ( intersects.length > 0 ) {
-          this.rubberband.addVertex(intersects[0].point);
-          this.origx = this.mouse.x;
-          this.origy = this.mouse.y;
-        }
-      } else if ( event.button == 1 ) {
-        if ( intersects.length > 0 ) {
-          this.rubberband.addVertex(intersects[0].point);
-        }
-        return false;
-      } else if ( event.button == 2 ) {
-        this.rubberband.removeVertex();
-        if (this.rubberband.count() == 0) {
-          return false;
-        }
+      if ( intersects.length > 0 ) {
+        this.rubberband.addVertex(intersects[0].point);
       }
+    } else if ( event.type === 'mouseup' ) {
+      return false;
     }
     return true;
   },

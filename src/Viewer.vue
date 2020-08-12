@@ -34,6 +34,7 @@ import {DirectionalLight} from 'three';
 import {OrthographicCamera} from 'three';
 import {Scene} from 'three';
 import {WebGLRenderer} from 'three';
+import {Vector2} from 'three';
 import {Vector3} from 'three';
 
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls';
@@ -226,6 +227,19 @@ export default {
       }
       return this.component.children[this.index];
     },
+    /**
+     * Calculate mouse position in normalized device coordinates
+     * (-1 to +1) for both components
+     * @param {Float32} x
+     * @param {Float32} y
+     * @return {Vector2}
+     */
+    ndc: function( x, y ) {
+      const mouse = new Vector2;
+      mouse.x = ( x / window.innerWidth ) * 2 - 1;
+      mouse.y = - ( y / window.innerHeight ) * 2 + 1;
+      return mouse;
+    },
     render: function() {
       this.renderer.render( this.scene, this.camera );
     },
@@ -251,11 +265,8 @@ export default {
       }
     },
     unproject: function( x, y ) {
-      const mouse = new Vector3;
-
-      mouse.x = ( x / this.$refs.canvas.clientWidth ) * 2 - 1;
-      mouse.y = - (y / this.$refs.canvas.clientHeight ) * 2 + 1;
-      mouse.z = -1;
+      const ndc = this.ndc( x, y );
+      const mouse = new Vector3(ndc.x, ndc.y, -1);
 
       mouse.unproject( this.camera );
 

@@ -61,7 +61,7 @@ ScribbleVertexManip.prototype = Object.assign( Object.create(
    */
   raycast: function(event) {
     this.mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-    this.mouse.y = - ( ( event.clientY - 50 ) / window.innerHeight ) * 2 + 1;
+    this.mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
 
     this.raycaster.setFromCamera( this.mouse, this.viewer.camera );
     const intersects = this.raycaster.intersectObject( this.viewer.mesh() );
