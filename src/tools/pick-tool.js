@@ -36,7 +36,7 @@ PickTool.prototype = Object.assign( Object.create( Tool.prototype ), {
    * @return {Command}
    */
   interpret: function( manipulator ) {
-    if (manipulatgor.rubberband.children.length > 0) {
+    if (manipulator.rubberband.children.length > 0) {
       const comp = new Component;
       for (let i = 0, l = manipulator.rubberband.children.length; i < l; ++i) {
         comp.add(manipulator.rubberband.children[i]);
