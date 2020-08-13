@@ -39,7 +39,6 @@ import {Vector3} from 'three';
 
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls';
 
-import {CameraHelper} from './camera-helper.js';
 import {Component} from './component.js';
 import {Tool} from './tools/tool.js';
 
@@ -159,8 +158,6 @@ export default {
       this.camera.zoom = 10;
       this.camera.position.set( 0, 0, 10 );
       this.camera.updateProjectionMatrix();
-
-      this.scene.add( new CameraHelper( this.camera ) );
     },
     initControls: function() {
       this.controls = new OrbitControls(this.camera, this.renderer.domElement);
