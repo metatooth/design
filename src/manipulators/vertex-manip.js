@@ -21,7 +21,6 @@
  */
 
 import {Raycaster} from 'three';
-import {Vector2} from 'three';
 
 import {DragManip} from './drag-manip.js';
 
@@ -37,7 +36,6 @@ function VertexManip( viewer, gv, tool ) {
   this.type = 'VertexManip';
 
   this.raycaster = new Raycaster;
-  this.mouse = new Vector2;
 }
 
 VertexManip.prototype = Object.assign( Object.create( DragManip.prototype ), {
@@ -46,17 +44,33 @@ VertexManip.prototype = Object.assign( Object.create( DragManip.prototype ), {
   isVertexManip: true,
 
   /**
+   * Cast pointer location -- typically (X, Y) of an event -- to the
+   * viewer's mesh. Returns closest intersection, if any.
+   * @param {Float32} x
+   * @param {Float32} y
+   * @return {Vector3} the closest intersection or null
+   */
+  raycast: function( x, y ) {
+    const p = this.viewer.ndc( event.clientX, event.clientY );
+    this.raycaster.setFromCamera( p, this.viewer.camera );
+    const intersects = this.raycaster.intersectObject( this.viewer.mesh() );
+
+    if ( intersects.length > 0 ) {
+      return intersects[0].point;
+    }
+
+    return null;
+  },
+
+  /**
    * @param {Event} event - the mousedown event to start the drag
    */
   grasp: function( event ) {
     DragManip.prototype.grasp.call(this, event);
 
-    const p1 = this.viewer.ndc( event.clientX, event.clientY );
-    this.raycaster.setFromCamera( p1, this.viewer.camera );
-    const intersects = this.raycaster.intersectObject( this.viewer.mesh() );
-
-    if ( intersects.length > 0 ) {
-      this.rubberband.addVertex(intersects[0].point);
+    const pt = this.raycast( event.clientX, event.clientY );
+    if ( pt ) {
+      this.rubberband.addVertex( pt );
     }
   },
 
@@ -69,12 +83,9 @@ VertexManip.prototype = Object.assign( Object.create( DragManip.prototype ), {
       const p = this.viewer.unproject( event.clientX, event.clientY );
       this.rubberband.track( p );
     } else if ( event.type == 'mousedown' ) {
-      const p = this.viewer.ndc( event.clientX, event.clientY );
-      this.raycaster.setFromCamera( p, this.viewer.camera );
-      const intersects = this.raycaster.intersectObject( this.viewer.mesh() );
-
-      if ( intersects.length > 0 ) {
-        this.rubberband.addVertex(intersects[0].point);
+      const pt = this.raycast( event.clientX, event.clientY );
+      if ( pt ) {
+        this.rubberband.addVertex( pt );
       }
     } else if ( event.type === 'mouseup' ) {
       return false;

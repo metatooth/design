@@ -38,11 +38,9 @@ function GrowingVertices(vec) {
   Rubberband.call(this, vec);
 
   this.type = 'GrowingVertices';
-  this.count = 0;
-  this.max = 500;
 
   if (vec) {
-    this.addVertex(vec);
+    this.track(vec);
   }
 }
 
@@ -61,7 +59,7 @@ GrowingVertices.prototype = Object.assign( Object.create(
    * @param {Vector3} v: the vertex to add
    */
   addVertex: function( v ) {
-    const geometry = new SphereGeometry(0.5, 32, 32);
+    const geometry = new SphereGeometry(0.3, 32, 32);
     const material = new MeshPhongMaterial({color: 0xff33bb});
     const mesh = new Mesh(geometry, material);
 
