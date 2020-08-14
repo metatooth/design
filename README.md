@@ -13,24 +13,29 @@ $ sudo apt-get update
 $ sudo apt-get install nodejs npm
 ```
 
-### Install
+### Install & Configure & Run
+
+#### api.metatooth.com
+
+An instance of https://github.com/metatooth/api needs to be available.
+
+#### the rest
 
 ```
 $ git clone https://github.com/metatooth/design.git
 $ cd design
 $ npm install
+$ echo "VUE_APP_API_URL=http://localhost:9393" >> .env
+$ echo "VUE_APP_API_KEY=169:2570ed9e29cc97fe84f642f653053c2e" >> .env
+$ echo "VUE_APP_VERSION=development" >> .env
+$ echo "VUE_APP_COMMIT=1974" >> .env
+$ echo "VUE_APP_DEFAULT_ASSET=ee98" >> .env
+$ echo "VUE_APP_DEFAULT_PLAN=9f0a" >> .env
+$ echo "VUE_APP_AWS_REGION=us-east-1" >> .env
+$ echo "VUE_APP_AWS_IDENTITY_POOL_ID=your-pool-id" >> .env
+$ echo "VUE_APP_S3_BUCKET_NAME=your-bucket-name" >> .env
 $ npm run serve
 ```
-
-### Test
-
-:TODO: 20190606 Terry: No tests!
-
-## Built With
-
-## Authors
-
-* **Terry Lorber** - *Initial work* - <terry@metatooth.com>
 
 ## License
 
