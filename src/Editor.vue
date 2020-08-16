@@ -22,6 +22,14 @@
         </user-control>
       </div>
       <div class="navbar-end">
+        <user-control
+          v-for="command in commands"
+          v-bind:key="command.id"
+          v-bind:keyLabel="command.id"
+          v-bind:keyCode="command.id"
+          v-bind:label="command.label"
+          v-bind:icon="command.icon">
+        </user-control>
         <div class="navbar-item">
           <a class="button disabled" v-bind:href=assetUrl download>
             <span class="icon">
@@ -93,18 +101,22 @@ export default {
     return {
       assetUrl: null,
       component: null,
+      commands: [
+        {id: 'z', command: new UndoCmd(this), label: 'Undo', icon: 'undo'},
+        {id: 'y', command: new RedoCmd(this), label: 'Redo', icon: 'redo'},
+      ],
       controls: [
-        {id: 'v', tool: null,
-          label: 'view', icon: 'glasses', cursor: 'default',
+        {id: 'c', tool: null,
+          label: 'View', icon: 'glasses', cursor: 'default',
           active: true},
         {id: 'm', tool: new MeasureTool,
-          label: 'measure', icon: 'ruler', cursor: 'crosshair',
+          label: 'Measure', icon: 'ruler', cursor: 'crosshair',
           active: false},
         {id: 'p', tool: new PickTool,
-          label: 'pick', icon: 'crosshairs', cursor: 'crosshair',
+          label: 'Pick', icon: 'crosshairs', cursor: 'crosshair',
           active: false},
         {id: 'd', tool: new DrawTool,
-          label: 'draw', icon: 'pen-square', cursor: 'crosshair',
+          label: 'Draw', icon: 'pen-square', cursor: 'crosshair',
           active: false},
       ],
       modified: null,
@@ -136,6 +148,13 @@ export default {
   },
   methods: {
     activate: function(key) {
+      for (let i = 0, l = this.commands.length; i < l; i++) {
+        if (key === this.commands[i].id) {
+          this.commands[i].command.execute();
+          return;
+        }
+      }
+
       this.tool = null;
       for (let i = 0, l = this.controls.length; i < l; i++) {
         this.controls[i].active = false;
@@ -151,6 +170,13 @@ export default {
         for (let i = 0, l = this.controls.length; i < l; i++) {
           if (event.key === this.controls[i].id) {
             this.activate(event.key);
+            return;
+          }
+        }
+
+        for (let i = 0, l = this.commands.length; i < l; i++) {
+          if (event.key === this.commands[i].id) {
+            this.commands[i].command.execute();
             return;
           }
         }
@@ -184,15 +210,6 @@ export default {
           event.preventDefault();
           const save = new SaveCmd(this);
           save.execute();
-        } else if ( event.ctrlKey && event.keyCode == 90 ) {
-          // Ctrl+Z
-          const undo = new UndoCmd(this);
-          undo.execute();
-        } else if ( ( event.ctrlKey && event.keyCode == 89 ) ||
-            event.keyCode == 115 ) {
-          // Ctrl+Y or F4
-          const redo = new RedoCmd(this);
-          redo.execute();
         }
       }
     },

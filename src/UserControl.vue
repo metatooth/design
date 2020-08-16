@@ -6,7 +6,7 @@
     </span>
     <span>
       <strong>
-        <u>{{ keyCode.toUpperCase() }}</u>{{ label.substr(1) }}
+        {{ label }} [{{ keyCode }}]
       </strong>
     </span>
   </div>
