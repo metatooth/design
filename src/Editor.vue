@@ -128,6 +128,9 @@ export default {
     unidraw: function() {
       return this.$parent;
     },
+    viewer: function() {
+      return this.$refs.viewer;
+    },
   },
   watch: {
     uri: function( newVal, oldVal ) {
@@ -156,6 +159,9 @@ export default {
       }
 
       this.tool = null;
+      this.viewer.scene.remove( this.viewer.temp );
+      this.viewer.temp = null;
+
       for (let i = 0, l = this.controls.length; i < l; i++) {
         this.controls[i].active = false;
         if (key === this.controls[i].id) {

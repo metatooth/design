@@ -50,12 +50,15 @@ ScribbleVertexManip.prototype = Object.assign( Object.create(
   manipulating: function( event ) {
     if ( event.type == 'mousemove' ) {
       if (!this.first) {
-        const p0 = this.raycast( event.clientX, event.clientY );
-        if ( p0 ) {
-          this.rubberband.addVertex( p0 );
-        }
         const p = this.viewer.unproject( event.clientX, event.clientY );
+
+
         this.rubberband.track( p );
+        const intersects = this.raycast( event.clientX, event.clientY );
+        if ( intersects.length > 0 ) {
+          this.rubberband.addVertex( intersects[0].point );
+          this.viewer.render();
+        }
       } else {
         this.first = false;
       }

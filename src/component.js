@@ -22,8 +22,6 @@
 
 import {Object3D} from 'three';
 
-import {DragManip} from './manipulators/drag-manip.js';
-
 /**
  * Description: Component - class of objects that are edited to
  * form domain-specific drawings. Component subjects contain structural,
@@ -66,42 +64,6 @@ Component.prototype = Object.assign( Object.create( Object3D.prototype ), {
     }
   },
 
-  /**
-   * Description: create manipulator for selected tool & event
-   * @param {Viewer} viewer
-   * @param {Event} event
-   * @param {Tool} tool
-   * @return {Manipulator}
-   */
-  createManipulator: function( viewer, event, tool ) {
-    let manipulator = null;
-
-    if (tool.constructor.name == 'ComponentTool') {
-      const x = ( event.clientX / window.innerWidth ) * 2 - 1;
-      const y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-
-      manipulator = new DragManip( viewer, new Rubberband(x, y), tool );
-    }
-
-    return manipulator;
-  },
-
-  /**
-   * Description: create a command as needed by the manipulator
-   * @param {Manipulator} manipulator
-   * @return {Command}
-   */
-  interpretManipulator: function( manipulator ) {
-    const editor = manipulator.viewer.editor();
-    const tool = manipulator.tool;
-    let command = null;
-
-    if (tool.constructor.name == 'ComponentTool') {
-      command = new PasteCmd(editor, [this.object3d.copy()]);
-    }
-
-    return command;
-  },
 
 });
 

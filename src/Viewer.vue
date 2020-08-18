@@ -88,6 +88,7 @@ export default {
       resized: true,
       scene: new Scene,
       secondary: '#ff33bb',
+      temp: null,
       threshold: 5,
       white: 0xffffff,
     };
@@ -225,7 +226,7 @@ export default {
       return this.component.children[this.index];
     },
     /**
-     * Calculate mouse position in normalized device coordinates
+     * Convert mouse position to normalized device coordinates
      * (-1 to +1) for both components
      * @param {Float32} x
      * @param {Float32} y
@@ -260,6 +261,22 @@ export default {
         this.camera.bottom = height / -2;
         this.camera.updateProjectionMatrix();
       }
+    },
+    temporary: function( obj ) {
+      this.scene.remove( this.temp );
+      this.temp = obj;
+      this.scene.add( obj );
+    },
+    topleft: function( point ) {
+      point.project( this.camera );
+
+      const height = this.$refs.canvas.clientHeight;
+      const width = this.$refs.canvas.clientWidth;
+
+      const top = height*((-point.y+1)/2);
+      const left = width*((point.x+1)/2);
+
+      return new Vector2(top, left);
     },
     unproject: function( x, y ) {
       const ndc = this.ndc( x, y );

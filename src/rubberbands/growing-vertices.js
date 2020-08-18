@@ -39,6 +39,11 @@ function GrowingVertices(vec) {
 
   this.type = 'GrowingVertices';
 
+  this.vertices = [];
+
+  this.geometry = new SphereGeometry(0.3, 8, 8);
+  this.material = new MeshPhongMaterial({color: 0xff33bb});
+
   if (vec) {
     this.track(vec);
   }
@@ -51,17 +56,9 @@ GrowingVertices.prototype = Object.assign( Object.create(
   isGrowingVertices: true,
 
   update: function() {
-    // no op
-  },
+    const mesh = new Mesh(this.geometry, this.material);
 
-  /**
-   * Description: Inserts a vertex (x, y, z) into the list at this.curPt
-   * @param {Vector3} v: the vertex to add
-   */
-  addVertex: function( v ) {
-    const geometry = new SphereGeometry(0.3, 32, 32);
-    const material = new MeshPhongMaterial({color: 0xff33bb});
-    const mesh = new Mesh(geometry, material);
+    const v = this.vertices[this.vertices.length - 1];
 
     mesh.position.x = v.x;
     mesh.position.y = v.y;
@@ -71,9 +68,18 @@ GrowingVertices.prototype = Object.assign( Object.create(
   },
 
   /**
+   * Adds a vertex to the list.
+   * @param {Vector3} v the vertex to add
+   */
+  addVertex: function( v ) {
+    this.vertices.push( v );
+  },
+
+  /**
    * Removes the last vertex from the list
    */
   removeVertex: function() {
+    this.vertices.pop();
     this.children.pop();
   },
 

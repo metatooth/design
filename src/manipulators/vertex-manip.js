@@ -53,13 +53,7 @@ VertexManip.prototype = Object.assign( Object.create( DragManip.prototype ), {
   raycast: function( x, y ) {
     const p = this.viewer.ndc( event.clientX, event.clientY );
     this.raycaster.setFromCamera( p, this.viewer.camera );
-    const intersects = this.raycaster.intersectObject( this.viewer.mesh() );
-
-    if ( intersects.length > 0 ) {
-      return intersects[0].point;
-    }
-
-    return null;
+    return this.raycaster.intersectObject( this.viewer.mesh() );
   },
 
   /**
@@ -68,9 +62,10 @@ VertexManip.prototype = Object.assign( Object.create( DragManip.prototype ), {
   grasp: function( event ) {
     DragManip.prototype.grasp.call(this, event);
 
-    const pt = this.raycast( event.clientX, event.clientY );
-    if ( pt ) {
-      this.rubberband.addVertex( pt );
+    const intersects = this.raycast( event.clientX, event.clientY );
+    if ( intersects.length > 0) {
+      this.rubberband.addVertex( intersects[0].point );
+      this.viewer.render();
     }
   },
 
@@ -83,9 +78,10 @@ VertexManip.prototype = Object.assign( Object.create( DragManip.prototype ), {
       const p = this.viewer.unproject( event.clientX, event.clientY );
       this.rubberband.track( p );
     } else if ( event.type == 'mousedown' ) {
-      const pt = this.raycast( event.clientX, event.clientY );
-      if ( pt ) {
-        this.rubberband.addVertex( pt );
+      const intersects = this.raycast( event.clientX, event.clientY );
+      if ( intersects.length > 0 ) {
+        this.rubberband.addVertex( intersects[0].point );
+        this.viewer.render();
       }
     } else if ( event.type === 'mouseup' ) {
       return false;

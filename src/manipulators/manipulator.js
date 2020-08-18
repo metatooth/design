@@ -33,14 +33,14 @@ Object.assign( Manipulator.prototype, {
   isManipulator: true,
 
   /**
-   * @param {Event} event - the starting event
+   * @param {Event} event the starting event
    */
   grasp: function( event ) {
     // no op
   },
 
   /**
-   * @param {Event} event - the subsequent events
+   * @param {Event} event the subsequent events
    * @return {boolean}
    */
   manipulating: function( event ) {
@@ -48,7 +48,7 @@ Object.assign( Manipulator.prototype, {
   },
 
   /**
-   * @param {Event} event - the final event
+   * @param {Event} event the final event
    */
   effect: function( event ) {
     // no op

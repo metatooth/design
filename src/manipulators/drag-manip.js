@@ -36,8 +36,6 @@ function DragManip( viewer, rubberband, tool ) {
   this.viewer = viewer;
   this.rubberband = rubberband;
   this.tool = tool;
-
-  this.label = null;
 }
 
 DragManip.prototype = Object.assign( Object.create( Manipulator.prototype ), {
@@ -46,7 +44,7 @@ DragManip.prototype = Object.assign( Object.create( Manipulator.prototype ), {
   isDragManip: true,
 
   /**
-   * @param {Event} event - the mousedown event to start the drag
+   * @param {Event} event the mousedown event to start the drag
    */
   grasp: function( event ) {
     this.viewer.controls.enabled = false;
@@ -59,7 +57,7 @@ DragManip.prototype = Object.assign( Object.create( Manipulator.prototype ), {
   },
 
   /**
-   * @param {Event} event - is dragging
+   * @param {Event} event is dragging
    * @return {boolean}
    */
   manipulating: function( event ) {
@@ -73,12 +71,9 @@ DragManip.prototype = Object.assign( Object.create( Manipulator.prototype ), {
   },
 
   /**
-   * @param {Event} event - mouseup to end the drag
+   * @param {Event} event mouseup to end the drag
    */
   effect: function( event ) {
-    if (this.rubberband.label) {
-      document.body.removeChild(this.rubberband.label);
-    }
     this.viewer.scene.remove(this.rubberband);
 
     this.viewer.controls.reset();

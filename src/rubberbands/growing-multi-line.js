@@ -51,10 +51,6 @@ function GrowingMultiLine(vec) {
 
   this.line = new Line(geometry, material);
   this.add(this.line);
-
-  if (vec) {
-    this.addVertex(vec);
-  }
 }
 
 GrowingMultiLine.prototype = Object.assign( Object.create(
@@ -64,28 +60,31 @@ GrowingMultiLine.prototype = Object.assign( Object.create(
   isGrowingMultiLine: true,
 
   update: function() {
-    // children contain collected vertices, and includes this.line
+    const length = this.vertices.length;
 
-    const length = this.children.length - 1;
+    if (this.line && length > 0) {
+      const v = this.vertices[this.vertices.length - 1];
 
-    if (length > this.max) {
-      this.max *= 2;
-      const positions = new Float32Array( this.max * 2 );
-      const doomed = this.line.geometry.getAttribute('position');
-      for (let i = 0, l = doomed.length; i < l; i++) {
-        positions[i] = doomed[i];
+      const positions = this.line.geometry.getAttribute('position');
+      positions[3*(length-1)] = v.x;
+      positions[3*(length-1)+1] = v.y;
+      positions[3*(length-1)+2] = v.z;
+      this.line.geometry.setDrawRange(0, 3*length);
+      this.line.geometry.attributes.position.needsUpdate = true;
+
+      if ( length + 1 > this.max ) {
+        this.max *= 2;
+        const positions = new Float32Array( this.max * 3 );
+        const doomed = this.line.geometry.getAttribute('position');
+        for (let i = 0, l = doomed.length; i < l; i++) {
+          positions[i] = doomed[i];
+        }
+
+        this.line.geometry = new BufferGeometry;
+        this.line.geometry.setAttribute('position', positions);
+        this.line.geometry.setDrawRange(0, doomed.length/3);
       }
-      this.line.geometry.setAttribute('position', positions);
-      this.line.geometry.setDrawRange(0, doomed.length/3);
     }
-
-    const last = this.children[length-1];
-
-    const positions = this.line.geometry.getAttribute('position');
-    positions[3*(length-1)] = last.position.x;
-    positions[3*(length-1)+1] = last.position.y;
-    positions[3*(length-1)+2] = last.position.z;
-    this.line.geometry.setDrawRange(0, 3*length);
   },
 
 });
