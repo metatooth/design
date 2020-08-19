@@ -65,8 +65,9 @@ VertexManip.prototype = Object.assign( Object.create( DragManip.prototype ), {
     const intersects = this.raycast( event.clientX, event.clientY );
     if ( intersects.length > 0) {
       this.rubberband.addVertex( intersects[0].point );
-      this.viewer.render();
     }
+    const p = this.viewer.unproject( event.clientX, event.clientY );
+    this.rubberband.track( p );
   },
 
   /**
@@ -81,7 +82,6 @@ VertexManip.prototype = Object.assign( Object.create( DragManip.prototype ), {
       const intersects = this.raycast( event.clientX, event.clientY );
       if ( intersects.length > 0 ) {
         this.rubberband.addVertex( intersects[0].point );
-        this.viewer.render();
       }
     } else if ( event.type === 'mouseup' ) {
       return false;

@@ -56,15 +56,17 @@ GrowingVertices.prototype = Object.assign( Object.create(
   isGrowingVertices: true,
 
   update: function() {
-    const mesh = new Mesh(this.geometry, this.material);
+    if (this.vertices.length) {
+      const mesh = new Mesh(this.geometry, this.material);
 
-    const v = this.vertices[this.vertices.length - 1];
+      const v = this.vertices[this.vertices.length - 1];
 
-    mesh.position.x = v.x;
-    mesh.position.y = v.y;
-    mesh.position.z = v.z;
+      mesh.position.x = v.x;
+      mesh.position.y = v.y;
+      mesh.position.z = v.z;
 
-    this.add(mesh);
+      this.add(mesh);
+    }
   },
 
   /**
@@ -73,6 +75,7 @@ GrowingVertices.prototype = Object.assign( Object.create(
    */
   addVertex: function( v ) {
     this.vertices.push( v );
+    this.update();
   },
 
   /**
