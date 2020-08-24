@@ -178,10 +178,12 @@ export default {
           }
         }
 
-        for (let i = 0, l = this.commands.length; i < l; i++) {
-          if (event.key === this.commands[i].id) {
-            this.commands[i].command.execute();
-            return;
+        if (!this.tool || this.tool.type != 'MeasureTool') {
+          for (let i = 0, l = this.commands.length; i < l; i++) {
+            if (event.key === this.commands[i].id) {
+              this.commands[i].command.execute();
+              return;
+            }
           }
         }
 
