@@ -28,7 +28,8 @@
           v-bind:keyLabel="command.id"
           v-bind:keyCode="command.id"
           v-bind:label="command.label"
-          v-bind:icon="command.icon">
+          v-bind:icon="command.icon"
+          v-bind:enabled="command.enabled">
         </user-control>
         <div class="navbar-item">
           <a class="button disabled" v-bind:href=assetUrl download>
@@ -100,8 +101,10 @@ export default {
       assetUrl: null,
       component: null,
       commands: [
-        {id: 'z', command: new UndoCmd(this), label: 'Undo', icon: 'undo'},
-        {id: 'y', command: new RedoCmd(this), label: 'Redo', icon: 'redo'},
+        {id: 'z', command: new UndoCmd(this), label: 'Undo', icon: 'undo',
+          enabled: true},
+        {id: 'y', command: new RedoCmd(this), label: 'Redo', icon: 'redo',
+          enabled: true},
       ],
       controls: [
         {id: 'c', tool: null,
@@ -149,6 +152,7 @@ export default {
   },
   methods: {
     activate: function(key) {
+      // :NOTE: 20200824 Terry: This handles a direct click on a command button.
       for (let i = 0, l = this.commands.length; i < l; i++) {
         if (key === this.commands[i].id) {
           this.commands[i].command.execute();
@@ -166,6 +170,15 @@ export default {
           document.body.style.cursor = this.controls[i].cursor;
           this.tool = this.controls[i].tool;
           this.controls[i].active = true;
+          if (key === 'm') {
+            this.commands.forEach((elem) => {
+              elem.enabled = false;
+            });
+          } else {
+            this.commands.forEach((elem) => {
+              elem.enabled = true;
+            });
+          }
         }
       }
     },
