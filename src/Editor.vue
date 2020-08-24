@@ -43,7 +43,6 @@
   <div class="meta">
     <span>&copy; Metatooth 2020</span><br/>
     <span>Version {{version}}</span><br/>
-    <span>Commit {{commit}}</span><br/>
   </div>
 </div>
 </template>
@@ -95,7 +94,6 @@ export default {
   props: {
     uri: String,
     version: String,
-    commit: String,
   },
   data: function() {
     return {

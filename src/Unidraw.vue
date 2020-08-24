@@ -2,7 +2,6 @@
   <Editor
     v-bind:uri='uri'
     v-bind:version='version'
-    v-bind:commit='commit'
     ref='editor'/>
 </template>
 
@@ -45,7 +44,6 @@ export default {
   data: function() {
     return {
       catalog: new Catalog,
-      commit: '',
       histories: new Map,
       maxhistlen: 100,
       uri: null,
@@ -53,8 +51,9 @@ export default {
     };
   },
   mounted() {
-    this.version = process.env.VUE_APP_VERSION;
-    this.commit = process.env.VUE_APP_COMMIT;
+    const commit = process.env.HEROKU_SLUG_COMMIT ?
+      process.env.HEROKU_SLUG_COMMIT.substring(0, 6) : '1974';
+    this.version = 'DEV.' + commit;
 
     const query = window.location.search;
     const params = new URLSearchParams( query );
