@@ -43,7 +43,7 @@
   </nav>
   <div class="meta">
     <span>&copy; Metatooth 2020</span><br/>
-    <span>Version {{version}}</span><br/>
+    <span>r{{version}}</span><br/>
   </div>
 </div>
 </template>
@@ -107,8 +107,8 @@ export default {
           enabled: true},
       ],
       controls: [
-        {id: 'c', tool: null,
-          label: 'View', icon: 'glasses', cursor: 'default',
+        {id: 'r', tool: null,
+          label: 'Rotate View', icon: 'sync', cursor: 'default',
           active: true},
         {id: 'm', tool: new MeasureTool,
           label: 'Measure', icon: 'ruler', cursor: 'crosshair',

@@ -52,8 +52,8 @@ export default {
   },
   mounted() {
     const commit = process.env.HEROKU_SLUG_COMMIT ?
-      process.env.HEROKU_SLUG_COMMIT.substring(0, 6) : '1974';
-    this.version = 'DEV.' + commit;
+      process.env.HEROKU_SLUG_COMMIT.substring(0, 6) : '19740621';
+    this.version = 'DEV ' + commit;
 
     const query = window.location.search;
     const params = new URLSearchParams( query );
