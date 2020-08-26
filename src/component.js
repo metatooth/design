@@ -23,11 +23,11 @@
 import {Object3D} from 'three';
 
 /**
- * Description: Component - class of objects that are edited to
- * form domain-specific drawings. Component subjects contain structural,
+ * Component - class of objects that are edited to form
+ * domain-specific drawings. Component subjects contain structural,
  * connectivity, constraint, and transfer function information.
  * @constructor
- * @param {Object3D} object3d: the 3D object this component tracks
+ * @param {Object3D} object3d the first child
  */
 function Component(object3d) {
   Object3D.call(this);

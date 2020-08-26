@@ -37,14 +37,10 @@ DrawTool.prototype = Object.assign( Object.create( Tool.prototype ), {
    * @return {Command}
    */
   interpret: function( manipulator ) {
-    const children = manipulator.rubberband.children;
-
-    if (children.length > 1) {
+    if (manipulator.rubberband.children.length > 1) {
       const comp = new Component;
-      for (let i = 0, l = children.length; i < l; i++) {
-        console.log(i, children[i].type);
-        comp.add(children[i]);
-      }
+      comp.children = manipulator.rubberband.children;
+
       return new PasteCmd( manipulator.viewer.editor, [comp] );
     }
     return null;
