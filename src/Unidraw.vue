@@ -52,9 +52,11 @@ export default {
   },
   mounted() {
     console.log(process.env);
-    const commit = process.env.HEROKU_SLUG_COMMIT ?
-      process.env.HEROKU_SLUG_COMMIT.substring(0, 7) : '19740621';
-    this.version = 'DEV ' + commit;
+    const version = process.env.VUE_APP_VERSION ?
+      process.env.VUE_APP_VERSION : 'DEV';
+    const commit = process.env.VUE_APP_COMMIT ?
+      process.env.VUE_APP_COMMIT : '19740621';
+    this.version = version + ' ' + commit;
 
     const query = window.location.search;
     const params = new URLSearchParams( query );
