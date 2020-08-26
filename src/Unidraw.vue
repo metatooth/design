@@ -51,6 +51,7 @@ export default {
     };
   },
   mounted() {
+    console.log(process.env);
     const commit = process.env.HEROKU_SLUG_COMMIT ?
       process.env.HEROKU_SLUG_COMMIT.substring(0, 7) : '19740621';
     this.version = 'DEV ' + commit;
