@@ -51,7 +51,6 @@ export default {
     };
   },
   mounted() {
-    console.log(process.env);
     const version = process.env.VUE_APP_VERSION ?
       process.env.VUE_APP_VERSION : 'DEVELOP';
     const commit = process.env.VUE_APP_COMMIT ?
