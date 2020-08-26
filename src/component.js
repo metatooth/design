@@ -48,6 +48,7 @@ Component.prototype = Object.assign( Object.create( Group.prototype ), {
     if (command.constructor.name == 'PasteCmd') {
       for (let i = 0, l = command.clipboard.length; i < l; ++i) {
         this.add( command.clipboard[i] );
+        console.log('pasted', this.children.length);
       }
     }
   },

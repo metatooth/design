@@ -38,6 +38,8 @@ DrawTool.prototype = Object.assign( Object.create( Tool.prototype ), {
    */
   interpret: function( manipulator ) {
     const comp = new Component;
+    comp.name = 'multiline';
+
     while (manipulator.rubberband.children.length > 0) {
       comp.add(manipulator.rubberband.children[0]);
     }

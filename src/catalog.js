@@ -127,7 +127,8 @@ Object.assign( Catalog.prototype, {
 
   createComponent: function(name, object) {
     return new Promise((resolve, reject) => {
-      const component = new Component();
+      const component = new Component;
+      component.name = 'root';
 
       if (object.scene) {
         const only = object.scene.children[0];
