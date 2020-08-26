@@ -42,8 +42,9 @@
     </div>
   </nav>
   <div class="meta">
-    <span>&copy; Metatooth 2020</span><br/>
+    <span>Design x Metatooth</span><br/>
     <span>r{{version}}</span><br/>
+    <span>&copy; Metatooth 2020</span><br/>
   </div>
 </div>
 </template>

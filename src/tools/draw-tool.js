@@ -42,6 +42,7 @@ DrawTool.prototype = Object.assign( Object.create( Tool.prototype ), {
     if (children.length > 1) {
       const comp = new Component;
       for (let i = 0, l = children.length; i < l; i++) {
+        console.log(i, children[i].type);
         comp.add(children[i]);
       }
       return new PasteCmd( manipulator.viewer.editor, [comp] );
