@@ -45,7 +45,7 @@ Component.prototype = Object.assign( Object.create( Group.prototype ), {
    * @param {Command} command: the command sent by the user interface
    */
   interpret: function( command ) {
-    if (command.constructor.name == 'PasteCmd') {
+    if (command.type === 'PasteCmd') {
       for (let i = 0, l = command.clipboard.length; i < l; ++i) {
         this.add( command.clipboard[i] );
         console.log('pasted', this.children.length);
@@ -58,7 +58,7 @@ Component.prototype = Object.assign( Object.create( Group.prototype ), {
    * @param {Command} command: the command sent by the user interface
    */
   uninterpret: function( command ) {
-    if (command.constructor.name == 'PasteCmd') {
+    if (command.type === 'PasteCmd') {
       for (let i = 0, l = command.clipboard.length; i < l; ++i) {
         this.remove( command.clipboard[i] );
       }
