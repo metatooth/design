@@ -70,7 +70,6 @@ Object.assign( Catalog.prototype, {
     const iter = this.compMap.entries();
     let result = iter.next();
     while (!result.done) {
-      console.log('forgot? ', result);
       if (result.value[1] == component) {
         this.compMap.delete(result.value[0]);
         break;
@@ -98,8 +97,6 @@ Object.assign( Catalog.prototype, {
             .then((object) => this.createComponent(name, object))
             .then((comp) => resolve(comp));
       } else {
-        console.log('name is ', name);
-        console.log('we already got one! ', this.compMap.get(name));
         resolve(this.compMap.get(name));
       }
     });
@@ -128,13 +125,10 @@ Object.assign( Catalog.prototype, {
 
   },
 
-  /** protected? */
-
   createComponent: function(name, object) {
     return new Promise((resolve, reject) => {
-      const component = new Component();
-
-      console.log(object);
+      const component = new Component;
+      component.name = 'root';
 
       if (object.scene) {
         const only = object.scene.children[0];
@@ -156,42 +150,23 @@ Object.assign( Catalog.prototype, {
   },
 
   exportGltf: function(component) {
-    console.log('exportGltf ~> ', component);
     const exporter = new GLTFExporter;
     return new Promise((resolve, reject) => {
       exporter.parse(component, (gltf) => {
-        console.log(gltf);
         resolve(gltf);
       });
     });
   },
 
   jsonCreate: function(data, name) {
-    console.log('JSON CREATE');
-    console.log(data);
-    console.log(name);
     const postpath = name + '/revisions';
-    console.log('postpath ~> ', postpath);
 
     return HTTP.post(postpath, data)
         .then((response) => {
-          console.log('jsonCreate ~> HTTP.post ~> ', response);
-          console.log(response.data.number);
-
-          console.log(this.compMap.size);
-          console.log(this.compMap);
           const newname = postpath + '/' + response.data.locator;
-          console.log(name);
           const comp = this.compMap.get(name);
-          console.log(comp);
           this.forget(comp);
-          console.log(this.compMap.size);
-          console.log(this.compMap);
-          console.log('newname ~> ', newname);
           this.compMap.set(newname, comp);
-          console.log(this.compMap.size);
-          console.log(this.compMap);
-
           return true;
         })
         .catch((error) => {
@@ -201,29 +176,20 @@ Object.assign( Catalog.prototype, {
   },
 
   jsonRetrieve: function(name) {
-    console.log('JSON RETRIEVE');
-    console.log(name);
     return HTTP.get( name )
         .then((response) => {
           if (response.data.data.url) {
             return response.data.data;
           } else {
             const latest = response.data.data.revisions.length - 1;
-            console.log(latest);
-            console.log(response.data.data.revisions[latest]);
             return response.data.data.revisions[latest];
           }
         });
   },
 
   jsonSave: function(data, name) {
-    console.log('JSON SAVE');
-    console.log(data);
-    console.log(name);
     return HTTP.put(name, data)
         .then((response) => {
-          console.log('jsonSave ~> HTTP.put ~> ', response);
-          console.log(response);
           return true;
         })
         .catch((error) => {
@@ -241,7 +207,6 @@ Object.assign( Catalog.prototype, {
     const url = data.url || data.location;
     return new Promise((resolve, reject) => {
       const m = url.match(/\.\w+$/);
-      console.log(m[0]);
       if (m[0] == '.stl') {
         resolve(this.loadStl(url));
       } else if (m[0] == '.gltf' || m[0] == '.glb') {
@@ -278,7 +243,6 @@ Object.assign( Catalog.prototype, {
   },
 
   makeJson: function(data) {
-    console.log('makeJson ~> ', data);
     return new Promise((resolve, reject) => {
       const params = {data: {
         location: data['Location'],
@@ -293,7 +257,6 @@ Object.assign( Catalog.prototype, {
   },
 
   makeUri: function(gltf) {
-    console.log('makeUri ~> ', gltf);
     return new Promise((resolve, reject) => {
       const dateObj = new Date;
       let month = dateObj.getUTCMonth() + 1;

@@ -37,7 +37,7 @@ RedoCmd.prototype = Object.assign( Object.create( Command.prototype ), {
   isRedoCmd: true,
 
   execute: function() {
-    this.editor.unidraw().redo(this.editor.component);
+    this.editor.unidraw.redo(this.editor.component);
   },
 
   /**

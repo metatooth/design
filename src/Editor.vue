@@ -1,38 +1,52 @@
 <template>
-  <div class="editor" @keydown="key($event)" @keyup="key($event)">
-    <nav class="navbar is-fixed-top is-transparent"
-         role="navigation"
-         aria-label="main navigation">
-      <div class="navbar-brand">
-        <a class="navbar-item" href="https://metatooth.com" target="_blank">
-          <img src="./assets/logo.png" alt="Metatooth">
+<div @keydown="key($event)" @keyup="key($event)">
+  <Viewer v-bind:component='component' v-bind:tool='tool' ref="viewer"/>
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <div class="navbar-item">
+        <a href="https://metatooth.com" target="_blank">
+          <img src="./assets/logo.png" width="30" alt="Metatooth">
         </a>
       </div>
-      <div class="navbar-menu" v-if=assetUrl>
-        <div class="navbar-start">
-          <user-control
-            v-for="control in controls"
-            v-bind:key="control.id"
-            v-bind:keyLabel="control.id"
-            v-bind:keyCode="control.id"
-            v-bind:label="control.label"
-            v-bind:icon="control.icon"
-            v-bind:active="control.active">
-          </user-control>
-        </div>
-        <div class="navbar-end">
-          <div class="navbar-item">
-            <a class="button" v-bind:href=assetUrl download>
-              <span class="icon">
-                <font-awesome-icon icon="download"/>
-              </span>
-            </a>
-          </div>
+    </div>
+    <div class="navbar-menu">
+      <div class="navbar-start">
+        <user-control
+          v-for="control in controls"
+          v-bind:key="control.id"
+          v-bind:keyLabel="control.id"
+          v-bind:keyCode="control.id"
+          v-bind:label="control.label"
+          v-bind:icon="control.icon"
+          v-bind:active="control.active">
+        </user-control>
+      </div>
+      <div class="navbar-end">
+        <user-control
+          v-for="command in commands"
+          v-bind:key="command.id"
+          v-bind:keyLabel="command.id"
+          v-bind:keyCode="command.id"
+          v-bind:label="command.label"
+          v-bind:icon="command.icon"
+          v-bind:enabled="command.enabled">
+        </user-control>
+        <div class="navbar-item">
+          <a class="button disabled" v-bind:href=assetUrl download>
+            <span class="icon">
+              <font-awesome-icon icon="download"/>
+            </span>
+          </a>
         </div>
       </div>
-    </nav>
-    <Viewer v-bind:component='component' v-bind:tool='tool' ref="viewer"/>
+    </div>
+  </nav>
+  <div class="meta">
+    <span>Design x Metatooth</span><br/>
+    <span>r{{version}}</span><br/>
+    <span>&copy; Metatooth 2020</span><br/>
   </div>
+</div>
 </template>
 
 <script>
@@ -53,7 +67,7 @@
  * INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS.
  * IN NO EVENT SHALL STANFORD BE LIABLE FOR ANY SPECIAL, INDIRECT OR
  * CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE,
- * DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+    * DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
  * OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION
  * WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
@@ -62,8 +76,10 @@ import {Vector3} from 'three';
 
 import {ComponentNameVar} from './component-name-var.js';
 import {DijkstraCmd} from './commands/dijkstra-cmd.js';
+import {DrawTool} from './tools/draw-tool.js';
 import {MeasureTool} from './tools/measure-tool.js';
 import {ModifiedStatusVar} from './modified-status-var.js';
+import {PickTool} from './tools/pick-tool.js';
 import {RedoCmd} from './commands/redo-cmd.js';
 import {SaveCmd} from './commands/save-cmd.js';
 import {UndoCmd} from './commands/undo-cmd.js';
@@ -79,27 +95,43 @@ export default {
   },
   props: {
     uri: String,
+    version: String,
   },
   data: function() {
     return {
       assetUrl: null,
       component: null,
+      commands: [
+        {id: 'z', command: new UndoCmd(this), label: 'Undo', icon: 'undo',
+          enabled: true},
+        {id: 'y', command: new RedoCmd(this), label: 'Redo', icon: 'redo',
+          enabled: true},
+      ],
+      controls: [
+        {id: 'r', tool: null,
+          label: 'Rotate View', icon: 'sync', cursor: 'default',
+          active: true},
+        {id: 'm', tool: new MeasureTool,
+          label: 'Measure', icon: 'ruler', cursor: 'crosshair',
+          active: false},
+        {id: 'p', tool: new PickTool,
+          label: 'Pick', icon: 'crosshairs', cursor: 'crosshair',
+          active: false},
+        {id: 'd', tool: new DrawTool,
+          label: 'Draw', icon: 'pen-square', cursor: 'crosshair',
+          active: false},
+      ],
       modified: null,
       name: null,
       tool: null,
-      controls: [
-        {id: 'v', tool: null,
-          label: 'view', icon: 'glasses', cursor: 'default',
-          active: true},
-        {id: 'm', tool: new MeasureTool,
-          label: 'measure', icon: 'ruler', cursor: 'crosshair',
-          active: false},
-      ],
     };
   },
   computed: {
     unidraw: function() {
       return this.$parent;
+    },
+    viewer: function() {
+      return this.$refs.viewer;
     },
   },
   watch: {
@@ -121,13 +153,33 @@ export default {
   },
   methods: {
     activate: function(key) {
+      // :NOTE: 20200824 Terry: This handles a direct click on a command button.
+      for (let i = 0, l = this.commands.length; i < l; i++) {
+        if (key === this.commands[i].id) {
+          this.commands[i].command.execute();
+          return;
+        }
+      }
+
       this.tool = null;
+      this.viewer.scene.remove( this.viewer.temp );
+      this.viewer.temp = null;
+
       for (let i = 0, l = this.controls.length; i < l; i++) {
         this.controls[i].active = false;
         if (key === this.controls[i].id) {
           document.body.style.cursor = this.controls[i].cursor;
           this.tool = this.controls[i].tool;
           this.controls[i].active = true;
+          if (key === 'm') {
+            this.commands.forEach((elem) => {
+              elem.enabled = false;
+            });
+          } else {
+            this.commands.forEach((elem) => {
+              elem.enabled = true;
+            });
+          }
         }
       }
     },
@@ -137,6 +189,15 @@ export default {
           if (event.key === this.controls[i].id) {
             this.activate(event.key);
             return;
+          }
+        }
+
+        if (!this.tool || this.tool.type != 'MeasureTool') {
+          for (let i = 0, l = this.commands.length; i < l; i++) {
+            if (event.key === this.commands[i].id) {
+              this.commands[i].command.execute();
+              return;
+            }
           }
         }
 
@@ -169,15 +230,6 @@ export default {
           event.preventDefault();
           const save = new SaveCmd(this);
           save.execute();
-        } else if ( event.ctrlKey && event.keyCode == 90 ) {
-          // Ctrl+Z
-          const undo = new UndoCmd(this);
-          undo.execute();
-        } else if ( ( event.ctrlKey && event.keyCode == 89 ) ||
-            event.keyCode == 115 ) {
-          // Ctrl+Y or F4
-          const redo = new RedoCmd(this);
-          redo.execute();
         }
       }
     },
@@ -185,6 +237,24 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
+.navbar {
+  background-color: #fefefe;
+  position: absolute;
+  top: 0px;
+  width: 100%;
+}
+.meta {
+  background-color: transparent;
+  color: #fefefe;
+  position: absolute;
+  bottom: 0px;
+  margin: 10px;
+  width: calc(100vw - 40px);
+  text-align: right;
+  user-select: none;
+  pointer-events: none;
+  z-index: 1;
+}
 </style>
 

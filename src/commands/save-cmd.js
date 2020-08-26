@@ -42,7 +42,6 @@ SaveCmd.prototype = Object.assign( Object.create( Command.prototype ), {
     const modified = this.editor.modified;
     const compName = this.editor.name;
     const name = (compName) ? compName.name : undefined;
-    console.log('THE NAME XXX ', name);
     if (name === undefined) {
       const saveas = new SaveAsCmd(this.editor);
       saveas.execute();
@@ -52,13 +51,10 @@ SaveCmd.prototype = Object.assign( Object.create( Command.prototype ), {
       catalog.retrieve(name)
           .then((comp) => catalog.save(comp, name))
           .then((ok) => {
-            console.log('ok? ', ok);
             if (ok) {
               if (modified) modified.modified = false;
-              console.log(name);
               const comp = catalog.compMap.get(name);
-              console.log(comp);
-              this.editor.unidraw().clearHistory(comp);
+              this.editor.unidraw.clearHistory(comp);
             } else {
               const saveas = new SaveAsCmd(this.editor);
               saveas.execute();

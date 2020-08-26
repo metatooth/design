@@ -22,97 +22,58 @@
  * OF THIS SOFTWARE.
  */
 
-import {BufferAttribute} from 'three';
-import {BufferGeometry} from 'three';
-import {Line} from 'three';
-import {LineBasicMaterial} from 'three';
+import {Group} from 'three';
 import {Vector3} from 'three';
 
 /**
- * Description: rubberbanding graphical objects
+ * Rubberbanding primitive for tracking points
  * @constructor
- * @param {Vector3} vec: the initial x, y, z coordinates
+ * @param {Vector3} offset an x, y, z offset
  */
-function Rubberband( vec ) {
-  Line.call(this);
+function Rubberband( offset ) {
+  Group.call(this);
   this.type = 'Rubberband';
 
-  this.off = null;
+  this.offset = (offset !== undefined) ? offset.clone() : null;
   this.tracked = null;
-  this.color = 0xff7700;
-  this.linewidth = 3;
-  this.epsilon = 0.1;
-
-  if (vec) {
-    this.off = vec.clone();
-  }
-
-  const positions = new Float32Array( 6 );
-  this.geometry = new BufferGeometry;
-  this.geometry.setAttribute( 'position', new BufferAttribute( positions, 3 ) );
-  this.geometry.setDrawRange( 0, 0 );
-
-  this.material = new LineBasicMaterial({color: this.color,
-    linewidth: this.linewidth});
 }
 
-Rubberband.prototype = Object.assign( Object.create( Line.prototype ), {
+Rubberband.prototype = Object.assign( Object.create( Group.prototype ), {
 
   constructor: Rubberband,
 
   isRubberband: true,
 
   /**
-   * Returns distance between tracked points on screen.
-* @return {Float32}
-   */
-  distance: function() {
-    return this.tracked.distanceTo(this.off);
-  },
-
-  /**
-   * Returns mid-point between tracked points on screen.
+   * Returns mid-point between two Vector3 objects.
+   * @param {Vector3} v0
+   * @param {Vector3} v1
    * @return {Vector3}
    */
-  midpoint: function() {
-    return new Vector3((this.off.x + this.tracked.x) / 2.0,
-        (this.off.y + this.tracked.y) / 2.0,
-        (this.off.z + this.tracked.z) / 2.0);
+  midpoint: function(v0, v1) {
+    return new Vector3((v0.x + v1.x) / 2.0,
+        (v0.y + v1.y) / 2.0,
+        (v0.z + v1.z) / 2.0);
+  },
+
+  update: function() {
+    throw new Error('Rubberband::update is an abstract method.');
   },
 
   /**
-   * @param {Vector3} vec - the x, y, z coordinates
+   * @param {Vector3} vec - the x, y, z coordinates to track
    */
   track: function( vec ) {
     if (!this.tracked) {
       this.tracked = new Vector3;
     }
 
-    this.tracked.x = vec.x;
-    this.tracked.y = vec.y;
-    this.tracked.z = vec.z || 0;
-
-    if (!this.off) {
-      this.off = this.tracked.clone();
+    if (this.tracked !== vec) {
+      this.tracked.x = vec.x;
+      this.tracked.y = vec.y;
+      this.tracked.z = vec.z;
+      this.update();
     }
-
-    if (this.off.distanceTo(this.tracked) > this.epsilon) {
-      const positions = this.geometry.attributes.position.array;
-
-      positions[0] = this.off.x;
-      positions[1] = this.off.y;
-      positions[2] = this.off.z;
-
-      positions[3] = this.tracked.x;
-      positions[4] = this.tracked.y;
-      positions[5] = this.tracked.z;
-
-      this.geometry.setDrawRange( 0, 2 );
-    } else {
-      this.geometry.setDrawRange( 0, 0 );
-    }
-
-    this.geometry.attributes.position.needsUpdate = true;
   },
 
 });

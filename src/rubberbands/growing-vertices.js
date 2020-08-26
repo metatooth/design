@@ -22,14 +22,14 @@
  * OF THIS SOFTWARE.
  */
 
-import {BufferGeometry} from 'three';
-import {BufferAttribute} from 'three';
-import {LineBasicMaterial} from 'three';
+import {MeshPhongMaterial} from 'three';
+import {SphereGeometry} from 'three';
+import {Mesh} from 'three';
 
 import {Rubberband} from './rubberband.js';
 
 /**
- * Description: GrowingVertices are rubberbands defined by a set of vertices
+ * GrowingVertices are Rubberbands defined by a set of vertices
  * that can grow dynamically in number.
  * @constructor
  * @param {Vector3} vec: the first vertex
@@ -38,18 +38,15 @@ function GrowingVertices(vec) {
   Rubberband.call(this, vec);
 
   this.type = 'GrowingVertices';
-  this.count = 0;
-  this.max = 500;
-  this.color = 0xff7700;
-  this.linewidth = 5;
 
-  const positions = new Float32Array( this.max * 3 );
-  this.geometry = new BufferGeometry;
-  this.geometry.setAttribute( 'position', new BufferAttribute( positions, 3 ) );
-  this.geometry.setDrawRange( 0, this.count );
+  this.vertices = [];
 
-  this.material = new LineBasicMaterial({color: this.color,
-    linewidth: this.linewidth});
+  this.geometry = new SphereGeometry(0.3, 8, 8);
+  this.material = new MeshPhongMaterial({color: 0xff33bb});
+
+  if (vec) {
+    this.track(vec);
+  }
 }
 
 GrowingVertices.prototype = Object.assign( Object.create(
@@ -58,52 +55,35 @@ GrowingVertices.prototype = Object.assign( Object.create(
 
   isGrowingVertices: true,
 
+  update: function() {
+    if (this.vertices.length) {
+      const mesh = new Mesh(this.geometry, this.material);
+
+      const v = this.vertices[this.vertices.length - 1];
+
+      mesh.position.x = v.x;
+      mesh.position.y = v.y;
+      mesh.position.z = v.z;
+
+      this.add(mesh);
+    }
+  },
+
   /**
-   * Description: Inserts a vertex (x, y, z) into the list at this.curPt
-   * @param {Vector3} v: the vertex to add
+   * Adds a vertex to the list.
+   * @param {Vector3} v the vertex to add
    */
   addVertex: function( v ) {
-    const positions = this.geometry.attributes.position.array;
-
-    positions[this.count++] = v.x;
-    positions[this.count++] = v.y;
-    positions[this.count++] = v.z;
-
-    this.geometry.setDrawRange( 0, this.count / 3 );
-    this.geometry.attributes.position.needsUpdate = true;
-
-    this.check();
+    this.vertices.push( v );
+    this.update();
   },
 
   /**
    * Removes the last vertex from the list
    */
   removeVertex: function() {
-    this.count -= 3;
-    this.geometry.setDrawRange( 0, this.count / 3 );
-    this.geometry.attributes.position.needsUpdate = true;
-  },
-
-  /**
-   * Check buffers and resize if necessary
-   */
-  check: function() {
-    if (this.count + 1 >= this.max) {
-      this.max *= 2;
-
-      const positions = new Float32Array( this.max * 3);
-      for (let i = 0, l = this.geometry.attributes.position.array.length;
-        i < l;
-        i++) {
-        positions[i] = this.geometry.attributes.position.array[i];
-      }
-
-      this.geometry.setAttribute( 'position',
-          new BufferAttribute( positions, 3 ) );
-      this.geometry.setDrawRange( 0, this.count );
-
-      this.geometry.attributes.position.needsUpdate = true;
-    }
+    this.vertices.pop();
+    this.children.pop();
   },
 
 });

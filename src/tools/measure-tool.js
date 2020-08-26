@@ -1,5 +1,5 @@
-import {DragManip} from '../manipulators/drag-manip.js';
-import {Rubberband} from '../rubberbands/rubberband.js';
+import {DragAndDropManip} from '../manipulators/drag-and-drop-manip.js';
+import {RubberRuler} from '../rubberbands/rubber-ruler.js';
 import {Tool} from './tool.js';
 
 /**
@@ -10,9 +10,6 @@ function MeasureTool() {
   Tool.call( this );
 
   this.type = 'MeasureTool';
-
-  this.color = 0xff33bb;
-  this.linewidth = 5;
 }
 
 MeasureTool.prototype = Object.assign( Object.create( Tool.prototype ), {
@@ -27,7 +24,10 @@ MeasureTool.prototype = Object.assign( Object.create( Tool.prototype ), {
    */
   create: function( viewer, event ) {
     if (event.type == 'mousedown') {
-      return new DragManip( viewer, new Rubberband, this );
+      const v = viewer.unproject( event.clientX, event.clientY );
+      return new DragAndDropManip( viewer,
+          new RubberRuler(viewer, v, v),
+          this );
     }
     return null;
   },

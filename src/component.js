@@ -20,24 +20,22 @@
  * WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-import {Object3D} from 'three';
-
-import {DragManip} from './manipulators/drag-manip.js';
+import {Group} from 'three';
 
 /**
- * Description: Component - class of objects that are edited to
- * form domain-specific drawings. Component subjects contain structural,
+ * Component - class of objects that are edited to form
+ * domain-specific drawings. Component subjects contain structural,
  * connectivity, constraint, and transfer function information.
  * @constructor
- * @param {Object3D} object3d: the 3D object this component tracks
+ * @param {Object3D} object3d the first child
  */
 function Component(object3d) {
-  Object3D.call(this);
+  Group.call(this);
   if (object3d) this.add(object3d);
   this.type = 'Component';
 }
 
-Component.prototype = Object.assign( Object.create( Object3D.prototype ), {
+Component.prototype = Object.assign( Object.create( Group.prototype ), {
   constructor: Component,
 
   isComponent: true,
@@ -47,7 +45,7 @@ Component.prototype = Object.assign( Object.create( Object3D.prototype ), {
    * @param {Command} command: the command sent by the user interface
    */
   interpret: function( command ) {
-    if (command.constructor.name == 'PasteCmd') {
+    if (command.type === 'PasteCmd') {
       for (let i = 0, l = command.clipboard.length; i < l; ++i) {
         this.add( command.clipboard[i] );
       }
@@ -59,49 +57,13 @@ Component.prototype = Object.assign( Object.create( Object3D.prototype ), {
    * @param {Command} command: the command sent by the user interface
    */
   uninterpret: function( command ) {
-    if (command.constructor.name == 'PasteCmd') {
+    if (command.type === 'PasteCmd') {
       for (let i = 0, l = command.clipboard.length; i < l; ++i) {
         this.remove( command.clipboard[i] );
       }
     }
   },
 
-  /**
-   * Description: create manipulator for selected tool & event
-   * @param {Viewer} viewer
-   * @param {Event} event
-   * @param {Tool} tool
-   * @return {Manipulator}
-   */
-  createManipulator: function( viewer, event, tool ) {
-    let manipulator = null;
-
-    if (tool.constructor.name == 'ComponentTool') {
-      const x = ( event.clientX / window.innerWidth ) * 2 - 1;
-      const y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-
-      manipulator = new DragManip( viewer, new Rubberband(x, y), tool );
-    }
-
-    return manipulator;
-  },
-
-  /**
-   * Description: create a command as needed by the manipulator
-   * @param {Manipulator} manipulator
-   * @return {Command}
-   */
-  interpretManipulator: function( manipulator ) {
-    const editor = manipulator.viewer.editor();
-    const tool = manipulator.tool;
-    let command = null;
-
-    if (tool.constructor.name == 'ComponentTool') {
-      command = new PasteCmd(editor, [this.object3d.copy()]);
-    }
-
-    return command;
-  },
 
 });
 

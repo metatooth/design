@@ -1,14 +1,8 @@
 <template>
-<div class="unidraw">
-  <div class="meta">
-    <span id="copyright">&copy; Metatooth 2020</span>
-    <br/>
-    <span id="version">Version {{version}}</span>
-    <br/>
-    <span id="commit">Commit {{commit}}</span>
-  </div>
-  <Editor v-bind:uri='uri' ref="editor"/>
-</div>
+  <Editor
+    v-bind:uri='uri'
+    v-bind:version='version'
+    ref='editor'/>
 </template>
 
 <script>
@@ -50,7 +44,6 @@ export default {
   data: function() {
     return {
       catalog: new Catalog,
-      commit: '',
       histories: new Map,
       maxhistlen: 100,
       uri: null,
@@ -58,8 +51,11 @@ export default {
     };
   },
   mounted() {
-    this.version = process.env.VUE_APP_VERSION;
-    this.commit = process.env.VUE_APP_COMMIT;
+    const version = process.env.VUE_APP_VERSION ?
+      process.env.VUE_APP_VERSION : 'DEVELOP';
+    const commit = process.env.VUE_APP_COMMIT ?
+      process.env.VUE_APP_COMMIT : '19740621';
+    this.version = version + ' ' + commit;
 
     const query = window.location.search;
     const params = new URLSearchParams( query );
@@ -67,6 +63,8 @@ export default {
       this.uri = '/assets/' + params.get('asset');
     } else if (params.get('plan')) {
       this.uri = '/plans/' + params.get( 'plan' );
+    } else if (process.env.VUE_APP_DEFAULT_ASSET) {
+      this.uri = '/assets/' + process.env.VUE_APP_DEFAULT_ASSET;
     } else if (process.env.VUE_APP_DEFAULT_PLAN) {
       this.uri = '/plans/' + process.env.VUE_APP_DEFAULT_PLAN;
     }
@@ -140,40 +138,5 @@ export default {
 </script>
 
 <style lang="scss">
-$pink: #ff33bb;
-$cyan: #00bbee;
-$green: #00dd77;
-$orange: #ff7700;
-$white: #fdfdfd;
-$jet: #2d2d2d;
-
 @import 'bulma';
-
-#app {
-    background-color: $jet;
-}
-.meta {
-    background-color: transparent;
-    color: $white;
-    position: absolute;
-    bottom: 0px;
-    margin: 10px;
-    text-align: right;
-    width: 95%;
-    user-select: none;
-    pointer-events: none;
-    z-index: 1;
-}
-.editor {
-  display: flex;
-  width: 100vw;
-  height: 100vh;
-}
-.editor>* {
-  flex: 1 1 50%;
-}
-canvas {
- width: 100%;
-  height: 100%;
-}
 </style>

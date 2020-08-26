@@ -37,7 +37,7 @@ UndoCmd.prototype = Object.assign( Object.create( Command.prototype ), {
   isUndoCmd: true,
 
   execute: function() {
-    this.editor.unidraw().undo(this.editor.component);
+    this.editor.unidraw.undo(this.editor.component);
   },
 
   /**

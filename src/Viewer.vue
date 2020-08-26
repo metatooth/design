@@ -1,10 +1,9 @@
 <template>
-<div class="viewer"
-     @mousemove="handle($event)"
-     @mousedown="handle($event)"
-     @mouseup="handle($event)">
-  <canvas ref="canvas"></canvas>
-</div>
+<canvas ref="canvas"
+        @mousemove="handle($event)"
+        @mousedown="handle($event)"
+        @mouseup="handle($event)">
+</canvas>
 </template>
 
 <script>
@@ -35,10 +34,11 @@ import {DirectionalLight} from 'three';
 import {OrthographicCamera} from 'three';
 import {Scene} from 'three';
 import {WebGLRenderer} from 'three';
+import {Vector2} from 'three';
+import {Vector3} from 'three';
 
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls';
 
-import {CameraHelper} from './camera-helper.js';
 import {Component} from './component.js';
 import {Tool} from './tools/tool.js';
 
@@ -68,7 +68,6 @@ export default {
   },
   data: function() {
     return {
-      aspect: 0.0,
       black: 0x2d2d2d,
       camera: null,
       controls: null,
@@ -86,9 +85,10 @@ export default {
       pink: 0xff33bb,
       primary: 0x00bbee,
       renderer: new WebGLRenderer,
-      resized: false,
+      resized: true,
       scene: new Scene,
       secondary: '#ff33bb',
+      temp: null,
       threshold: 5,
       white: 0xffffff,
     };
@@ -112,7 +112,7 @@ export default {
     handle: function( event ) {
       if (this.tool && this.manipulator) {
         if (this.manipulator.manipulating( event )) {
-          console.log('// no op');
+          // no op
         } else {
           this.manipulator.effect( event );
 
@@ -137,8 +137,6 @@ export default {
     init: function() {
       // initialization order is important
 
-      this.aspect = window.innerWidth / window.innerHeight;
-
       this.initCamera();
 
       this.initLights();
@@ -150,20 +148,20 @@ export default {
       window.addEventListener( 'resize', this.isResized, false );
     },
     initCamera: function() {
-      this.camera = new OrthographicCamera( this.frustum * this.aspect / -2,
-          this.frustum * this.aspect / 2,
-          this.frustum / 2,
-          this.frustum / -2, 1, 1000 );
+      const width = this.$refs.canvas.clientWidth;
+      const height = this.$refs.canvas.clientHeight;
+
+      this.camera = new OrthographicCamera( width / -2,
+          width / 2,
+          height / 2,
+          height / -2, 1, 1000 );
       this.camera.lookAt( 0, 0, 0 );
       this.camera.zoom = 10;
       this.camera.position.set( 0, 0, 10 );
       this.camera.updateProjectionMatrix();
-
-      this.scene.add( new CameraHelper( this.camera ) );
     },
     initControls: function() {
-      this.controls = new OrbitControls( this.camera,
-          this.renderer.domElement );
+      this.controls = new OrbitControls(this.camera, this.renderer.domElement);
 
       this.controls.enablePan = false;
       this.controls.enableDamping = true;
@@ -227,25 +225,66 @@ export default {
       }
       return this.component.children[this.index];
     },
+    /**
+     * Convert mouse position to normalized device coordinates
+     * (-1 to +1) for both components
+     * @param {Float32} x
+     * @param {Float32} y
+     * @return {Vector2}
+     */
+    ndc: function( x, y ) {
+      const mouse = new Vector2;
+      mouse.x = ( x / window.innerWidth ) * 2 - 1;
+      mouse.y = - ( y / window.innerHeight ) * 2 + 1;
+      return mouse;
+    },
     render: function() {
-      this.resize();
       this.renderer.render( this.scene, this.camera );
     },
     resize: function() {
       this.resized = false;
 
+      const canvas = this.renderer.domElement;
+
       const width = this.$refs.canvas.clientWidth;
       const height = this.$refs.canvas.clientHeight;
 
-      this.renderer.setSize( width, height, false );
+      if (canvas.width !== width || canvas.height !== height) {
+        canvas.width = width;
+        canvas.height = height;
 
-      this.aspect = width / height;
+        this.renderer.setSize(width, height, false);
 
-      this.camera.left = - this.frustum * this.aspect / 2;
-      this.camera.right = this.frustum * this.aspect / 2;
-      this.camera.top = this.frustum / 2;
-      this.camera.bottom = this.frustum / -2;
-      this.camera.updateProjectionMatrix();
+        this.camera.left = width / -2;
+        this.camera.right = width / 2;
+        this.camera.top = height / 2;
+        this.camera.bottom = height / -2;
+        this.camera.updateProjectionMatrix();
+      }
+    },
+    temporary: function( obj ) {
+      this.scene.remove( this.temp );
+      this.temp = obj;
+      this.scene.add( obj );
+    },
+    topleft: function( point ) {
+      point.project( this.camera );
+
+      const height = this.$refs.canvas.clientHeight;
+      const width = this.$refs.canvas.clientWidth;
+
+      const top = height*((-point.y+1)/2);
+      const left = width*((point.x+1)/2);
+
+      return new Vector2(top, left);
+    },
+    unproject: function( x, y ) {
+      const ndc = this.ndc( x, y );
+      const mouse = new Vector3(ndc.x, ndc.y, -1);
+
+      mouse.unproject( this.camera );
+
+      return mouse;
     },
     update: function() {
       this.controls.update();
@@ -255,4 +294,9 @@ export default {
 </script>
 
 <style>
+canvas {
+display: block;
+height: 100vh;
+width: 100vw;
+}
 </style>

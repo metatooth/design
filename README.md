@@ -27,10 +27,7 @@ $ cd design
 $ npm install
 $ echo "VUE_APP_API_URL=http://localhost:9393" >> .env
 $ echo "VUE_APP_API_KEY=169:2570ed9e29cc97fe84f642f653053c2e" >> .env
-$ echo "VUE_APP_VERSION=development" >> .env
-$ echo "VUE_APP_COMMIT=1974" >> .env
 $ echo "VUE_APP_DEFAULT_ASSET=ee98" >> .env
-$ echo "VUE_APP_DEFAULT_PLAN=9f0a" >> .env
 $ echo "VUE_APP_AWS_REGION=us-east-1" >> .env
 $ echo "VUE_APP_AWS_IDENTITY_POOL_ID=your-pool-id" >> .env
 $ echo "VUE_APP_S3_BUCKET_NAME=your-bucket-name" >> .env

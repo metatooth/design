@@ -65,7 +65,7 @@ Object.assign( Command.prototype, {
    * Log the command.
    */
   log: function() {
-    this.editor.unidraw().log(this);
+    this.editor.unidraw.log(this);
   },
 
 });

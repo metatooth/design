@@ -1,23 +1,23 @@
 import {Component} from '../component.js';
-import {GrowingMultiLine} from '../rubberbands/growing-multi-line.js';
+import {GrowingVertices} from '../rubberbands/growing-vertices.js';
 import {PasteCmd} from '../commands/paste-cmd.js';
-import {ScribbleVertexManip} from '../manipulators/scribble-vertex-manip.js';
+import {VertexManip} from '../manipulators/vertex-manip.js';
 import {Tool} from './tool.js';
 
 /**
- * Description: A tool for drawing.
+ * A tool for picking points on the target mesh.
  * @constructor
  */
-function DrawTool() {
+function PickTool() {
   Tool.call( this );
 
-  this.type = 'DrawTool';
+  this.type = 'PickTool';
 }
 
-DrawTool.prototype = Object.assign( Object.create( Tool.prototype ), {
-  constructor: DrawTool,
+PickTool.prototype = Object.assign( Object.create( Tool.prototype ), {
+  constructor: PickTool,
 
-  isDrawTool: true,
+  isPickTool: true,
 
   /**
    * @param {Viewer} viewer - the container
@@ -26,8 +26,7 @@ DrawTool.prototype = Object.assign( Object.create( Tool.prototype ), {
    */
   create: function( viewer, event ) {
     if (event.type == 'mousedown') {
-      const v = viewer.unproject( event.clientX, event.clientY );
-      return new ScribbleVertexManip( viewer, new GrowingMultiLine(v), this );
+      return new VertexManip( viewer, new GrowingVertices, this );
     }
     return null;
   },
@@ -38,8 +37,6 @@ DrawTool.prototype = Object.assign( Object.create( Tool.prototype ), {
    */
   interpret: function( manipulator ) {
     const comp = new Component;
-    comp.name = 'multiline';
-
     while (manipulator.rubberband.children.length > 0) {
       comp.add(manipulator.rubberband.children[0]);
     }
@@ -47,21 +44,8 @@ DrawTool.prototype = Object.assign( Object.create( Tool.prototype ), {
     if (comp.children.length > 0) {
       return new PasteCmd( manipulator.viewer.editor, [comp] );
     }
-
     return null;
-  },
-
-  subdivide: function(a, b, steps) {
-    const dir = new Vector3;
-    dir.subVectors(b, a);
-
-    const points = [];
-    for (let i = 0; i < steps; i++) {
-      points.push( a.clone().addScaledVector( dir, i/steps ) );
-    }
-
-    return points;
   },
 });
 
-export {DrawTool};
+export {PickTool};
