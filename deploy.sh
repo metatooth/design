@@ -1,19 +1,19 @@
 #!/usr/bin/bash
 
-if [ "$#" -ne 3 ]; then
-  echo "usage: deploy.sh <key> <app> <version>"
+if [ "$#" -ne 2 ]; then
+  echo "usage: deploy.sh <key> <app>"
   echo
   echo "  Packages current HEAD for deployment to Heroku"
-  echo "  with API <key> to <app>, marked as <version>"
+  echo "  with API <key> to <app>"
   echo
-  echo "  for example, deploy.sh 700fa157-e0c0-4fbd-b988-8c18c21aab54 sleepy-depths-21550 DEV"
+  echo "  for example, deploy.sh 700fa157-e0c0-4fbd-b988-8c18c21aab54 sleepy-depths-21550"
   exit
 fi
 
 COMMIT=`git rev-parse --verify --short HEAD`
 API_KEY=$1
 APP_NAME=$2
-APP_VERSION=$3
+APP_VERSION="DEV"
 
 echo $APP_VERSION > ./VERSION
 echo $COMMIT > ./COMMIT

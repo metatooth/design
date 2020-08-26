@@ -53,7 +53,7 @@ export default {
   mounted() {
     console.log(process.env);
     const version = process.env.VUE_APP_VERSION ?
-      process.env.VUE_APP_VERSION : 'DEV';
+      process.env.VUE_APP_VERSION : 'DEVELOP';
     const commit = process.env.VUE_APP_COMMIT ?
       process.env.VUE_APP_COMMIT : '19740621';
     this.version = version + ' ' + commit;
