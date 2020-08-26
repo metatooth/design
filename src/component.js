@@ -20,7 +20,7 @@
  * WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-import {Object3D} from 'three';
+import {Group} from 'three';
 
 /**
  * Component - class of objects that are edited to form
@@ -30,12 +30,12 @@ import {Object3D} from 'three';
  * @param {Object3D} object3d the first child
  */
 function Component(object3d) {
-  Object3D.call(this);
+  Group.call(this);
   if (object3d) this.add(object3d);
   this.type = 'Component';
 }
 
-Component.prototype = Object.assign( Object.create( Object3D.prototype ), {
+Component.prototype = Object.assign( Object.create( Group.prototype ), {
   constructor: Component,
 
   isComponent: true,

@@ -36,12 +36,12 @@ PickTool.prototype = Object.assign( Object.create( Tool.prototype ), {
    * @return {Command}
    */
   interpret: function( manipulator ) {
-    if (manipulator.rubberband.children.length > 0) {
-      const comp = new Component;
-      for (let i = 0, l = manipulator.rubberband.children.length; i < l; ++i) {
-        comp.add(manipulator.rubberband.children[i]);
-      }
+    const comp = new Component;
+    while (manipulator.rubberband.children.length > 0) {
+      comp.add(manipulator.rubberband.children[0]);
+    }
 
+    if (comp.children.length > 0) {
       return new PasteCmd( manipulator.viewer.editor, [comp] );
     }
     return null;
