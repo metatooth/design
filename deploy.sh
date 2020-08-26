@@ -13,7 +13,7 @@ fi
 COMMIT=`git rev-parse --verify --short HEAD`
 API_KEY=$1
 APP_NAME=$2
-APP_VERSION="9"
+APP_VERSION="DEVELOP"
 
 echo $APP_VERSION > ./VERSION
 echo $COMMIT > ./COMMIT
