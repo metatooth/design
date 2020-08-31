@@ -8,6 +8,7 @@ import {faDownload} from '@fortawesome/free-solid-svg-icons';
 import {faPenSquare} from '@fortawesome/free-solid-svg-icons';
 import {faRedo} from '@fortawesome/free-solid-svg-icons';
 import {faRuler} from '@fortawesome/free-solid-svg-icons';
+import {faSave} from '@fortawesome/free-solid-svg-icons';
 import {faSync} from '@fortawesome/free-solid-svg-icons';
 import {faUndo} from '@fortawesome/free-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/vue-fontawesome';
@@ -17,6 +18,7 @@ library.add(faDownload);
 library.add(faPenSquare);
 library.add(faRedo);
 library.add(faRuler);
+library.add(faSave);
 library.add(faSync);
 library.add(faUndo);
 

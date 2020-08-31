@@ -18,10 +18,12 @@
           v-bind:keyCode="control.id"
           v-bind:label="control.label"
           v-bind:icon="control.icon"
-          v-bind:active="control.active">
+          v-bind:active="control.active"
+          ref="control">
         </user-control>
       </div>
       <div class="navbar-end">
+        <save-control v-bind:modified="modified" ref="save" />
         <user-control
           v-for="command in commands"
           v-bind:key="command.id"
@@ -29,7 +31,8 @@
           v-bind:keyCode="command.id"
           v-bind:label="command.label"
           v-bind:icon="command.icon"
-          v-bind:enabled="command.enabled">
+          v-bind:enabled="command.enabled"
+          ref="command">
         </user-control>
         <div class="navbar-item">
           <a class="button disabled" v-bind:href=assetUrl download>
@@ -84,12 +87,14 @@ import {RedoCmd} from './commands/redo-cmd.js';
 import {SaveCmd} from './commands/save-cmd.js';
 import {UndoCmd} from './commands/undo-cmd.js';
 
+import SaveControl from './SaveControl.vue';
 import UserControl from './UserControl.vue';
 import Viewer from './Viewer.vue';
 
 export default {
   name: 'editor',
   components: {
+    SaveControl,
     UserControl,
     Viewer,
   },
@@ -121,7 +126,7 @@ export default {
           label: 'Draw', icon: 'pen-square', cursor: 'crosshair',
           active: false},
       ],
-      modified: null,
+      modified: new ModifiedStatusVar(null, false),
       name: null,
       tool: null,
     };
@@ -141,7 +146,7 @@ export default {
             this.component = response;
             this.name = new ComponentNameVar(this.component,
                 this.unidraw.catalog);
-            this.modified = new ModifiedStatusVar(this.component);
+            this.modified = new ModifiedStatusVar(this.component, false);
             if (this.component.children[0].type === 'Mesh') {
               this.assetUrl = this.component.children[0].sourceUrl;
             }
@@ -172,13 +177,11 @@ export default {
           this.tool = this.controls[i].tool;
           this.controls[i].active = true;
           if (key === 'm') {
-            this.commands.forEach((elem) => {
-              elem.enabled = false;
-            });
+            this.commands[0].enabled = false;
+            this.commands[1].enabled = false;
           } else {
-            this.commands.forEach((elem) => {
-              elem.enabled = true;
-            });
+            this.commands[0].enabled = true;
+            this.commands[1].enabled = true;
           }
         }
       }
