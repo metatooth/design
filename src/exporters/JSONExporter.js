@@ -13,7 +13,7 @@ JSONExporter.prototype = {
 
   /**
    * Parse an object and generate assimp2json output
-   * @param {Component} object Root component to parse
+   * @param {Object3D} object Root component to parse
    * @param {Function} onDone Callback on completed
    * @param {Object} options options
    */

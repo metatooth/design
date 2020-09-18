@@ -29,6 +29,7 @@ import {Command} from './command.js';
  */
 function RedoCmd( editor ) {
   Command.call( this, editor, null );
+  this.type = 'RedoCmd';
 }
 
 RedoCmd.prototype = Object.assign( Object.create( Command.prototype ), {

@@ -1,10 +1,8 @@
-import {Vector3} from 'three';
 import {BufferGeometry} from 'three';
 import {BufferAttribute} from 'three';
 import {Line} from 'three';
 import {LineBasicMaterial} from 'three';
-
-import {Component} from '../component.js';
+import {Vector3} from 'three';
 
 import {Command} from './command.js';
 import {PasteCmd} from './paste-cmd.js';
@@ -98,11 +96,9 @@ DijkstraCmd.prototype = Object.assign( Object.create( Command.prototype ), {
       geometry.setAttribute( 'position',
           new BufferAttribute( newPositions, 3 ));
       geometry.setDrawRange( 0, results.length );
-      const material = new LineBasicMaterial({color: 0x00bbee,
-        linewidth: 5});
+      const material = new LineBasicMaterial({color: 0x00bbee, linewidth: 5});
 
-      const line = new Line( geometry, material );
-      const cmd = new PasteCmd( this.editor, [new Component(line)] );
+      const cmd = new PasteCmd( this.editor, [new Line( geometry, material )] );
       cmd.execute();
     }
   },

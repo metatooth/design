@@ -25,7 +25,7 @@ import {StateVar} from './state-var.js';
 /**
  * Description: modified-status state variable
  * @constructor
- * @param {Component} component
+ * @param {Object3D} component
  * @param {Boolean} modified
  */
 function ModifiedStatusVar(component, modified) {

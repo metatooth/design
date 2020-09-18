@@ -1,4 +1,4 @@
-import {Component} from '../component.js';
+import {Object3D} from 'three';
 import {GrowingVertices} from '../rubberbands/growing-vertices.js';
 import {PasteCmd} from '../commands/paste-cmd.js';
 import {VertexManip} from '../manipulators/vertex-manip.js';
@@ -36,7 +36,7 @@ PickTool.prototype = Object.assign( Object.create( Tool.prototype ), {
    * @return {Command}
    */
   interpret: function( manipulator ) {
-    const comp = new Component;
+    const comp = new Object3D;
     comp.name = 'point';
 
     while (manipulator.rubberband.children.length > 0) {

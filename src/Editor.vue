@@ -11,7 +11,7 @@
     </div>
     <div class="navbar-menu">
       <div class="navbar-start">
-        <user-control
+        <tool-control
           v-for="control in controls"
           v-bind:key="control.id"
           v-bind:keyLabel="control.id"
@@ -20,12 +20,13 @@
           v-bind:icon="control.icon"
           v-bind:active="control.active"
           ref="control">
-        </user-control>
+        </tool-control>
       </div>
       <div class="navbar-end">
         <save-control v-bind:modified="modified" ref="save" />
-        <user-control
+        <command-control
           v-for="command in commands"
+          v-bind:command="command.command"
           v-bind:key="command.id"
           v-bind:keyLabel="command.id"
           v-bind:keyCode="command.id"
@@ -33,7 +34,7 @@
           v-bind:icon="command.icon"
           v-bind:enabled="command.enabled"
           ref="command">
-        </user-control>
+        </command-control>
         <div class="navbar-item">
           <a class="button disabled" v-bind:href=assetUrl download>
             <span class="icon">
@@ -87,15 +88,17 @@ import {RedoCmd} from './commands/redo-cmd.js';
 import {RotateTool} from './tools/rotate-tool.js';
 import {UndoCmd} from './commands/undo-cmd.js';
 
+import CommandControl from './CommandControl.vue';
 import SaveControl from './SaveControl.vue';
-import UserControl from './UserControl.vue';
+import ToolControl from './ToolControl.vue';
 import Viewer from './Viewer.vue';
 
 export default {
   name: 'editor',
   components: {
+    CommandControl,
+    ToolControl,
     SaveControl,
-    UserControl,
     Viewer,
   },
   props: {
@@ -160,6 +163,11 @@ export default {
     this.tool = this.controls[0].tool;
   },
   methods: {
+    addObjects: function(clipboard) {
+      clipboard.forEach((obj) => {
+        this.component.add(obj);
+      });
+    },
     activate: function(key) {
       this.viewer.scene.remove( this.viewer.temp );
       this.viewer.temp = null;
@@ -214,7 +222,7 @@ export default {
             this.$refs.save.command.execute();
           } else if (this.tool.type != 'MeasureTool') {
             this.commands.forEach((elem) => {
-              if ( event.keyCode == elem.id ) {
+              if ( event.key == elem.id ) {
                 elem.command.execute();
               }
             });
@@ -222,6 +230,12 @@ export default {
         }
       }
     },
+    removeObjects: function(clipboard) {
+      clipboard.forEach((obj) => {
+        this.component.remove(obj);
+      });
+    },
+
   },
 };
 </script>

@@ -24,17 +24,18 @@ import {S3} from './api-services/s3.js';
 import {HTTP} from './api-services/http-common.js';
 import * as md5 from 'blueimp-md5';
 
+import {STLLoader} from 'three/examples/jsm/loaders/STLLoader.js';
+
+import {JSONLoader} from './loaders/JSONLoader.js';
 import {JSONExporter} from './exporters/JSONExporter.js';
 
 /**
  * A catalog manages persistent information
  * @constructor
- * @param {Creator} creator
  */
-function Catalog(creator) {
+function Catalog() {
   this.type = 'Catalog';
 
-  this.creator = creator;
   this.compMap = new Map;
 }
 
@@ -162,7 +163,6 @@ Object.assign( Catalog.prototype, {
   },
 
   parseData: function(data) {
-    const scope = this;
     return new Promise((resolve, reject) => {
       let url;
       if (data.url) {
@@ -174,9 +174,15 @@ Object.assign( Catalog.prototype, {
 
       const m = url.match(/\.\w+$/);
       if (m[0] == '.stl') {
-        resolve(scope.creator.create('Metamesh', url));
+        const loader = new STLLoader();
+        loader.load( url, function( object ) {
+          resolve(object);
+        });
       } else if (m[0] == '.json') {
-        resolve(scope.creator.create('Metaroot', url));
+        const loader = new JSONLoader();
+        loader.load( url, function( object ) {
+          resolve(object);
+        });
       } else {
         reject(new Error('Unknown file extension ', m[0]));
       }

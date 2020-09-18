@@ -26,7 +26,7 @@ import {NameVar} from './name-var.js';
  * Description: state variables allow for dataflow and
  * component-component commuinication
  * @constructor
- * @param {Component} component
+ * @param {Object3D} component
  * @param {Catalog} catalog
  */
 function ComponentNameVar(component, catalog) {

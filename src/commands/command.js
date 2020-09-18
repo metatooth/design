@@ -21,12 +21,11 @@
  */
 
 /**
- * Description: Command objects operator on selected componets, and
+ * Description: Command objects operator on selected components, and
  * editor, or the app itself.
  * @constructor
- * @param {Editor} editor: the editor the command acts within
- * @param {Array} clipboard: an array of Component objects that will
- * interpret the command
+ * @param {Editor} editor the editor the command acts within
+ * @param {Array} clipboard an array of objects that will be acted upon
  */
 function Command( editor, clipboard ) {
   this.editor = editor;

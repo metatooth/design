@@ -3,7 +3,6 @@ import {BufferGeometry} from 'three';
 import {Mesh} from 'three';
 import {MeshStandardMaterial} from 'three';
 
-import {Component} from '../src/component.js';
 import {JSONExporter} from '../src/exporters/JSONExporter.js';
 import {JSONLoader} from '../src/loaders/JSONLoader.js';
 
@@ -12,9 +11,8 @@ describe('JSONLoader', () => {
     expect(new JSONLoader()).toEqual(expect.anything());
   });
 
-
   test('parse - basic', () => {
-    const comp = new Component();
+    const comp = new Object3D();
 
     const geometry = new BufferGeometry();
     const array = new Float32Array( [-1, -1, -1, 1, 1, 1, 4, 4, 4] );

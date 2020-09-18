@@ -51,7 +51,7 @@ Object.assign( Tool.prototype, {
   },
 
   /**
-    * @return {Component}
+    * @return {Object3D}
     */
   component: function() {
     return null;

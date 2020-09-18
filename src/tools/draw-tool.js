@@ -1,6 +1,6 @@
+import {Object3D} from 'three';
 import {Vector3} from 'three';
 
-import {Component} from '../component.js';
 import {GrowingMultiLine} from '../rubberbands/growing-multi-line.js';
 import {PasteCmd} from '../commands/paste-cmd.js';
 import {ScribbleVertexManip} from '../manipulators/scribble-vertex-manip.js';
@@ -39,7 +39,7 @@ DrawTool.prototype = Object.assign( Object.create( Tool.prototype ), {
    * @return {Command}
    */
   interpret: function( manipulator ) {
-    const comp = new Component;
+    const comp = new Object3D;
     comp.name = 'multiline';
 
     while (manipulator.rubberband.children.length > 0) {

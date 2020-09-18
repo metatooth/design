@@ -11,7 +11,6 @@ import {Points} from 'three';
 import {PointsMaterial} from 'three';
 import {Vector3} from 'three';
 
-import {Component} from '../src/component.js';
 import {JSONExporter} from '../src/exporters/JSONExporter.js';
 
 describe('JSONExporter', () => {
@@ -29,7 +28,7 @@ describe('JSONExporter', () => {
   });
 
   test('parse - meshref', () => {
-    const comp = new Component();
+    const comp = new Object3D();
     const mesh = new Mesh(new Geometry(),
         new MeshPhongMaterial({color: 0x00bbee,
           specular: 0x222222,
@@ -55,7 +54,7 @@ describe('JSONExporter', () => {
         if (prop.key === '?mat.name') {
           expect(prop.value).toBe('DefaultMaterial');
         } else if (prop.key === '?clr.diffuse') {
-          expect(prop.value[0]).toBeCloseTo(0.);
+          expect(prop.value[0]).toBeCloseTo(0.000);
           expect(prop.value[1]).toBeCloseTo(0.733);
           expect(prop.value[2]).toBeCloseTo(0.933);
         } else if (prop.key === '?clr.specular') {
@@ -70,7 +69,7 @@ describe('JSONExporter', () => {
   });
 
   test('parse - points', () => {
-    const comp = new Component();
+    const comp = new Object3D();
 
     const points = [];
     points.push( new Vector3( -10, 0, 0 ) );
@@ -105,7 +104,7 @@ describe('JSONExporter', () => {
   });
 
   test('parse - line', () => {
-    const comp = new Component();
+    const comp = new Object3D();
 
     const points = [];
     points.push( new Vector3( -10, 0, 0 ) );
@@ -140,7 +139,7 @@ describe('JSONExporter', () => {
   });
 
   test('parse - mesh', () => {
-    const comp = new Component();
+    const comp = new Object3D();
 
     const geometry = new BufferGeometry();
     const array = new Float32Array( [-1, -1, -1, 1, 1, 1, 4, 4, 4] );

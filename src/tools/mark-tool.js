@@ -20,7 +20,6 @@
  * WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-import {Component} from '../component.js';
 import {ClickManip} from '../manipulators/click-manip.js';
 import {Mesh} from 'three';
 import {MeshPhongMaterial} from 'three';
@@ -70,15 +69,14 @@ MarkTool.prototype = Object.assign( Object.create( Tool.prototype ), {
       const geometry = new SphereGeometry( this.radius, this.div, this.div );
       const material = new MeshPhongMaterial( {color: this.color,
         specular: this.specular, shininess: this.shininess} );
+
       const sphere = new Mesh( geometry, material );
       sphere.position.x = manipulator.point.x;
       sphere.position.y = manipulator.point.y;
       sphere.position.z = manipulator.point.z;
+      sphere.name = 'point';
 
-      const comp = new Component(sphere);
-      comp.name = 'point';
-
-      return new PasteCmd(manipulator.viewer.editor(), [comp]);
+      return new PasteCmd(manipulator.viewer.editor(), [sphere]);
     }
     return null;
   },

@@ -31,6 +31,7 @@
 
 import {AmbientLight} from 'three';
 import {DirectionalLight} from 'three';
+import {Object3D} from 'three';
 import {OrthographicCamera} from 'three';
 import {Scene} from 'three';
 import {WebGLRenderer} from 'three';
@@ -39,14 +40,13 @@ import {Vector3} from 'three';
 
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls';
 
-import {Component} from './component.js';
 import {Tool} from './tools/tool.js';
 
 export default {
   name: 'viewer',
   props: {
     component: {
-      type: Component,
+      type: Object3D,
       default: function() {
         return null;
       },

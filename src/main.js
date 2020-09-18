@@ -13,6 +13,24 @@ import {faSync} from '@fortawesome/free-solid-svg-icons';
 import {faUndo} from '@fortawesome/free-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/vue-fontawesome';
 
+import {Object3D} from 'three';
+
+Object3D.prototype.interpret = function( cmd ) {
+  if ( cmd.type === 'PasteCmd' ) {
+    cmd.clipboard.forEach((obj) => {
+      this.add( obj );
+    });
+  }
+};
+
+Object3D.prototype.uninterpret = function( cmd ) {
+  if ( cmd.type === 'PasteCmd' ) {
+    cmd.clipboard.forEach((obj) => {
+      this.remove( obj );
+    });
+  }
+};
+
 library.add(faCrosshairs);
 library.add(faDownload);
 library.add(faPenSquare);

@@ -25,9 +25,8 @@ import {Command} from './command.js';
 /**
  * Description: paste command
  * @constructor
- * @param {Editor} editor: the editor the command acts within
- * @param {Array} clipboard: an array of Component objects that will
- * interpret the command
+ * @param {Editor} editor the editor the command acts within
+ * @param {Array<Object3D>} clipboard an array of objects to act upon
  */
 function PasteCmd( editor, clipboard ) {
   Command.call( this, editor, clipboard );
@@ -42,12 +41,12 @@ PasteCmd.prototype = Object.assign( Object.create( Command.prototype ), {
   executed: false,
 
   execute: function() {
-    this.editor.component.interpret(this);
+    this.editor.addObjects(this.clipboard);
     this.executed = true;
   },
 
   unexecute: function() {
-    this.editor.component.uninterpret(this);
+    this.editor.removeObjects(this.clipboard);
     this.executed = false;
   },
 

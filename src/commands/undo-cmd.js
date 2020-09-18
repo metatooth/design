@@ -29,6 +29,7 @@ import {Command} from './command.js';
  */
 function UndoCmd( editor ) {
   Command.call( this, editor, null );
+  this.type = 'UndoCmd';
 }
 
 UndoCmd.prototype = Object.assign( Object.create( Command.prototype ), {
