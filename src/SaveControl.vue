@@ -8,7 +8,7 @@
       <font-awesome-icon icon="save"/>
     </span>
     <span>
-      <strong>Save [{{ this.key }}]</strong>
+      <strong>Save [{{ this.code }}]</strong>
     </span>
   </div>
 </div>
@@ -26,7 +26,7 @@ export default {
   data: function() {
     return {
       command: null,
-      key: 's',
+      code: 's',
     };
   },
   mounted: function() {

@@ -75,7 +75,10 @@ MarkTool.prototype = Object.assign( Object.create( Tool.prototype ), {
       sphere.position.y = manipulator.point.y;
       sphere.position.z = manipulator.point.z;
 
-      return new PasteCmd(manipulator.viewer.editor(), [new Component(sphere)]);
+      const comp = new Component(sphere);
+      comp.name = 'point';
+
+      return new PasteCmd(manipulator.viewer.editor(), [comp]);
     }
     return null;
   },

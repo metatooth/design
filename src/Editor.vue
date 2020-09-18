@@ -84,7 +84,7 @@ import {MeasureTool} from './tools/measure-tool.js';
 import {ModifiedStatusVar} from './modified-status-var.js';
 import {PickTool} from './tools/pick-tool.js';
 import {RedoCmd} from './commands/redo-cmd.js';
-import {SaveCmd} from './commands/save-cmd.js';
+import {RotateTool} from './tools/rotate-tool.js';
 import {UndoCmd} from './commands/undo-cmd.js';
 
 import SaveControl from './SaveControl.vue';
@@ -113,7 +113,7 @@ export default {
           enabled: true},
       ],
       controls: [
-        {id: 'r', tool: null,
+        {id: 'r', tool: new RotateTool,
           label: 'Rotate View', icon: 'sync', cursor: 'default',
           active: true},
         {id: 'm', tool: new MeasureTool,
@@ -147,7 +147,7 @@ export default {
             this.name = new ComponentNameVar(this.component,
                 this.unidraw.catalog);
             this.modified = new ModifiedStatusVar(this.component, false);
-            if (this.component.children[0].type === 'Mesh') {
+            if (this.component.type === 'Metamesh') {
               this.assetUrl = this.component.children[0].sourceUrl;
             }
           });
@@ -156,23 +156,18 @@ export default {
       document.body.style.cursor = 'default';
     },
   },
+  mounted: function() {
+    this.tool = this.controls[0].tool;
+  },
   methods: {
     activate: function(key) {
-      // :NOTE: 20200824 Terry: This handles a direct click on a command button.
-      for (let i = 0, l = this.commands.length; i < l; i++) {
-        if (key === this.commands[i].id) {
-          this.commands[i].command.execute();
-          return;
-        }
-      }
-
-      this.tool = null;
       this.viewer.scene.remove( this.viewer.temp );
       this.viewer.temp = null;
-
+      let activated = false;
       for (let i = 0, l = this.controls.length; i < l; i++) {
         this.controls[i].active = false;
         if (key === this.controls[i].id) {
+          activated = true;
           document.body.style.cursor = this.controls[i].cursor;
           this.tool = this.controls[i].tool;
           this.controls[i].active = true;
@@ -185,54 +180,45 @@ export default {
           }
         }
       }
+      return activated;
     },
     key: function( event ) {
       if (event.type == 'keydown') {
-        for (let i = 0, l = this.controls.length; i < l; i++) {
-          if (event.key === this.controls[i].id) {
-            this.activate(event.key);
-            return;
-          }
-        }
+        if (!this.activate(event.key)) {
+          if ( event.keyCode == 32 ) {
+            // SPACE
+            console.log(this.component);
+            let geometry = null;
+            for (let i = 0, l = this.component.children.length; i < l; i++) {
+              if (this.component.children[i].type === 'Mesh') {
+                continue;
+              }
 
-        if (!this.tool || this.tool.type != 'MeasureTool') {
-          for (let i = 0, l = this.commands.length; i < l; i++) {
-            if (event.key === this.commands[i].id) {
-              this.commands[i].command.execute();
-              return;
+              geometry = this.component.children[i].children[0].geometry;
+              const positions = geometry.getAttribute('position');
+              const last = (positions.count - 1) * 3;
+              console.log(last);
+              for (let j = 0, l = (positions.count - 1) * 3; j < l; j++) {
+                const source = new Vector3(positions.array[j],
+                    positions.array[j+1],
+                    positions.array[j+2]);
+                const target = new Vector3(positions.array[j+3],
+                    positions.array[j+4],
+                    positions.array[j+5]);
+                const dijkstra = new DijkstraCmd(this, source, target);
+                dijkstra.execute();
+              }
             }
+          } else if ( event.keyCode == 83 ) {
+            // s
+            this.$refs.save.command.execute();
+          } else if (this.tool.type != 'MeasureTool') {
+            this.commands.forEach((elem) => {
+              if ( event.keyCode == elem.id ) {
+                elem.command.execute();
+              }
+            });
           }
-        }
-
-        if ( event.keyCode == 32 ) {
-          // SPACE
-          console.log(this.component);
-          let geometry = null;
-          for (let i = 0, l = this.component.children.length; i < l; i++) {
-            if (this.component.children[i].type === 'Mesh') {
-              continue;
-            }
-
-            geometry = this.component.children[i].children[0].geometry;
-            const positions = geometry.getAttribute('position');
-            const last = (positions.count - 1) * 3;
-            console.log(last);
-            for (let j = 0, l = (positions.count - 1) * 3; j < l; j++) {
-              const source = new Vector3(positions.array[j],
-                  positions.array[j+1],
-                  positions.array[j+2]);
-              const target = new Vector3(positions.array[j+3],
-                  positions.array[j+4],
-                  positions.array[j+5]);
-              const dijkstra = new DijkstraCmd(this, source, target);
-              dijkstra.execute();
-            }
-          }
-        } else if ( event.ctrlKey && event.keyCode == 83 ) {
-          // Ctrl+S
-          event.preventDefault();
-          const save = new SaveCmd(this);
-          save.execute();
         }
       }
     },

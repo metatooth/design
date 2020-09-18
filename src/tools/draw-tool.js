@@ -1,3 +1,5 @@
+import {Vector3} from 'three';
+
 import {Component} from '../component.js';
 import {GrowingMultiLine} from '../rubberbands/growing-multi-line.js';
 import {PasteCmd} from '../commands/paste-cmd.js';
@@ -52,7 +54,7 @@ DrawTool.prototype = Object.assign( Object.create( Tool.prototype ), {
   },
 
   subdivide: function(a, b, steps) {
-    const dir = new Vector3;
+    const dir = new Vector3();
     dir.subVectors(b, a);
 
     const points = [];

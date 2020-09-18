@@ -217,13 +217,13 @@ export default {
       if (this.index == null) {
         this.index = 0;
         while (this.component.children[this.index]) {
-          if (this.component.children[this.index].type == 'Mesh') {
+          if (this.component.children[this.index].name === 'maxillary') {
             break;
           }
           this.index++;
         }
       }
-      return this.component.children[this.index];
+      return this.component.children[this.index].children[0];
     },
     /**
      * Convert mouse position to normalized device coordinates

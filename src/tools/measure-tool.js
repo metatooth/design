@@ -23,7 +23,7 @@ MeasureTool.prototype = Object.assign( Object.create( Tool.prototype ), {
    * @return {Manipulator}
    */
   create: function( viewer, event ) {
-    if (event.type == 'mousedown') {
+    if (event.type == 'mouseup') {
       const v = viewer.unproject( event.clientX, event.clientY );
       return new ClickDragClickManip( viewer,
           new RubberRuler(viewer, v, v),

@@ -31,6 +31,7 @@
 import Editor from './Editor.vue';
 
 import {Catalog} from './catalog.js';
+import {Creator} from './creator.js';
 import {History} from './history.js';
 
 import {DirtyCmd} from './commands/dirty-cmd.js';
@@ -43,7 +44,7 @@ export default {
   },
   data: function() {
     return {
-      catalog: new Catalog,
+      catalog: new Catalog(new Creator),
       histories: new Map,
       maxhistlen: 100,
       uri: null,

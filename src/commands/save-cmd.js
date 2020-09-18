@@ -42,7 +42,7 @@ SaveCmd.prototype = Object.assign( Object.create( Command.prototype ), {
     const modified = this.editor.modified;
     const compName = this.editor.name;
     const name = (compName) ? compName.name : undefined;
-    if (name === undefined) {
+    if (name === undefined || compName.name.match(/^\/assets\//)) {
       const saveas = new SaveAsCmd(this.editor);
       saveas.execute();
     } else if (modified && modified.modified) {

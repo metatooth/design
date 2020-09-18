@@ -10,8 +10,6 @@ function ClickDragClickManip( viewer, rubberband, tool ) {
   DragManip.call( this, viewer, rubberband, tool );
 
   this.type = 'ClickDragClickManip';
-
-  this.first = true;
 }
 
 ClickDragClickManip.prototype = Object.assign(
@@ -42,10 +40,6 @@ ClickDragClickManip.prototype = Object.assign(
           const p = this.viewer.unproject( event.clientX, event.clientY );
           this.rubberband.track( p );
         } else if (event.type == 'mouseup' ) {
-          if (this.first) {
-            this.first = false;
-            return true;
-          }
           return false;
         }
         return true;
