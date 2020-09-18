@@ -1,11 +1,14 @@
 import {BufferAttribute} from 'three';
 import {BufferGeometry} from 'three';
+import {Color} from 'three';
 import {FileLoader} from 'three';
 import {Loader} from 'three';
 import {LoaderUtils} from 'three';
 import {Mesh} from 'three';
 import {MeshPhongMaterial} from 'three';
 import {Object3D} from 'three';
+
+import {STLLoader} from 'three/examples/jsm/loaders/STLLoader.js';
 
 /**
  * Imports from assimp2json format.
@@ -34,7 +37,8 @@ JSONLoader.prototype = Object.assign( Object.create( Loader.prototype ), {
 
     loader.load( url, function( buffer ) {
       try {
-        onLoad( scope.parse( buffer, path ) );
+        const data = JSON.parse(buffer);
+        onLoad( scope.parse( data, path ) );
       } catch ( e ) {
         if ( onError ) {
           onError( e );
@@ -62,11 +66,11 @@ JSONLoader.prototype = Object.assign( Object.create( Loader.prototype ), {
       const m = new MeshPhongMaterial();
 
       material.properties.forEach((prop) => {
-        if (prop.key === '$clr.diffuse') {
-          m.color = new Color(prop.value);
-        } else if (prop.key === '$clr.specular') {
-          m.specular = new Color(prop.value);
-        } else if (prop.key === '$clr.shininess') {
+        if (prop.key === '?clr.diffuse') {
+          m.color = new Color(prop.value[0], prop.value[1], prop.value[2]);
+        } else if (prop.key === '?clr.specular') {
+          m.specular = new Color(prop.value[0], prop.value[1], prop.value[2]);
+        } else if (prop.key === '$mat.shininess') {
           m.shininess = prop.value;
         }
       });
