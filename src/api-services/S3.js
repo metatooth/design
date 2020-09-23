@@ -22,7 +22,6 @@ Object.assign( S3.prototype, {
   isS3: true,
 
   upload: function(blob, name) {
-    console.log('S3 upload ~> ', blob, name);
     const params = {
       Bucket: process.env.VUE_APP_S3_BUCKET_NAME,
       Key: name,

@@ -62,7 +62,6 @@ export default {
     component: function( newVal, oldVal ) {
       if (this.scene) {
         this.scene.remove( oldVal );
-        console.log( 'add to scene', newVal.id );
         this.scene.add( newVal );
       }
     },

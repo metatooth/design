@@ -24,6 +24,11 @@ import {S3} from './api-services/S3.js';
 import {HTTP} from './api-services/http-common.js';
 import * as md5 from 'blueimp-md5';
 
+import {Mesh} from 'three';
+import {MeshPhongMaterial} from 'three';
+import {Object3D} from 'three';
+import {Vector3} from 'three';
+
 import {STLLoader} from 'three/examples/jsm/loaders/STLLoader.js';
 
 import {JSONLoader} from './loaders/JSONLoader.js';
@@ -141,18 +146,23 @@ Object.assign( Catalog.prototype, {
   },
 
   jsonCreate: function(data, name) {
-    const postpath = name + '/revisions';
+    let postpath;
+    if (name.match(/^\/plans\/[0-9a-f]*/)) {
+      postpath = name + '/revisions';
+    } else {
+      postpath = '/plans';
+      data.data.name = name;
+    }
 
     return HTTP.post(postpath, data)
         .then((response) => {
-          const newname = postpath + '/' + response.data.locator;
+          const newname = postpath + '/' + response.data.data.locator;
           const comp = this.compMap.get(name);
           this.forget(comp);
           this.compMap.set(newname, comp);
           return true;
         })
         .catch((error) => {
-          console.log('error at jsonCreate: ', error);
           return false;
         });
   },
@@ -165,11 +175,9 @@ Object.assign( Catalog.prototype, {
               return true;
             })
             .catch((error) => {
-              console.log('error at jsonSave: ', error);
               return false;
             });
       } else {
-        console.log(name, 'not writeable at jsonSave');
         return false;
       }
     });
@@ -188,7 +196,28 @@ Object.assign( Catalog.prototype, {
       const m = url.match(/\.\w+$/);
       if (m[0] == '.stl') {
         const loader = new STLLoader();
-        loader.load( url, function( object ) {
+        loader.load( url, function( geometry ) {
+          const material = new MeshPhongMaterial( {
+            color: 0x00bbee,
+            specular: 0x2d2d2d,
+            shininess: 40,
+          } );
+
+          const mesh = new Mesh(geometry, material);
+          mesh.name = 'maxillary';
+          mesh.geometry.sourceUrl = url;
+          geometry.computeBoundingBox();
+
+          const off = new Vector3();
+          geometry.boundingBox.getCenter(off);
+          mesh.position.x = - off.x;
+          mesh.position.y = - off.y;
+          mesh.position.z = - off.z;
+
+          const object = new Object3D();
+          object.name = '<MetatoothRoot>';
+          object.add(mesh);
+
           resolve(object);
         });
       } else if (m[0] == '.json') {

@@ -52,8 +52,13 @@ SaveAsCmd.prototype = Object.assign( Object.create( Command.prototype ), {
             unidraw.clearHistory(comp);
             const name = unidraw.catalog.name(comp);
             namevar.name = name;
+
+            if (oldname.match(/^\/assets/)) {
+              const arr = name.split('/');
+              window.location.href = '?plan=' + arr[2];
+            }
           } else {
-            console.log('save as -- not ok!');
+            console.warn('save as -- not ok!');
           }
         });
   },

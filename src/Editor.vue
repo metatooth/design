@@ -146,7 +146,6 @@ export default {
     uri: function( newVal, oldVal ) {
       this.unidraw.catalog.retrieve(newVal)
           .then((response) => {
-            console.log('now response?', response.id);
             this.component = response;
             this.name = new ComponentNameVar(this.component,
                 this.unidraw.catalog);
