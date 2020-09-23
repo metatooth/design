@@ -20,7 +20,7 @@
 import {Command} from './commands/command.js';
 
 export default {
-  name: 'user-control',
+  name: 'command-control',
   props: {
     command: {
       type: Command,

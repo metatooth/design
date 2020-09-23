@@ -1,11 +1,10 @@
-import {Object3D} from 'three';
 import {GrowingVertices} from '../rubberbands/growing-vertices.js';
 import {PasteCmd} from '../commands/paste-cmd.js';
 import {VertexManip} from '../manipulators/vertex-manip.js';
 import {Tool} from './tool.js';
 
 /**
- * A tool for picking points on the target mesh.
+ * A tool for picking a point on the target mesh.
  * @constructor
  */
 function PickTool() {
@@ -36,15 +35,9 @@ PickTool.prototype = Object.assign( Object.create( Tool.prototype ), {
    * @return {Command}
    */
   interpret: function( manipulator ) {
-    const comp = new Object3D;
-    comp.name = 'point';
-
-    while (manipulator.rubberband.children.length > 0) {
-      comp.add(manipulator.rubberband.children[0]);
-    }
-
-    if (comp.children.length > 0) {
-      return new PasteCmd( manipulator.viewer.editor, [comp] );
+    if (manipulator.rubberband.children.length > 0) {
+      return new PasteCmd( manipulator.viewer.editor,
+          manipulator.rubberband.children );
     }
     return null;
   },

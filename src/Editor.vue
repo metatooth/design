@@ -146,13 +146,11 @@ export default {
     uri: function( newVal, oldVal ) {
       this.unidraw.catalog.retrieve(newVal)
           .then((response) => {
+            console.log('now response?', response.id);
             this.component = response;
             this.name = new ComponentNameVar(this.component,
                 this.unidraw.catalog);
             this.modified = new ModifiedStatusVar(this.component, false);
-            if (this.component.type === 'Metamesh') {
-              this.assetUrl = this.component.children[0].sourceUrl;
-            }
           });
     },
     component: function( newVal, oldVal ) {

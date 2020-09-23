@@ -30,7 +30,6 @@ JSONExporter.prototype = {
     };
 
     const pending = [];
-    const nodeMap = new Map();
 
     const cachedData = {
       materials: new Map(),
@@ -42,9 +41,10 @@ JSONExporter.prototype = {
      * Process material
      *
      * @param {THREE.Material} material Material to process
+* @param {String} name
      * @return {Integer} Index of the process material in the "materials" array
      */
-    function processMaterial( material ) {
+    function processMaterial( material, name ) {
       if ( cachedData.materials.has( material ) ) {
         return cachedData.materials.get( material );
       }
@@ -56,7 +56,7 @@ JSONExporter.prototype = {
             semantic: 0,
             index: 0,
             type: 3,
-            value: 'DefaultMaterial',
+            value: name,
           },
         ],
       };
@@ -116,12 +116,12 @@ JSONExporter.prototype = {
         return cachedData.meshes.get( meshCacheKey );
       }
 
-      const matIndex = processMaterial( mesh.material );
+      const matIndex = processMaterial( mesh.material, 'meshref' );
 
       const jsonMeshRef = {
         name: mesh.name,
         materialindex: matIndex,
-        url: mesh.sourceUrl,
+        url: mesh.geometry.sourceUrl,
       };
 
       if ( ! outputJSON.meshrefs ) {
@@ -149,7 +149,7 @@ JSONExporter.prototype = {
         return cachedData.meshes.get( meshCacheKey );
       }
 
-      const matIndex = processMaterial( mesh.material );
+      const matIndex = processMaterial( mesh.material, 'mesh' );
 
       let type;
       if ( mesh.isPoints ) {
@@ -164,8 +164,26 @@ JSONExporter.prototype = {
         name: mesh.name,
         materialindex: matIndex,
         primitivetypes: type,
-        vertices: mesh.geometry.getAttribute('position').array,
       };
+
+      if ( mesh.geometry.isBufferGeometry ) {
+        console.log('!!! IS BUFFFER GEOMETRY !!!');
+        jsonMesh.vertices = mesh.geometry.getAttribute('position').array;
+      } else {
+        jsonMesh.vertices = [];
+        mesh.geometry.vertices.forEach(( vert ) => {
+          jsonMesh.vertices.push(vert.x);
+          jsonMesh.vertices.push(vert.y);
+          jsonMesh.vertices.push(vert.z);
+        });
+
+        jsonMesh.faces = [];
+        mesh.geometry.faces.forEach(( face ) => {
+          jsonMesh.faces.push(face.a);
+          jsonMesh.faces.push(face.b);
+          jsonMesh.faces.push(face.c);
+        });
+      }
 
       if ( ! outputJSON.meshes ) {
         outputJSON.meshes = [];
@@ -184,28 +202,28 @@ JSONExporter.prototype = {
      * @return {Integer} Index of the node in the nodes list
      */
     function processNode( object ) {
-      if ( ! outputJSON.rootnode.children ) {
-        outputJSON.rootnode.children = [];
-      }
-
       const jsonNode = {};
 
       if ( object.matrixAutoUpdate ) {
         object.updateMatrix();
       }
+      console.log('process node',
+          object.id,
+          object.matrix.elements);
 
       jsonNode.transformation = object.matrix.elements;
+      console.log('transform', jsonNode.transformation);
 
-      if ( object.name !== '' ) {
-        jsonNode.name = String( object.name );
-      }
+      jsonNode.name = object.name || '';
+
+
       if ( object.isLine || object.isPoints ) {
         const meshIndex = processMesh( object );
         if ( meshIndex !== null ) {
           jsonNode.meshes = [meshIndex];
         }
       } else if ( object.isMesh ) {
-        if ( object.sourceUrl ) {
+        if ( object.geometry.sourceUrl ) {
           const meshRefIndex = processMeshRef( object );
           if ( meshRefIndex !== null ) {
             jsonNode.meshrefs = [meshRefIndex];
@@ -218,40 +236,32 @@ JSONExporter.prototype = {
         }
       }
 
-      if ( object.children.length > 0 ) {
-        const children = [];
+      const children = [];
 
-        for (let i = 0, l = object.children.length; i < l; i ++ ) {
-          const node = processNode( object.children[i] );
-          if ( node !== null ) {
-            children.push( node );
-          }
-        }
+      console.log('object has children?',
+          object.id,
+          object.type,
+          object.name,
+          object.children.length);
 
-        if ( children.length > 0 ) {
-          jsonNode.children = children;
+      object.children.forEach(( child ) => {
+        const node = processNode( child );
+        if ( node !== null ) {
+          children.push( node );
         }
+      });
+
+      if ( children.length > 0 ) {
+        jsonNode.children = children;
       }
 
-      outputJSON.rootnode.children.push( jsonNode );
-
-      const nodeIndex = outputJSON.rootnode.children.length - 1;
-      nodeMap.set( object, nodeIndex );
-
-      return nodeIndex;
+      return jsonNode;
     };
 
-    /**
-     * Process the root node of the tree
-     * @param {Object3D} object
-     */
-    function processRootNode( object ) {
-      for ( let i = 0, il = object.children.length; i < il; i ++ ) {
-        processNode( object.children[i] );
-      }
-    };
 
-    processRootNode( object );
+    console.log('process root node ~>', object);
+
+    outputJSON.rootnode = processNode( object );
 
     Promise.all( pending ).then( function() {
       onDone( outputJSON );

@@ -29,6 +29,7 @@
  * WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+import {AxesHelper} from 'three';
 import {AmbientLight} from 'three';
 import {DirectionalLight} from 'three';
 import {Object3D} from 'three';
@@ -62,6 +63,7 @@ export default {
     component: function( newVal, oldVal ) {
       if (this.scene) {
         this.scene.remove( oldVal );
+        console.log( 'add to scene', newVal.id );
         this.scene.add( newVal );
       }
     },
@@ -144,6 +146,8 @@ export default {
       this.initRenderer();
 
       this.initControls();
+
+      this.scene.add( new AxesHelper(50) );
 
       window.addEventListener( 'resize', this.isResized, false );
     },

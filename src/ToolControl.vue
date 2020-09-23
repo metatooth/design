@@ -18,7 +18,7 @@
 
 <script>
 export default {
-  name: 'user-control',
+  name: 'tool-control',
   props: {
     label: {
       type: String,

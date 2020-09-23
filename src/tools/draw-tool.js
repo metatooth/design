@@ -1,4 +1,4 @@
-import {Object3D} from 'three';
+import {Group} from 'three';
 import {Vector3} from 'three';
 
 import {GrowingMultiLine} from '../rubberbands/growing-multi-line.js';
@@ -39,7 +39,7 @@ DrawTool.prototype = Object.assign( Object.create( Tool.prototype ), {
    * @return {Command}
    */
   interpret: function( manipulator ) {
-    const comp = new Object3D;
+    const comp = new Group;
     comp.name = 'multiline';
 
     while (manipulator.rubberband.children.length > 0) {

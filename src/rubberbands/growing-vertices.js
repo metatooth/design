@@ -58,6 +58,7 @@ GrowingVertices.prototype = Object.assign( Object.create(
   update: function() {
     if (this.vertices.length) {
       const mesh = new Mesh(this.geometry, this.material);
+      mesh.name = 'point-as-sphere';
 
       const v = this.vertices[this.vertices.length - 1];
 

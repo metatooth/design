@@ -115,7 +115,13 @@ Object.assign( Catalog.prototype, {
   },
 
   writable: function(name) {
-    console.log('not implemented!');
+    return new Promise((resolve, reject) => {
+      if (name.match(/revisions\/[0-9a-f]*$/)) {
+        resolve(true);
+      } else {
+        resolve(false);
+      }
+    });
   },
 
   createComponent: function(name, object) {
@@ -135,7 +141,7 @@ Object.assign( Catalog.prototype, {
   },
 
   jsonCreate: function(data, name) {
-    const postpath = '/plans';
+    const postpath = name + '/revisions';
 
     return HTTP.post(postpath, data)
         .then((response) => {
@@ -152,14 +158,21 @@ Object.assign( Catalog.prototype, {
   },
 
   jsonSave: function(data, name) {
-    return HTTP.put(name, data)
-        .then((response) => {
-          return true;
-        })
-        .catch((error) => {
-          console.log('error at jsonSave: ', error);
-          return false;
-        });
+    return this.writable(name).then((ok) => {
+      if (ok) {
+        return HTTP.put(name, data)
+            .then((response) => {
+              return true;
+            })
+            .catch((error) => {
+              console.log('error at jsonSave: ', error);
+              return false;
+            });
+      } else {
+        console.log(name, 'not writeable at jsonSave');
+        return false;
+      }
+    });
   },
 
   parseData: function(data) {
