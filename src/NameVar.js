@@ -20,44 +20,25 @@
  * WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-import {Command} from './command.js';
+import {StateVar} from './StateVar.js';
 
 /**
- * Description: command sets the modified flag for the root component
- * @param {Editor} editor: the editor the command acts within
+ * Description: state variables allow for dataflow and
+ * component-component commuinication
+ * @constructor
+ * @param {String} name: the name to track
  */
-function DirtyCmd( editor ) {
-  Command.call( this, editor, null );
-  this.type = 'DirtyCmd';
+function NameVar(name) {
+  StateVar.call(this);
+  this.type = 'NameVar';
+  this.name = name;
 }
 
-DirtyCmd.prototype = Object.assign( Object.create( Command.prototype ), {
-  constructor: DirtyCmd,
+NameVar.prototype = Object.assign( Object.create( StateVar.prototype ), {
+  constructor: NameVar,
 
-  isDirtyCmd: true,
-
-  reverse: false,
-
-  execute: function() {
-    if (this.reverse) {
-      this.reverse = false;
-      this.unexecute();
-      this.reverse = true;
-    } else {
-      if (this.editor.modified) this.editor.modified.modified = true;
-    }
-  },
-
-  unexecute: function() {
-    if (this.reverse) {
-      this.reverse = false;
-      this.execute();
-      this.reverse = true;
-    } else {
-      if (this.editor.modified) this.editor.modified.modified = false;
-    }
-  },
+  isNameVar: true,
 
 });
 
-export {DirtyCmd};
+export {NameVar};

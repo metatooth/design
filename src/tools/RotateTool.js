@@ -1,7 +1,7 @@
-import {Tool} from './tool.js';
+import {Tool} from './Tool.js';
 
 /**
- * Description: A tool for drawing.
+ * This tool is active when rotating the view.
  * @constructor
  */
 function RotateTool() {

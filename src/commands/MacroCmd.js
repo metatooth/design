@@ -20,53 +20,49 @@
  * WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-import {Command} from './command.js';
-import {SaveAsCmd} from './save-as-cmd.js';
+import {Command} from './Command.js';
 
 /**
- * Description: save command
+ * Description: command containing a sequence of other commands to execute
  * @constructor
  * @param {Editor} editor: the editor the command acts within
+ * @param {Command} c1
+ * @param {Command} c2
  */
-function SaveCmd( editor ) {
-  Command.call( this, editor, null );
-  this.type = 'SaveCmd';
+function MacroCmd( editor, c1, c2 ) {
+  Command.call( this, editor );
+  this.type = 'MacroCmd';
+  this.cmds = [];
+  if (c1) this.cmds.unshift(c1);
+  if (c2) this.cmds.unshift(c2);
 }
 
-SaveCmd.prototype = Object.assign( Object.create( Command.prototype ), {
-  constructor: SaveCmd,
+MacroCmd.prototype = Object.assign( Object.create( Command.prototype ), {
+  constructor: MacroCmd,
 
-  isSaveCmd: true,
+  isMacroCmd: true,
 
   execute: function() {
-    const modified = this.editor.modified;
-    const compName = this.editor.name;
-    const name = (compName) ? compName.name : undefined;
-    if (name === undefined || compName.name.match(/^\/assets\//)) {
-      const saveas = new SaveAsCmd(this.editor);
-      saveas.execute();
-    } else if (modified && modified.modified) {
-      const catalog = this.editor.$parent.catalog;
-
-      catalog.retrieve(name)
-          .then((comp) => catalog.save(comp, name))
-          .then((ok) => {
-            if (ok) {
-              if (modified) modified.modified = false;
-              const comp = catalog.compMap.get(name);
-              this.editor.unidraw.clearHistory(comp);
-            } else {
-              const saveas = new SaveAsCmd(this.editor);
-              saveas.execute();
-            }
-          })
-          .catch((error) => {
-            console.log('save-cmd catch @ execute');
-            console.log(error);
-          });
+    for (let i = 0, l = this.cmds.length; i < l; ++i) {
+      this.cmds[i].execute();
     }
+  },
+
+  unexecute: function() {
+    for (let i = 0, l = this.cmds.length; i < l; ++i) {
+      this.cmds[i].unexecute();
+    }
+  },
+
+  reversible: function() {
+    for (let i = 0, l = this.cmds.length; i < l; ++i) {
+      if (this.cmds[i].reversible()) {
+        return true;
+      }
+    }
+    return false;
   },
 
 });
 
-export {SaveCmd};
+export {MacroCmd};

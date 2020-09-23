@@ -20,37 +20,44 @@
  * WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-import {Rubberband} from '../rubberbands/rubberband.js';
-import {DragManip} from '../manipulators/drag-manip.js';
-import {Tool} from './tool.js';
+import {Command} from './Command.js';
 
 /**
- * Description: A tool for selecting.
+ * Description: save as command
  * @constructor
+ * @param {Editor} editor: the editor the command acts within
  */
-function SelectTool() {
-  Tool.call( this );
-
-  this.type = 'SelectTool';
+function SaveAsCmd( editor ) {
+  Command.call( this, editor, null );
+  this.type = 'SaveAsCmd';
 }
 
-SelectTool.prototype = Object.assign( Object.create( Tool.prototype ), {
-  constructor: SelectTool,
+SaveAsCmd.prototype = Object.assign( Object.create( Command.prototype ), {
+  constructor: SaveAsCmd,
 
-  isSelectTool: true,
+  isSaveAsCmd: true,
 
-  /**
-   * @param {Viewer} viewer - the container
-   * @param {Event} event - the starting event
-   * @return {Manipulator}
-   */
-  create: function( viewer, event ) {
-    if (event.type == 'mousedown') {
-      return new DragManip( viewer, new Rubberband, this );
-    }
-    return null;
+  execute: function() {
+    const comp = this.editor.component;
+    const namevar = this.editor.name;
+    const oldname = namevar.name;
+
+    const modifvar = this.editor.modified;
+    const unidraw = this.editor.unidraw;
+
+    unidraw.catalog.create(comp, oldname)
+        .then((ok) => {
+          if (ok) {
+            modifvar.modified = false;
+            unidraw.clearHistory(comp);
+            const name = unidraw.catalog.name(comp);
+            namevar.name = name;
+          } else {
+            console.log('save as -- not ok!');
+          }
+        });
   },
 
 });
 
-export {SelectTool};
+export {SaveAsCmd};

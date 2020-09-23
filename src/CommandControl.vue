@@ -17,7 +17,7 @@
 </template>
 
 <script>
-import {Command} from './commands/command.js';
+import {Command} from './commands/Command.js';
 
 export default {
   name: 'command-control',

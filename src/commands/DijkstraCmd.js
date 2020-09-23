@@ -4,10 +4,10 @@ import {Line} from 'three';
 import {LineBasicMaterial} from 'three';
 import {Vector3} from 'three';
 
-import {Command} from './command.js';
-import {PasteCmd} from './paste-cmd.js';
+import {Command} from './Command.js';
+import {PasteCmd} from './PasteCmd.js';
 
-import {Graph} from '../graph.js';
+import {Graph} from '../Graph.js';
 
 /**
  * Description: dijkstra command

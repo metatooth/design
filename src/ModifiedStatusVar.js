@@ -20,35 +20,27 @@
  * WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-import {Command} from './command.js';
+import {StateVar} from './StateVar.js';
 
 /**
- * Description: undo command
+ * Description: modified-status state variable
  * @constructor
- * @param {Editor} editor: the editor the command acts within
+ * @param {Object3D} component
+ * @param {Boolean} modified
  */
-function UndoCmd( editor ) {
-  Command.call( this, editor, null );
-  this.type = 'UndoCmd';
+function ModifiedStatusVar(component, modified) {
+  StateVar.call(this);
+  this.type = 'ModifiedStatusVar';
+  this.component = component;
+  this.modified = modified;
 }
 
-UndoCmd.prototype = Object.assign( Object.create( Command.prototype ), {
-  constructor: UndoCmd,
+ModifiedStatusVar.prototype =
+  Object.assign( Object.create( StateVar.prototype ), {
+    constructor: ModifiedStatusVar,
 
-  isUndoCmd: true,
+    isModifiedStatusVar: true,
 
-  execute: function() {
-    this.editor.unidraw.undo(this.editor.component);
-  },
+  });
 
-  /**
-   * If true, the command can be unexecuted.
-   * @return {boolean}
-   */
-  reversible: function() {
-    return false;
-  },
-
-});
-
-export {UndoCmd};
+export {ModifiedStatusVar};

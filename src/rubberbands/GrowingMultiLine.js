@@ -29,7 +29,7 @@ import {MeshPhongMaterial} from 'three';
 import {Object3D} from 'three';
 import {Vector3} from 'three';
 
-import {GrowingVertices} from './growing-vertices.js';
+import {GrowingVertices} from './GrowingVertices.js';
 
 /**
  * GrowingMultiLine are Rubberbands defined by a set of vertices

@@ -20,7 +20,7 @@
  * WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-import {S3} from './api-services/s3.js';
+import {S3} from './api-services/S3.js';
 import {HTTP} from './api-services/http-common.js';
 import * as md5 from 'blueimp-md5';
 

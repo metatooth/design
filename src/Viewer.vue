@@ -40,7 +40,7 @@ import {Vector3} from 'three';
 
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls';
 
-import {Tool} from './tools/tool.js';
+import {Tool} from './tools/Tool.js';
 
 export default {
   name: 'viewer',

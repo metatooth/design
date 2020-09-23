@@ -15,7 +15,7 @@
 </template>
 
 <script>
-import {SaveCmd} from './commands/save-cmd.js';
+import {SaveCmd} from './commands/SaveCmd.js';
 
 export default {
   name: 'save-control',

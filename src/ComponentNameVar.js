@@ -20,35 +20,41 @@
  * WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-import {Command} from './command.js';
+import {NameVar} from './NameVar.js';
 
 /**
- * Description: redo command
+ * Description: state variables allow for dataflow and
+ * component-component commuinication
  * @constructor
- * @param {Editor} editor: the editor the command acts within
+ * @param {Object3D} component
+ * @param {Catalog} catalog
  */
-function RedoCmd( editor ) {
-  Command.call( this, editor, null );
-  this.type = 'RedoCmd';
+function ComponentNameVar(component, catalog) {
+  NameVar.call(this, catalog.name(component));
+  this.type = 'ComponentNameVar';
+  this.component = component;
+  this.catalog = catalog;
+
+  if (this.component) {
+    const name = this.catalog.name(this.component);
+    this.name = name;
+  }
 }
 
-RedoCmd.prototype = Object.assign( Object.create( Command.prototype ), {
-  constructor: RedoCmd,
+ComponentNameVar.prototpye =
+    Object.assign( Object.create( NameVar.prototype ), {
+      constructor: ComponentNameVar,
 
-  isRedoCmd: true,
+      isComponentNameVar: true,
 
-  execute: function() {
-    this.editor.unidraw.redo(this.editor.component);
-  },
+      updateName: function() {
+        if (!this.component) {
+          this.name = null;
+        } else {
+          const name = this.catalog.name(this.component);
+          this.name = name;
+        }
+      },
+    });
 
-  /**
-   * If true, the command can be unexecuted.
-   * @return {boolean}
-   */
-  reversible: function() {
-    return false;
-  },
-
-});
-
-export {RedoCmd};
+export {ComponentNameVar};

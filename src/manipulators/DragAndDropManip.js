@@ -1,4 +1,4 @@
-import {DragManip} from './drag-manip';
+import {DragManip} from './DragManip';
 
 /**
  * Description: Mousedown. Drag... Mouseup.

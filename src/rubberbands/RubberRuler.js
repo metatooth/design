@@ -2,7 +2,7 @@ import {CanvasTexture} from 'three';
 import {Sprite} from 'three';
 import {SpriteMaterial} from 'three';
 
-import {RubberLine} from './rubber-line.js';
+import {RubberLine} from './RubberLine.js';
 
 /**
  * Rubber Ruler displays distance between origin & tracked.

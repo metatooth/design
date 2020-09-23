@@ -22,7 +22,7 @@
 
 import {Raycaster} from 'three';
 
-import {DragManip} from './drag-manip.js';
+import {DragManip} from './DragManip.js';
 
 /**
  * Description: A multi-click manipulation.

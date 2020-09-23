@@ -20,7 +20,7 @@
  * WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-import {Manipulator} from './manipulator';
+import {Manipulator} from './Manipulator.js';
 
 /**
  * Description: Mousedown. Drag... Mouseup.

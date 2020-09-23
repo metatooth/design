@@ -20,49 +20,53 @@
  * WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-import {Command} from './command.js';
+import {Command} from './Command.js';
+import {SaveAsCmd} from './SaveAsCmd.js';
 
 /**
- * Description: command containing a sequence of other commands to execute
+ * Description: save command
  * @constructor
  * @param {Editor} editor: the editor the command acts within
- * @param {Command} c1
- * @param {Command} c2
  */
-function MacroCmd( editor, c1, c2 ) {
-  Command.call( this, editor );
-  this.type = 'MacroCmd';
-  this.cmds = [];
-  if (c1) this.cmds.unshift(c1);
-  if (c2) this.cmds.unshift(c2);
+function SaveCmd( editor ) {
+  Command.call( this, editor, null );
+  this.type = 'SaveCmd';
 }
 
-MacroCmd.prototype = Object.assign( Object.create( Command.prototype ), {
-  constructor: MacroCmd,
+SaveCmd.prototype = Object.assign( Object.create( Command.prototype ), {
+  constructor: SaveCmd,
 
-  isMacroCmd: true,
+  isSaveCmd: true,
 
   execute: function() {
-    for (let i = 0, l = this.cmds.length; i < l; ++i) {
-      this.cmds[i].execute();
-    }
-  },
+    const modified = this.editor.modified;
+    const compName = this.editor.name;
+    const name = (compName) ? compName.name : undefined;
+    if (name === undefined || compName.name.match(/^\/assets\//)) {
+      const saveas = new SaveAsCmd(this.editor);
+      saveas.execute();
+    } else if (modified && modified.modified) {
+      const catalog = this.editor.$parent.catalog;
 
-  unexecute: function() {
-    for (let i = 0, l = this.cmds.length; i < l; ++i) {
-      this.cmds[i].unexecute();
+      catalog.retrieve(name)
+          .then((comp) => catalog.save(comp, name))
+          .then((ok) => {
+            if (ok) {
+              if (modified) modified.modified = false;
+              const comp = catalog.compMap.get(name);
+              this.editor.unidraw.clearHistory(comp);
+            } else {
+              const saveas = new SaveAsCmd(this.editor);
+              saveas.execute();
+            }
+          })
+          .catch((error) => {
+            console.log('save-cmd catch @ execute');
+            console.log(error);
+          });
     }
-  },
-
-  reversible: function() {
-    for (let i = 0, l = this.cmds.length; i < l; ++i) {
-      if (this.cmds[i].reversible()) {
-        return true;
-      }
-    }
-    return false;
   },
 
 });
 
-export {MacroCmd};
+export {SaveCmd};

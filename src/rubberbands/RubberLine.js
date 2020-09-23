@@ -27,7 +27,7 @@ import {BufferGeometry} from 'three';
 import {Line} from 'three';
 import {LineBasicMaterial} from 'three';
 
-import {Rubberband} from './rubberband.js';
+import {Rubberband} from './Rubberband.js';
 
 /**
  * Rubberbanding lines.

@@ -20,7 +20,7 @@
  * WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-import {VertexManip} from './vertex-manip.js';
+import {VertexManip} from './VertexManip.js';
 
 /**
  * Description: Mousedown. Drag... Mouseup.

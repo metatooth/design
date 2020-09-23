@@ -26,7 +26,7 @@ import {MeshPhongMaterial} from 'three';
 import {SphereGeometry} from 'three';
 import {Mesh} from 'three';
 
-import {Rubberband} from './rubberband.js';
+import {Rubberband} from './Rubberband.js';
 
 /**
  * GrowingVertices are Rubberbands defined by a set of vertices

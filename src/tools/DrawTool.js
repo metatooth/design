@@ -1,10 +1,10 @@
 import {Group} from 'three';
 import {Vector3} from 'three';
 
-import {GrowingMultiLine} from '../rubberbands/growing-multi-line.js';
-import {PasteCmd} from '../commands/paste-cmd.js';
-import {ScribbleVertexManip} from '../manipulators/scribble-vertex-manip.js';
-import {Tool} from './tool.js';
+import {GrowingMultiLine} from '../rubberbands/GrowingMultiLine.js';
+import {PasteCmd} from '../commands/PasteCmd.js';
+import {ScribbleVertexManip} from '../manipulators/ScribbleVertexManip.js';
+import {Tool} from './Tool.js';
 
 /**
  * Description: A tool for drawing.

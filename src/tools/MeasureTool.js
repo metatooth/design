@@ -1,6 +1,6 @@
-import {ClickDragClickManip} from '../manipulators/click-drag-click-manip.js';
-import {RubberRuler} from '../rubberbands/rubber-ruler.js';
-import {Tool} from './tool.js';
+import {ClickDragClickManip} from '../manipulators/ClickDragClickManip.js';
+import {RubberRuler} from '../rubberbands/RubberRuler.js';
+import {Tool} from './Tool.js';
 
 /**
  * Measures the 2d distance on screen from the source to target point.

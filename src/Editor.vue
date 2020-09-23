@@ -78,15 +78,15 @@
 
 import {Vector3} from 'three';
 
-import {ComponentNameVar} from './component-name-var.js';
-import {DijkstraCmd} from './commands/dijkstra-cmd.js';
-import {DrawTool} from './tools/draw-tool.js';
-import {MeasureTool} from './tools/measure-tool.js';
-import {ModifiedStatusVar} from './modified-status-var.js';
-import {PickTool} from './tools/pick-tool.js';
-import {RedoCmd} from './commands/redo-cmd.js';
-import {RotateTool} from './tools/rotate-tool.js';
-import {UndoCmd} from './commands/undo-cmd.js';
+import {ComponentNameVar} from './ComponentNameVar.js';
+import {DijkstraCmd} from './commands/DijkstraCmd.js';
+import {DrawTool} from './tools/DrawTool.js';
+import {MeasureTool} from './tools/MeasureTool.js';
+import {ModifiedStatusVar} from './ModifiedStatusVar.js';
+import {PickTool} from './tools/PickTool.js';
+import {RedoCmd} from './commands/RedoCmd.js';
+import {RotateTool} from './tools/RotateTool.js';
+import {UndoCmd} from './commands/UndoCmd.js';
 
 import CommandControl from './CommandControl.vue';
 import SaveControl from './SaveControl.vue';

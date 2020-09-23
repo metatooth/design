@@ -20,12 +20,13 @@
  * WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-import {ClickManip} from '../manipulators/click-manip.js';
 import {Mesh} from 'three';
 import {MeshPhongMaterial} from 'three';
-import {PasteCmd} from '../commands/paste-cmd.js';
 import {SphereGeometry} from 'three';
-import {Tool} from './tool.js';
+
+import {ClickManip} from '../manipulators/ClickManip.js';
+import {PasteCmd} from '../commands/PasteCmd.js';
+import {Tool} from './Tool.js';
 
 /**
  * Description: A tool for drawing.

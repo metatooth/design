@@ -1,7 +1,7 @@
-import {GrowingVertices} from '../rubberbands/growing-vertices.js';
-import {PasteCmd} from '../commands/paste-cmd.js';
-import {VertexManip} from '../manipulators/vertex-manip.js';
-import {Tool} from './tool.js';
+import {GrowingVertices} from '../rubberbands/GrowingVertices.js';
+import {PasteCmd} from '../commands/PasteCmd.js';
+import {Tool} from './Tool.js';
+import {VertexManip} from '../manipulators/VertexManip.js';
 
 /**
  * A tool for picking a point on the target mesh.
