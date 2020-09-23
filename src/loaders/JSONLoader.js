@@ -12,6 +12,8 @@
  * See webgl_loader_assimp2json example.
  */
 
+import {BufferAttribute} from 'three';
+import {BufferGeometry} from 'three';
 import {Color} from 'three';
 import {Face3} from 'three';
 import {FileLoader} from 'three';
@@ -23,6 +25,8 @@ import {MeshPhongMaterial} from 'three';
 import {Object3D} from 'three';
 import {Vector3} from 'three';
 
+import {BufferGeometryUtils}
+  from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import {STLLoader} from 'three/examples/jsm/loaders/STLLoader.js';
 
 /**
@@ -130,7 +134,7 @@ JSONLoader.prototype = Object.assign( Object.create( Loader.prototype ), {
   },
 
   /**
-   * Create a THREE.Mesh from an assimp mesh description
+   * Create a THREE.Geometry from an assimp2json mesh description
    * @param {JSON} json
    * @return {Geometry}
    */
@@ -139,13 +143,11 @@ JSONLoader.prototype = Object.assign( Object.create( Loader.prototype ), {
       const geometry = new Geometry();
 
       for (let data = json.vertices, i = 0, e = data.length; i < e;) {
-        const vec = new Vector3(data[i++], data[i++], data[i++]);
-        geometry.vertices.push( vec );
+        geometry.vertices.push( new Vector3(data[i++], data[i++], data[i++]) );
       }
 
       for (let data = json.faces, i = 0, e = data.length; i < e;) {
-        const face = new Face3(data[i++], data[i++], data[i++]);
-        geometry.faces.push( face );
+        geometry.faces.push( new Face3(data[i++], data[i++], data[i++]) );
       }
 
       geometry.computeFaceNormals();
@@ -172,51 +174,61 @@ JSONLoader.prototype = Object.assign( Object.create( Loader.prototype ), {
   },
 
   /**
-   * Create a THREE.Object3D from an assimp Scene description
+   * Create a THREE.Mesh from an assimp description
    * @param {JSON} json
    * @param {JSON} node
    * @param {Array} meshes
    * @param {Array} meshrefs
    * @param {Array} materials
-   * @return {Object3D}
+   * @return {Mesh}
    */
   parseObject: function( json, node, meshes, meshrefs, materials ) {
-    const o = new Object3D();
+    const pending = [];
+
+    let o;
+    if (node.meshes) {
+      o = new Mesh(new Geometry());
+
+      node.meshes.forEach(( index ) => {
+        const geomPromise = meshes[index];
+        pending.push(geomPromise);
+
+        geomPromise.then((geometry) => {
+          o.geometry.mergeMesh( new Mesh(geometry) );
+          o.material = materials[json.meshes[index].materialindex];
+        });
+      });
+    } else if (node.meshrefs) {
+      const geometry = new BufferGeometry();
+      const colors = new Float32Array();
+      const normals = new Float32Array();
+      const vertices = new Float32Array();
+      geometry.setAttribute( 'color', new BufferAttribute( colors, 3 ) );
+      geometry.setAttribute( 'normal', new BufferAttribute( normals, 3 ) );
+      geometry.setAttribute( 'position', new BufferAttribute( vertices, 3 ) );
+
+      o = new Mesh(geometry);
+
+      node.meshrefs.forEach(( index ) => {
+        const geomPromise = meshrefs[index];
+        pending.push(geomPromise);
+
+        geomPromise.then((geometry) => {
+          const url = geometry.sourceUrl;
+          o.geometry = BufferGeometryUtils.mergeBufferGeometries(
+              [o.geometry, geometry], false
+          );
+          o.geometry.sourceUrl = url;
+          o.material = materials[json.meshrefs[index].materialindex];
+        });
+      });
+    } else {
+      o = new Object3D();
+    }
 
     o.name = node.name || '';
     o.matrix = new Matrix4().fromArray(node.transformation);
     o.matrix.decompose( o.position, o.quaternion, o.scale );
-
-    const pending = [];
-
-    for ( let i = 0; node.meshes && i < node.meshes.length; i ++ ) {
-      const index = node.meshes[i];
-      const geomPromise = meshes[index];
-      pending.push(geomPromise);
-
-      geomPromise.then((geometry) => {
-        console.log(index,
-            json.meshes[index].name,
-            json.meshes[index].materialindex,
-            materials[json.meshes[index].materialindex]);
-
-        o.add(
-            new Mesh( geometry, materials[json.meshes[index].materialindex] )
-        );
-      });
-    }
-
-    for ( let i = 0; node.meshrefs && i < node.meshrefs.length; i ++ ) {
-      const index = node.meshrefs[i];
-      const geomPromise = meshrefs[index];
-      pending.push(geomPromise);
-
-      geomPromise.then((geometry) => {
-        o.add(
-            new Mesh( geometry, materials[json.meshrefs[index].materialindex] )
-        );
-      });
-    }
 
     for ( let i = 0; node.children && i < node.children.length; i ++ ) {
       const childPromise = this.parseObject( json,

@@ -166,24 +166,19 @@ JSONExporter.prototype = {
         primitivetypes: type,
       };
 
-      if ( mesh.geometry.isBufferGeometry ) {
-        console.log('!!! IS BUFFFER GEOMETRY !!!');
-        jsonMesh.vertices = mesh.geometry.getAttribute('position').array;
-      } else {
-        jsonMesh.vertices = [];
-        mesh.geometry.vertices.forEach(( vert ) => {
-          jsonMesh.vertices.push(vert.x);
-          jsonMesh.vertices.push(vert.y);
-          jsonMesh.vertices.push(vert.z);
-        });
+      jsonMesh.vertices = [];
+      mesh.geometry.vertices.forEach(( vert ) => {
+        jsonMesh.vertices.push(vert.x);
+        jsonMesh.vertices.push(vert.y);
+        jsonMesh.vertices.push(vert.z);
+      });
 
-        jsonMesh.faces = [];
-        mesh.geometry.faces.forEach(( face ) => {
-          jsonMesh.faces.push(face.a);
-          jsonMesh.faces.push(face.b);
-          jsonMesh.faces.push(face.c);
-        });
-      }
+      jsonMesh.faces = [];
+      mesh.geometry.faces.forEach(( face ) => {
+        jsonMesh.faces.push(face.a);
+        jsonMesh.faces.push(face.b);
+        jsonMesh.faces.push(face.c);
+      });
 
       if ( ! outputJSON.meshes ) {
         outputJSON.meshes = [];
@@ -207,15 +202,9 @@ JSONExporter.prototype = {
       if ( object.matrixAutoUpdate ) {
         object.updateMatrix();
       }
-      console.log('process node',
-          object.id,
-          object.matrix.elements);
-
-      jsonNode.transformation = object.matrix.elements;
-      console.log('transform', jsonNode.transformation);
 
       jsonNode.name = object.name || '';
-
+      jsonNode.transformation = object.matrix.elements;
 
       if ( object.isLine || object.isPoints ) {
         const meshIndex = processMesh( object );
@@ -238,12 +227,6 @@ JSONExporter.prototype = {
 
       const children = [];
 
-      console.log('object has children?',
-          object.id,
-          object.type,
-          object.name,
-          object.children.length);
-
       object.children.forEach(( child ) => {
         const node = processNode( child );
         if ( node !== null ) {
@@ -257,9 +240,6 @@ JSONExporter.prototype = {
 
       return jsonNode;
     };
-
-
-    console.log('process root node ~>', object);
 
     outputJSON.rootnode = processNode( object );
 

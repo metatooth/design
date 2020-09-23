@@ -227,7 +227,7 @@ export default {
           this.index++;
         }
       }
-      return this.component.children[this.index].children[0];
+      return this.component.children[this.index];
     },
     /**
      * Convert mouse position to normalized device coordinates
