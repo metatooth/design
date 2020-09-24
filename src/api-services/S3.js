@@ -7,6 +7,8 @@ import * as AWS from 'aws-sdk';
 function S3() {
   this.type = 'S3';
 
+  console.log('S3', process.env);
+
   AWS.config.update({
     region: process.env.VUE_APP_AWS_REGION,
     credentials: new AWS.CognitoIdentityCredentials({
