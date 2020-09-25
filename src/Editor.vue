@@ -201,7 +201,6 @@ export default {
 
               geometry = this.component.children[i].children[0].geometry;
               const positions = geometry.getAttribute('position');
-              const last = (positions.count - 1) * 3;
 
               for (let j = 0, l = (positions.count - 1) * 3; j < l; j++) {
                 const source = new Vector3(positions.array[j],

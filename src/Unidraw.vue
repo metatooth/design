@@ -51,7 +51,7 @@ export default {
     };
   },
   mounted() {
-    const version = '10';
+    const version = '10.2';
     const commit = process.env.VUE_APP_COMMIT ?
       process.env.VUE_APP_COMMIT : '19740621';
     this.version = version + ' ' + commit;
