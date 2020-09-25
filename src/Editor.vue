@@ -161,8 +161,8 @@ export default {
   },
   methods: {
     addObjects: function(clipboard) {
-      clipboard.forEach((obj) => {
-        this.component.add(obj);
+      clipboard.forEach((child) => {
+        this.component.add(child);
       });
     },
     activate: function(key) {
@@ -192,7 +192,7 @@ export default {
         if (!this.activate(event.key)) {
           if ( event.keyCode == 32 ) {
             // SPACE
-            console.log(this.component);
+
             let geometry = null;
             for (let i = 0, l = this.component.children.length; i < l; i++) {
               if (this.component.children[i].type === 'Mesh') {
@@ -202,7 +202,7 @@ export default {
               geometry = this.component.children[i].children[0].geometry;
               const positions = geometry.getAttribute('position');
               const last = (positions.count - 1) * 3;
-              console.log(last);
+
               for (let j = 0, l = (positions.count - 1) * 3; j < l; j++) {
                 const source = new Vector3(positions.array[j],
                     positions.array[j+1],
@@ -232,7 +232,6 @@ export default {
         this.component.remove(obj);
       });
     },
-
   },
 };
 </script>
