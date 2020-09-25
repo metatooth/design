@@ -25,6 +25,8 @@ DragAndDropManip.prototype = Object.assign(
         this.viewer.controls.enabled = false;
         this.viewer.controls.saveState();
 
+        document.body.style.cursor = 'move';
+
         const p = this.viewer.unproject( event.clientX, event.clientY );
         this.rubberband.track( p );
 
@@ -51,6 +53,8 @@ DragAndDropManip.prototype = Object.assign(
       effect: function( event ) {
         this.viewer.controls.reset();
         this.viewer.controls.enabled = true;
+
+        document.body.style.cursor = 'crosshair';
       },
     });
 

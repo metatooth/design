@@ -1,4 +1,4 @@
-import {ClickDragClickManip} from '../manipulators/ClickDragClickManip.js';
+import {DragAndDropManip} from '../manipulators/DragAndDropManip.js';
 import {RubberRuler} from '../rubberbands/RubberRuler.js';
 import {Tool} from './Tool.js';
 
@@ -23,9 +23,9 @@ MeasureTool.prototype = Object.assign( Object.create( Tool.prototype ), {
    * @return {Manipulator}
    */
   create: function( viewer, event ) {
-    if (event.type == 'mouseup') {
+    if (event.type == 'mousedown') {
       const v = viewer.unproject( event.clientX, event.clientY );
-      return new ClickDragClickManip( viewer,
+      return new DragAndDropManip( viewer,
           new RubberRuler(viewer, v, v),
           this );
     }
