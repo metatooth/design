@@ -30,11 +30,11 @@
 
 import Editor from './Editor.vue';
 
-import {Catalog} from './catalog.js';
-import {History} from './history.js';
+import {Catalog} from './Catalog.js';
+import {History} from './History.js';
 
-import {DirtyCmd} from './commands/dirty-cmd.js';
-import {MacroCmd} from './commands/macro-cmd.js';
+import {DirtyCmd} from './commands/DirtyCmd.js';
+import {MacroCmd} from './commands/MacroCmd.js';
 
 export default {
   name: 'unidraw',
@@ -51,8 +51,7 @@ export default {
     };
   },
   mounted() {
-    const version = process.env.VUE_APP_VERSION ?
-      process.env.VUE_APP_VERSION : 'DEVELOP';
+    const version = '10';
     const commit = process.env.VUE_APP_COMMIT ?
       process.env.VUE_APP_COMMIT : '19740621';
     this.version = version + ' ' + commit;
