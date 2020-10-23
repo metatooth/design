@@ -5,6 +5,7 @@ import Unidraw from './Unidraw.vue';
 import {library} from '@fortawesome/fontawesome-svg-core';
 import {faCrosshairs} from '@fortawesome/free-solid-svg-icons';
 import {faDownload} from '@fortawesome/free-solid-svg-icons';
+import {faFileExport} from '@fortawesome/free-solid-svg-icons';
 import {faPenSquare} from '@fortawesome/free-solid-svg-icons';
 import {faRedo} from '@fortawesome/free-solid-svg-icons';
 import {faRuler} from '@fortawesome/free-solid-svg-icons';
@@ -15,6 +16,7 @@ import {FontAwesomeIcon} from '@fortawesome/vue-fontawesome';
 
 library.add(faCrosshairs);
 library.add(faDownload);
+library.add(faFileExport);
 library.add(faPenSquare);
 library.add(faRedo);
 library.add(faRuler);

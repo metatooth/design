@@ -81,6 +81,7 @@ import {Vector3} from 'three';
 import {ComponentNameVar} from './ComponentNameVar.js';
 import {DijkstraCmd} from './commands/DijkstraCmd.js';
 import {DrawTool} from './tools/DrawTool.js';
+import {ExportCmd} from './commands/ExportCmd.js';
 import {MeasureTool} from './tools/MeasureTool.js';
 import {ModifiedStatusVar} from './ModifiedStatusVar.js';
 import {PickTool} from './tools/PickTool.js';
@@ -114,6 +115,8 @@ export default {
           enabled: true},
         {id: 'y', command: new RedoCmd(this), label: 'Redo', icon: 'redo',
           enabled: true},
+        {id: 'e', command: new ExportCmd(this), label: 'Export',
+          icon: 'file-export', enabled: true},
       ],
       controls: [
         {id: 'r', tool: new RotateTool,
