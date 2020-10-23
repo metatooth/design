@@ -35,6 +35,7 @@
           v-bind:enabled="command.enabled"
           ref="command">
         </command-control>
+        <export-control v-bind:modified="modified" ref="export" />
         <div class="navbar-item">
           <a class="button disabled" v-bind:href=assetUrl download>
             <span class="icon">
@@ -81,7 +82,6 @@ import {Vector3} from 'three';
 import {ComponentNameVar} from './ComponentNameVar.js';
 import {DijkstraCmd} from './commands/DijkstraCmd.js';
 import {DrawTool} from './tools/DrawTool.js';
-import {ExportCmd} from './commands/ExportCmd.js';
 import {MeasureTool} from './tools/MeasureTool.js';
 import {ModifiedStatusVar} from './ModifiedStatusVar.js';
 import {PickTool} from './tools/PickTool.js';
@@ -90,6 +90,7 @@ import {RotateTool} from './tools/RotateTool.js';
 import {UndoCmd} from './commands/UndoCmd.js';
 
 import CommandControl from './CommandControl.vue';
+import ExportControl from './ExportControl.vue';
 import SaveControl from './SaveControl.vue';
 import ToolControl from './ToolControl.vue';
 import Viewer from './Viewer.vue';
@@ -98,6 +99,7 @@ export default {
   name: 'editor',
   components: {
     CommandControl,
+    ExportControl,
     ToolControl,
     SaveControl,
     Viewer,
@@ -115,8 +117,6 @@ export default {
           enabled: true},
         {id: 'y', command: new RedoCmd(this), label: 'Redo', icon: 'redo',
           enabled: true},
-        {id: 'e', command: new ExportCmd(this), label: 'Export',
-          icon: 'file-export', enabled: true},
       ],
       controls: [
         {id: 'r', tool: new RotateTool,

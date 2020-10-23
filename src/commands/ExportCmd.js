@@ -18,12 +18,20 @@ ExportCmd.prototype = Object.assign( Object.create( Command.prototype ), {
   isExportCmd: true,
 
   /**
-   * Publish an item that describes the plan that's ready for the next
-   * production step.
+   * Publish an item identifying a plan & revision that's ready for
+   * the next production step.
    */
   execute: function() {
-    const pubsub = new PubSub;
-    pubsub.publish('Hello, World!', 'First post.');
+    const compName = this.editor.name;
+    const name = (compName) ? compName.name : undefined;
+    if (name !== undefined) {
+      const plan = name.match(/\/([0-9a-fA-F]+)\//);
+      const revision = name.match(/\/([0-9a-fA-F]+)$/);
+      if (plan && revision) {
+        const pubsub = new PubSub;
+        pubsub.publish(plan[1], revision[1]);
+      }
+    }
   },
 
   /**

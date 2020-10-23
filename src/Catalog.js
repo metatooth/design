@@ -186,10 +186,13 @@ Object.assign( Catalog.prototype, {
   parseData: function(data) {
     return new Promise((resolve, reject) => {
       let url;
+      let revision;
       if (data.url) {
         url = data.url;
       } else {
         const latest = data.revisions.length - 1;
+        revision = data.revisions[latest].locator;
+        console.log(revision);
         url = data.revisions[latest].location;
       }
 

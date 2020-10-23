@@ -4,7 +4,7 @@ import {XmppCommon} from './xmpp-common.js';
 import setupPubSub from '@xmpp-plugins/pubsub';
 
 const PUBSUB_SERVICE_ID = 'pubsub.xmpp.metatooth.com';
-const PUBSUB_NODE = 'chatter';
+const PUBSUB_NODE = '500 Mouthguard Export';
 
 /**
  * @constructor
@@ -27,14 +27,10 @@ Object.assign( PubSub.prototype, {
     });
   },
 
-  publish: async function(title, summary) {
+  publish: async function(plan, revision) {
     const xmpp = new XmppCommon;
     xmpp.create().then(async () => {
       const pubSubPlugin = setupPubSub(xmpp.client);
-
-      pubSubPlugin.on(`item-published:${PUBSUB_SERVICE_ID}`, (ev) => {
-        console.log('An item was published on ${PUBSUB_SERVICE_ID}');
-      });
 
       const entry = xml(
           'item',
@@ -42,8 +38,8 @@ Object.assign( PubSub.prototype, {
           xml(
               'entry',
               {},
-              xml('title', {}, title),
-              xml('summary', {}, summary),
+              xml('plan', {}, plan),
+              xml('revision', {}, revision),
           ),
       );
 
