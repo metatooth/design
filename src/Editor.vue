@@ -77,6 +77,7 @@
  * WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+import {MeshPhongMaterial} from 'three';
 import {Vector3} from 'three';
 
 import {ComponentNameVar} from './ComponentNameVar.js';
@@ -84,6 +85,7 @@ import {DijkstraCmd} from './commands/DijkstraCmd.js';
 import {DrawTool} from './tools/DrawTool.js';
 import {MeasureTool} from './tools/MeasureTool.js';
 import {ModifiedStatusVar} from './ModifiedStatusVar.js';
+import {PasteCmd} from './commands/PasteCmd.js';
 import {PickTool} from './tools/PickTool.js';
 import {RedoCmd} from './commands/RedoCmd.js';
 import {RotateTool} from './tools/RotateTool.js';
@@ -94,6 +96,8 @@ import ExportControl from './ExportControl.vue';
 import SaveControl from './SaveControl.vue';
 import ToolControl from './ToolControl.vue';
 import Viewer from './Viewer.vue';
+
+import {PubSub} from './api-services/pub-sub.js';
 
 export default {
   name: 'editor',
@@ -134,7 +138,9 @@ export default {
       ],
       modified: new ModifiedStatusVar(null, false),
       name: null,
+      pubsub: new PubSub,
       tool: null,
+      updates: new Map,
     };
   },
   computed: {
@@ -160,7 +166,15 @@ export default {
     },
   },
   mounted: function() {
+    this.pubsub.create();
+
+    this.pubsub.published((ev) => {
+      console.log('Published!', ev);
+    });
+
     this.tool = this.controls[0].tool;
+
+    this.poll();
   },
   methods: {
     addObjects: function(clipboard) {
@@ -228,6 +242,58 @@ export default {
           }
         }
       }
+    },
+    poll: async function() {
+      const items = await this.pubsub.items();
+      items.forEach((item) => {
+        const parser = new DOMParser;
+        const doc = parser.parseFromString(item, 'text/xml');
+
+        const id =
+doc.getElementsByTagName('item')[0].attributes.getNamedItem('id').value;
+
+        if (!this.updates.has(id)) {
+          this.updates.set(id, Date.new);
+
+          const plan =
+              doc.getElementsByTagName('plan')[0].childNodes[0].nodeValue;
+          const asset =
+              doc.getElementsByTagName('asset')[0].childNodes[0].nodeValue;
+
+          console.log(`Item for ${plan} ... add asset ${asset}`);
+
+          if (this.name != null) {
+            const name = this.name.name;
+            console.log(`name ${name}`);
+
+            const arr = name.split('/');
+            console.log(`plan ${arr[2]}`);
+            if (arr[2] === plan) {
+              console.log('its the plan!');
+
+              this.unidraw.catalog.retrieve(`/assets/${asset}`).then((comp) => {
+                console.log(comp);
+
+                const material = new MeshPhongMaterial({
+                  color: 0xff33bb,
+                  opacity: 0.5,
+                  transparent: true,
+                });
+                comp.children[0].material = material;
+
+                const command = new PasteCmd( this, [comp] );
+                command.execute();
+
+                if (command.reversible()) {
+                  command.log();
+                }
+              });
+            }
+          }
+        }
+      });
+
+      await this.poll();
     },
     removeObjects: function(clipboard) {
       clipboard.forEach((obj) => {
