@@ -30,6 +30,7 @@ import {Object3D} from 'three';
 import {Vector3} from 'three';
 
 import {STLLoader} from 'three/examples/jsm/loaders/STLLoader.js';
+import {PLYLoader} from 'three/examples/jsm/loaders/PLYLoader.js';
 
 import {JSONLoader} from './loaders/JSONLoader.js';
 import {JSONExporter} from './exporters/JSONExporter.js';
@@ -197,8 +198,14 @@ Object.assign( Catalog.prototype, {
       }
 
       const m = url.match(/\.\w+$/);
-      if (m[0] == '.stl') {
-        const loader = new STLLoader();
+      if (m[0] == '.stl' || m[0] == '.ply') {
+        let loader;
+        if (m[0] == '.stl') {
+          loader = new STLLoader();
+        } else if (m[0] == '.ply') {
+          loader = new PLYLoader();
+        }
+
         loader.load( url, function( geometry ) {
           const material = new MeshPhongMaterial( {
             color: 0x00bbee,

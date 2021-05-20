@@ -28,6 +28,7 @@ import {Vector3} from 'three';
 import {BufferGeometryUtils}
   from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import {STLLoader} from 'three/examples/jsm/loaders/STLLoader.js';
+import {PLYLoader} from 'three/examples/jsm/loaders/PLYLoader.js';
 
 /**
  * Imports from assimp2json format.
@@ -164,7 +165,14 @@ JSONLoader.prototype = Object.assign( Object.create( Loader.prototype ), {
    * @return {Geometry}
    */
   parseMeshRef: function( data ) {
-    const loader = new STLLoader();
+    console.log(data.url, 'to be loaded');
+    let loader;
+    if (data.url.match(/\.stl$/).length > 0) {
+      loader = new STLLoader();
+    } else if (data.url.match(/\.ply$/).length > 0) {
+      loader = new PLYLoader();
+    }
+
     return new Promise((resolve) => {
       loader.load(data.url, function(geometry) {
         geometry.sourceUrl = data.url;
