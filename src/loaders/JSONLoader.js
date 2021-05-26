@@ -167,9 +167,9 @@ JSONLoader.prototype = Object.assign( Object.create( Loader.prototype ), {
   parseMeshRef: function( data ) {
     console.log(data.url, 'to be loaded');
     let loader;
-    if (data.url.match(/\.stl$/).length > 0) {
+    if (data.url.match(/\.stl$/)) {
       loader = new STLLoader();
-    } else if (data.url.match(/\.ply$/).length > 0) {
+    } else if (data.url.match(/\.ply$/)) {
       loader = new PLYLoader();
     }
 
