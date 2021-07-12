@@ -1,6 +1,12 @@
 <template>
-<div @keydown="key($event)" @keyup="key($event)">
-  <Viewer v-bind:component='component' v-bind:tool='tool' ref="viewer"/>
+  <div @keydown="key($event)" @keyup="key($event)">
+  <context-menu :options="controls" @option-clicked="menuSelect" ref="menu" />
+  <Viewer
+    v-bind:component="component"
+    v-bind:tool="tool"
+    v-bind:options="controls"
+    ref="viewer"
+    @show-context-menu="menuOpen" />
   <nav class="navbar">
     <div class="navbar-brand">
       <div class="navbar-item">
@@ -49,53 +55,34 @@
   <div class="meta">
     <span>Design x Metatooth</span><br/>
     <span>r{{version}}</span><br/>
-    <span>&copy; Metatooth 2020</span><br/>
+    <span>&copy; Metatooth 2021</span><br/>
   </div>
 </div>
 </template>
 
 <script>
-/*
- * Copyright (c) 1990, 1991 Stanford University
- *
- * Permission to use, copy, modify, distribute, and sell this software and its
- * documentation for any purpose is hereby granted without fee, provided
- * that the above copyright notice appear in all copies and that both that
- * copyright notice and this permission notice appear in supporting
- * documentation, and that the name of Stanford not be used in advertising or
- * publicity pertaining to distribution of the software without specific,
- * written prior permission.  Stanford makes no representations about
- * the suitability of this software for any purpose.  It is provided "as is"
- * without express or implied warranty.
- *
- * STANFORD DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
- * INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS.
- * IN NO EVENT SHALL STANFORD BE LIABLE FOR ANY SPECIAL, INDIRECT OR
- * CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE,
-    * DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
- * OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION
- * WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
- */
-
 import {MeshPhongMaterial} from 'three';
 import {Vector3} from 'three';
 
 import {ComponentNameVar} from './ComponentNameVar.js';
+import {ModifiedStatusVar} from './ModifiedStatusVar.js';
+import ContextMenu from './ContextMenu.vue';
+import Viewer from './Viewer.vue';
+
 import {DijkstraCmd} from './commands/DijkstraCmd.js';
+import {PasteCmd} from './commands/PasteCmd.js';
+import {RedoCmd} from './commands/RedoCmd.js';
+import {UndoCmd} from './commands/UndoCmd.js';
+
 import {DrawTool} from './tools/DrawTool.js';
 import {MeasureTool} from './tools/MeasureTool.js';
-import {ModifiedStatusVar} from './ModifiedStatusVar.js';
-import {PasteCmd} from './commands/PasteCmd.js';
 import {PickTool} from './tools/PickTool.js';
-import {RedoCmd} from './commands/RedoCmd.js';
 import {RotateTool} from './tools/RotateTool.js';
-import {UndoCmd} from './commands/UndoCmd.js';
 
 import CommandControl from './CommandControl.vue';
 import ExportControl from './ExportControl.vue';
 import SaveControl from './SaveControl.vue';
 import ToolControl from './ToolControl.vue';
-import Viewer from './Viewer.vue';
 
 import {PubSub} from './api-services/pub-sub.js';
 
@@ -103,9 +90,10 @@ export default {
   name: 'editor',
   components: {
     CommandControl,
+    ContextMenu,
     ExportControl,
-    ToolControl,
     SaveControl,
+    ToolControl,
     Viewer,
   },
   props: {
@@ -243,6 +231,14 @@ export default {
         }
       }
     },
+    menuOpen: function(event) {
+      this.$refs.menu.open(event);
+    },
+    menuSelect: function(option) {
+      console.log('select', option);
+      this.activate(option.id);
+      this.$refs.menu.close();
+    },
     poll: async function() {
       const items = await this.pubsub.items();
       items.forEach((item) => {
@@ -295,6 +291,7 @@ doc.getElementsByTagName('item')[0].attributes.getNamedItem('id').value;
 
       await this.poll();
     },
+
     removeObjects: function(clipboard) {
       clipboard.forEach((obj) => {
         this.component.remove(obj);
@@ -302,6 +299,28 @@ doc.getElementsByTagName('item')[0].attributes.getNamedItem('id').value;
     },
   },
 };
+
+/*
+ * Copyright (c) 1990, 1991 Stanford University
+ *
+ * Permission to use, copy, modify, distribute, and sell this software and its
+ * documentation for any purpose is hereby granted without fee, provided
+ * that the above copyright notice appear in all copies and that both that
+ * copyright notice and this permission notice appear in supporting
+ * documentation, and that the name of Stanford not be used in advertising or
+ * publicity pertaining to distribution of the software without specific,
+ * written prior permission.  Stanford makes no representations about
+ * the suitability of this software for any purpose.  It is provided "as is"
+ * without express or implied warranty.
+ *
+ * STANFORD DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
+ * INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS.
+ * IN NO EVENT SHALL STANFORD BE LIABLE FOR ANY SPECIAL, INDIRECT OR
+ * CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE,
+    * DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+ * OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION
+ * WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ */
 </script>
 
 <style scoped>

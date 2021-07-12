@@ -1,9 +1,10 @@
 <template>
-<canvas ref="canvas"
-        @mousemove="handle($event)"
-        @mousedown="handle($event)"
-        @mouseup="handle($event)">
-</canvas>
+  <canvas
+    ref="canvas"
+    @mousemove="handle($event)"
+    @mousedown="handle($event)"
+    @mouseup="handle($event)">
+  </canvas>
 </template>
 
 <script>
@@ -106,9 +107,14 @@ export default {
           this.manipulator = null;
         }
       } else if (this.tool) {
-        this.manipulator = this.tool.create( this, event );
-        if (this.manipulator) {
-          this.manipulator.grasp( event );
+        if (event.button === 2 && event.type === 'mouseup') {
+          console.log('show context menu');
+          this.$emit('show-context-menu', event);
+        } else {
+          this.manipulator = this.tool.create( this, event );
+          if (this.manipulator) {
+            this.manipulator.grasp( event );
+          }
         }
       }
     },
@@ -295,8 +301,8 @@ export default {
 
 <style>
 canvas {
-display: block;
-height: 100vh;
-width: 100vw;
+  display: block;
+  height: 100vh;
+  width: 100vw;
 }
 </style>
