@@ -13,6 +13,8 @@ import {PLYLoader} from 'three/examples/jsm/loaders/PLYLoader.js';
 import {JSONLoader} from './loaders/JSONLoader.js';
 import {JSONExporter} from './exporters/JSONExporter.js';
 
+import {InsertionPath} from './components/InsertionPath.js';
+
 /**
  * A catalog manages persistent information
  * @constructor
@@ -207,9 +209,9 @@ Object.assign( Catalog.prototype, {
 
           const off = new Vector3();
           geometry.boundingBox.getCenter(off);
-          mesh.position.x = - off.x;
-          mesh.position.y = - off.y;
-          mesh.position.z = - off.z;
+          mesh.position.set(-off.x, -off.y, -off.z);
+
+          mesh.add(new InsertionPath());
 
           const object = new Object3D();
           object.name = '<MetatoothRoot>';
