@@ -195,12 +195,8 @@ Object.assign( Catalog.prototype, {
 
           const mesh = new Mesh(geometry, material);
 
-          console.log(geometry.attributes);
-
           if (!geometry.attributes.normal) {
-            console.log('no normals, computing...');
             geometry.computeVertexNormals();
-            console.log('done.');
           }
 
           mesh.name = 'maxillary';
@@ -211,7 +207,10 @@ Object.assign( Catalog.prototype, {
           geometry.boundingBox.getCenter(off);
           mesh.position.set(-off.x, -off.y, -off.z);
 
-          mesh.add(new InsertionPath());
+          const path = new InsertionPath();
+          path.name = 'insertion-path';
+
+          mesh.add(path);
 
           const object = new Object3D();
           object.name = '<MetatoothRoot>';

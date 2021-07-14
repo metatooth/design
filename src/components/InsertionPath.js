@@ -1,3 +1,4 @@
+import {CircleGeometry} from 'three';
 import {CylinderGeometry} from 'three';
 import {Group} from 'three';
 import {MeshPhongMaterial} from 'three';
@@ -22,8 +23,25 @@ function InsertionPath(vec) {
   const coneradius = 0.4;
   const coneheight = 5;
   const sphere = 0.4;
+  const circle = 40;
   const attr = {color: 0xff33bb};
   const h = 32;
+
+  {
+    const geometry = new CircleGeometry(circle, h);
+    const material = new MeshPhongMaterial(attr);
+
+    const mesh = new Mesh(geometry, material);
+
+    const x = new Vector3(0, 0, -1);
+    const t = x.angleTo(this.vec);
+    const p = x.cross(this.vec);
+    p.normalize();
+
+    mesh.setRotationFromAxisAngle(p, t);
+
+    this.add(mesh);
+  }
 
   {
     const geometry =

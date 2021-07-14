@@ -49,11 +49,11 @@ export default {
     return {
       black: 0x2d2d2d,
       camera: null,
-      controls: null,
       cyan: 0x00bbee,
       frustum: 1000,
       highlighted: null,
-      index: null,
+      mindex: null,
+      pindex: null,
       jet: 0x2d2d2d,
       line: null,
       linewidth: 7,
@@ -61,6 +61,7 @@ export default {
       manipulator: null,
       max: 500,
       orange: 0xff7700,
+      orbit: null,
       pink: 0xff33bb,
       primary: 0x00bbee,
       renderer: new WebGLRenderer,
@@ -108,7 +109,6 @@ export default {
         }
       } else if (this.tool) {
         if (event.button === 2 && event.type === 'mouseup') {
-          console.log('show context menu');
           this.$emit('show-context-menu', event);
         } else {
           this.manipulator = this.tool.create( this, event );
@@ -145,15 +145,17 @@ export default {
       this.camera.updateProjectionMatrix();
     },
     initControls: function() {
-      this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+      this.orbit = new OrbitControls(this.camera, this.renderer.domElement);
 
-      this.controls.enablePan = false;
-      this.controls.enableDamping = true;
-      this.controls.dampingFactor = 0.1;
-      this.controls.screenSpacePanning = false;
-      this.controls.minDistance = 100;
-      this.controls.maxDistance = 500;
-      this.controls.maxPolarAngle = 2 * Math.PI;
+      this.orbit.addEventListener( 'change', this.render );
+
+      this.orbit.enablePan = false;
+      this.orbit.enableDamping = true;
+      this.orbit.dampingFactor = 0.1;
+      this.orbit.screenSpacePanning = false;
+      this.orbit.minDistance = 100;
+      this.orbit.maxDistance = 500;
+      this.orbit.maxPolarAngle = 4 * Math.PI;
     },
     initLights: function() {
       const ambient = new AmbientLight( this.white, 0.25 );
@@ -198,16 +200,16 @@ export default {
       return rgb;
     },
     mesh: function() {
-      if (this.index == null) {
-        this.index = 0;
-        while (this.component.children[this.index]) {
-          if (this.component.children[this.index].name === 'maxillary') {
+      if (this.mindex == null) {
+        this.mindex = 0;
+        while (this.component.children[this.mindex]) {
+          if (this.component.children[this.mindex].name === 'maxillary') {
             break;
           }
-          this.index++;
+          this.mindex++;
         }
       }
-      return this.component.children[this.index];
+      return this.component.children[this.mindex];
     },
     /**
      * Convert mouse position to normalized device coordinates
@@ -221,6 +223,20 @@ export default {
       mouse.x = ( x / window.innerWidth ) * 2 - 1;
       mouse.y = - ( y / window.innerHeight ) * 2 + 1;
       return mouse;
+    },
+    path: function() {
+      console.log('mesh', this.mesh());
+      if (this.pindex == null) {
+        this.pindex = 0;
+        while (this.mesh().children[this.pindex]) {
+          console.log('child', this.pindex, this.mesh().children[this.pindex]);
+          if (this.mesh().children[this.pindex].type === 'InsertionPath') {
+            break;
+          }
+          this.pindex++;
+        }
+      }
+      return this.mesh().children[this.pindex];
     },
     render: function() {
       this.renderer.render( this.scene, this.camera );
@@ -244,6 +260,25 @@ export default {
         this.camera.top = height / 2;
         this.camera.bottom = height / -2;
         this.camera.updateProjectionMatrix();
+      }
+    },
+    set: function( name ) {
+      switch (name) {
+        case 'top':
+          this.camera.position.set(0, 100, 0);
+          break;
+        case 'bottom':
+          this.camera.position.set(0, -100, 0);
+          break;
+        case 'left':
+          this.camera.position.set(-100, 0, 0);
+          break;
+        case 'right':
+          this.camera.position.set(100, 0, 0);
+          break;
+        case 'center':
+        default:
+          this.camera.position.set(0, 0, 100);
       }
     },
     temporary: function( obj ) {
@@ -271,7 +306,7 @@ export default {
       return mouse;
     },
     update: function() {
-      this.controls.update();
+      this.orbit.update();
     },
   },
 };

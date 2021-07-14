@@ -1,63 +1,69 @@
 <template>
   <div @keydown="key($event)" @keyup="key($event)">
-  <context-menu :options="controls" @option-clicked="menuSelect" ref="menu" />
-  <Viewer
-    v-bind:component="component"
-    v-bind:tool="tool"
-    v-bind:options="controls"
-    ref="viewer"
-    @show-context-menu="menuOpen" />
-  <nav class="navbar">
-    <div class="navbar-brand">
-      <div class="navbar-item">
-        <a href="https://metatooth.com" target="_blank">
-          <img src="./assets/logo.png" width="30" alt="Metatooth">
-        </a>
-      </div>
-    </div>
-    <div class="navbar-menu">
-      <div class="navbar-start">
-        <tool-control
-          v-for="control in controls"
-          v-bind:key="control.id"
-          v-bind:keyLabel="control.id"
-          v-bind:keyCode="control.id"
-          v-bind:label="control.label"
-          v-bind:icon="control.icon"
-          v-bind:active="control.active"
-          ref="control">
-        </tool-control>
-      </div>
-      <div class="navbar-end">
-        <save-control v-bind:modified="modified" ref="save" />
-        <command-control
-          v-for="command in commands"
-          v-bind:command="command.command"
-          v-bind:key="command.id"
-          v-bind:keyLabel="command.id"
-          v-bind:keyCode="command.id"
-          v-bind:label="command.label"
-          v-bind:icon="command.icon"
-          v-bind:enabled="command.enabled"
-          ref="command">
-        </command-control>
-        <export-control v-bind:modified="modified" ref="export" />
+    <context-menu :options="controls" @option-clicked="menuSelect" ref="menu" />
+    <view-widget
+      @view-center="view('center')"
+      @view-top="view('top')"
+      @view-bottom="view('bottom')"
+      @view-left="view('left')"
+      @view-right="view('right')" />
+    <Viewer
+      v-bind:component="component"
+      v-bind:tool="tool"
+      v-bind:options="controls"
+      ref="viewer"
+      @show-context-menu="menuOpen" />
+    <nav class="navbar">
+      <div class="navbar-brand">
         <div class="navbar-item">
-          <a class="button disabled" v-bind:href=assetUrl download>
-            <span class="icon">
-              <font-awesome-icon icon="download"/>
-            </span>
+          <a href="https://metatooth.com" target="_blank">
+            <img src="./assets/logo.png" width="30" alt="Metatooth">
           </a>
         </div>
       </div>
+      <div class="navbar-menu">
+        <div class="navbar-start">
+          <tool-control
+            v-for="control in controls"
+            v-bind:key="control.id"
+            v-bind:keyLabel="control.id"
+            v-bind:keyCode="control.id"
+            v-bind:label="control.label"
+            v-bind:icon="control.icon"
+            v-bind:active="control.active"
+            ref="control">
+          </tool-control>
+        </div>
+        <div class="navbar-end">
+          <save-control v-bind:modified="modified" ref="save" />
+          <command-control
+            v-for="command in commands"
+            v-bind:command="command.command"
+            v-bind:key="command.id"
+            v-bind:keyLabel="command.id"
+            v-bind:keyCode="command.id"
+            v-bind:label="command.label"
+            v-bind:icon="command.icon"
+            v-bind:enabled="command.enabled"
+            ref="command">
+          </command-control>
+          <export-control v-bind:modified="modified" ref="export" />
+          <div class="navbar-item">
+            <a class="button disabled" v-bind:href=assetUrl download>
+              <span class="icon">
+                <font-awesome-icon icon="download"/>
+              </span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </nav>
+    <div class="meta">
+      <span>Design x Metatooth</span><br/>
+      <span>r{{version}}</span><br/>
+      <span>&copy; Metatooth 2021</span><br/>
     </div>
-  </nav>
-  <div class="meta">
-    <span>Design x Metatooth</span><br/>
-    <span>r{{version}}</span><br/>
-    <span>&copy; Metatooth 2021</span><br/>
   </div>
-</div>
 </template>
 
 <script>
@@ -73,16 +79,19 @@ import {DijkstraCmd} from './commands/DijkstraCmd.js';
 import {PasteCmd} from './commands/PasteCmd.js';
 import {RedoCmd} from './commands/RedoCmd.js';
 import {UndoCmd} from './commands/UndoCmd.js';
+import {SetInsertionPathCmd} from './commands/SetInsertionPathCmd.js';
 
 import {DrawTool} from './tools/DrawTool.js';
 import {MeasureTool} from './tools/MeasureTool.js';
 import {PickTool} from './tools/PickTool.js';
 import {RotateTool} from './tools/RotateTool.js';
+import {SurveyorTool} from './tools/SurveyorTool.js';
 
 import CommandControl from './CommandControl.vue';
 import ExportControl from './ExportControl.vue';
 import SaveControl from './SaveControl.vue';
 import ToolControl from './ToolControl.vue';
+import ViewWidget from './ViewWidget.vue';
 
 import {PubSub} from './api-services/pub-sub.js';
 
@@ -95,6 +104,7 @@ export default {
     SaveControl,
     ToolControl,
     Viewer,
+    ViewWidget,
   },
   props: {
     uri: String,
@@ -105,6 +115,8 @@ export default {
       assetUrl: null,
       component: null,
       commands: [
+        {id: 'i', command: new SetInsertionPathCmd(this), label: 'Insertion',
+          icon: 'star', enabled: true},
         {id: 'z', command: new UndoCmd(this), label: 'Undo', icon: 'undo',
           enabled: true},
         {id: 'y', command: new RedoCmd(this), label: 'Redo', icon: 'redo',
@@ -112,7 +124,7 @@ export default {
       ],
       controls: [
         {id: 'r', tool: new RotateTool,
-          label: 'Rotate View', icon: 'sync', cursor: 'default',
+          label: 'Rotate View', icon: 'sync', cursor: 'move',
           active: true},
         {id: 'm', tool: new MeasureTool,
           label: 'Measure', icon: 'ruler', cursor: 'crosshair',
@@ -122,6 +134,9 @@ export default {
           active: false},
         {id: 'd', tool: new DrawTool,
           label: 'Draw', icon: 'pen-square', cursor: 'crosshair',
+          active: false},
+        {id: 'y', tool: new SurveyorTool,
+          label: 'Survey', icon: 'globe', cursor: 'move',
           active: false},
       ],
       modified: new ModifiedStatusVar(null, false),
@@ -150,7 +165,7 @@ export default {
           });
     },
     component: function( newVal, oldVal ) {
-      document.body.style.cursor = 'default';
+      document.body.style.cursor = 'move';
     },
   },
   mounted: function() {
@@ -165,11 +180,6 @@ export default {
     this.poll();
   },
   methods: {
-    addObjects: function(clipboard) {
-      clipboard.forEach((child) => {
-        this.component.add(child);
-      });
-    },
     activate: function(key) {
       this.viewer.scene.remove( this.viewer.temp );
       this.viewer.temp = null;
@@ -192,12 +202,15 @@ export default {
       }
       return activated;
     },
+    addObjects: function(clipboard) {
+      clipboard.forEach((child) => {
+        this.component.add(child);
+      });
+    },
     key: function( event ) {
       if (event.type == 'keydown') {
         if (!this.activate(event.key)) {
-          if ( event.keyCode == 32 ) {
-            // SPACE
-
+          if ( event.keyCode == 32 ) { // SPACE
             let geometry = null;
             for (let i = 0, l = this.component.children.length; i < l; i++) {
               if (this.component.children[i].type === 'Mesh') {
@@ -218,8 +231,7 @@ export default {
                 dijkstra.execute();
               }
             }
-          } else if ( event.keyCode == 83 ) {
-            // s
+          } else if (event.keyCode == 83) { // s
             this.$refs.save.command.execute();
           } else if (this.tool.type != 'MeasureTool') {
             this.commands.forEach((elem) => {
@@ -296,6 +308,10 @@ doc.getElementsByTagName('item')[0].attributes.getNamedItem('id').value;
       clipboard.forEach((obj) => {
         this.component.remove(obj);
       });
+    },
+
+    view: function(name) {
+      this.viewer.set(name);
     },
   },
 };
